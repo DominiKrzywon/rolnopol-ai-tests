@@ -1,0 +1,30 @@
+{
+  "name": "rolnopol-atf",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed",
+    "test:debug": "npx playwright test --debug",
+    "codegen": "npx playwright codegen",
+    "test:report": "npx playwright show-report",
+    "install:drivers": "npx playwright install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aiprzemo/rolnopol-atf.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aiprzemo/rolnopol-atf/issues"
+  },
+  "homepage": "https://github.com/aiprzemo/rolnopol-atf#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^24.3.3",
+    "dotenv": "^17.3.1"
+  }
+}
