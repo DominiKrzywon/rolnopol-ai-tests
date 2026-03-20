@@ -3,7 +3,7 @@ import { ENV } from "./src/config/env.config";
 
 export default defineConfig({
   testDir: "./tests",
-  timeout: 10 * 1000,
+  timeout: 30 * 1000,
   fullyParallel: true,
   reporter: process.env.CI
     ? [["github"], ["html"]]

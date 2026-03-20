@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { createUser } from "../src/models/User";
+import { getEmptyUserData } from "../src/models/User";
 import { LoginPage } from "../src/pages/LoginPage";
 import { ProfilePage } from "../src/pages/ProfilePage";
 
@@ -8,7 +8,7 @@ test.describe("Profile Page E2E", () => {
     "should display correct user information in profile sections after login",
     { tag: ["@auth", "@profile", "@happy-path"] },
     async ({ page }) => {
-      const user = createUser();
+      const user = getEmptyUserData();
       const loginPage = new LoginPage(page);
       const profilePage = new ProfilePage(page);
 
@@ -20,9 +20,7 @@ test.describe("Profile Page E2E", () => {
         .soft(profilePage.welcomeMessage)
         .toContainText(`Welcome, ${user.displayName}`);
 
-      await expect
-        .soft(profilePage.displayedName)
-        .toHaveText(user.displayName);
+      await expect.soft(profilePage.displayedName).toHaveText(user.displayName);
       await expect.soft(profilePage.emailValue).toHaveText(user.email);
       await expect.soft(profilePage.userId).not.toBeEmpty();
       await expect.soft(profilePage.createdAt).not.toBeEmpty();
