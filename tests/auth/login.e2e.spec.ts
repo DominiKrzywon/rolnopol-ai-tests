@@ -5,6 +5,8 @@ import { LoginPage } from "../../src/pages/LoginPage";
 import { ProfilePage } from "../../src/pages/ProfilePage";
 
 test.describe("Login E2E", () => {
+  test.use({ storageState: undefined });
+
   test(
     "should login, verify profile sections, and logout successfully",
     { tag: ["@auth", "@login", "@session", "@logout", "@happy-path"] },
@@ -15,6 +17,17 @@ test.describe("Login E2E", () => {
       const homePage = new HomePage(page);
 
       await loginPage.goto();
+
+      // If DEMO_USER storage state is active, login page redirects to profile.
+      // Ensure we are on login page by logging out first if needed.
+      if (
+        page.url().endsWith("/profile.html") ||
+        page.url().endsWith("/profile")
+      ) {
+        await profilePage.logout();
+        await loginPage.goto();
+      }
+
       await loginPage.login(user.email, user.password);
 
       await expect.soft(page).toHaveURL(profilePage.PAGE_URL);
