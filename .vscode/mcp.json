@@ -5,6 +5,8 @@
       "command": "npx",
       "args": [
         "@playwright/mcp@latest"
+        //  ,   "--isolated",
+        //     "--storage-state=playwright/.auth/user.json"
         //   ,"--headless"
       ],
       "gallery": "https://api.mcp.github.com",
