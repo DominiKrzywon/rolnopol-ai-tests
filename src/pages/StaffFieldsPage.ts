@@ -4,7 +4,7 @@ import { BasePage } from "./BasePage";
 
 /**
  * Page Object for the Staff & Fields Management page.
- * Provides locators and actions for managing fields and staff resources.
+ * Provides locators and actions for managing fields, staff, and animal resources.
  */
 export class StaffFieldsPage extends BasePage {
   readonly PAGE_URL = PAGE_URLS.STAFF_FIELDS;

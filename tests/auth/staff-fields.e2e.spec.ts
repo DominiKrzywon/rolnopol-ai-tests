@@ -63,3 +63,29 @@ test.describe("Staff & Fields Management", () => {
     },
   );
 });
+
+test.describe("Staff & Fields - Animal Management", () => {
+  test(
+    "should create a new animal herd in Staff & Fields view",
+    { tag: ["@crud", "@farm", "@resources", "@happy-path"] },
+    async ({ page }) => {
+      const staffFieldsPage = new StaffFieldsPage(page);
+
+      await staffFieldsPage.goto();
+
+      await expect(staffFieldsPage.pageHeading).toBeVisible();
+      await expect(staffFieldsPage.animalsHeading).toBeVisible();
+      await expect(staffFieldsPage.addAnimalBtn).toBeVisible();
+
+      await staffFieldsPage.addAnimal(ANIMAL_TYPE, ANIMAL_AMOUNT);
+
+      await expect(staffFieldsPage.addAnimalModal).toBeHidden();
+
+      await staffFieldsPage.searchAnimals(ANIMAL_TYPE);
+      await expect(
+        staffFieldsPage.getAnimalByType(ANIMAL_TYPE),
+      ).toBeVisible();
+    },
+  );
+});
+
