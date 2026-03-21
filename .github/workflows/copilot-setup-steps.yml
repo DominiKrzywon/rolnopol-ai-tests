@@ -48,6 +48,12 @@ jobs:
         if: steps.cache-browsers.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
 
+      - name: Create .env.ai file
+        run: |
+          printf 'BASE_URL=%s\nEMPTY_USER_EMAIL=%s\nEMPTY_USER_PASSWORD=%s\nEMPTY_USER_DISPLAY_NAME=%s\nDEMO_USER_EMAIL=%s\nDEMO_USER_PASSWORD=%s\nDEMO_USER_DISPLAY_NAME=%s\n' \
+            "${BASE_URL}" "${EMPTY_USER_EMAIL}" "${EMPTY_USER_PASSWORD}" "${EMPTY_USER_DISPLAY_NAME}" \
+            "${DEMO_USER_EMAIL}" "${DEMO_USER_PASSWORD}" "${DEMO_USER_DISPLAY_NAME}" > .env.ai
+
       - name: Wait for rolnopol service
         shell: bash
         env:
