@@ -4,6 +4,7 @@ import { StaffFieldsPage } from "../../src/pages/StaffFieldsPage";
 const FIELD_NAME_PREFIX = "AutoField";
 const FIELD_AREA = 25;
 const ANIMAL_TYPE = "goat";
+const ANIMAL_AMOUNT = 50;
 
 function generateUniqueFieldName(): string {
   const timestamp = Date.now();
@@ -52,13 +53,11 @@ test.describe("Staff & Fields Management", () => {
 
       await staffFieldsPage.addAnimalGroup(ANIMAL_TYPE, animalAmount);
 
-      await staffFieldsPage.goto();
+      await expect(staffFieldsPage.addAnimalModal).toBeHidden();
+
       await staffFieldsPage.searchAnimals(ANIMAL_TYPE);
       await expect(
-        staffFieldsPage.getAnimalGroupByTypeAndAmount(
-          ANIMAL_TYPE,
-          animalAmount,
-        ),
+        staffFieldsPage.getAnimalByType(ANIMAL_TYPE),
       ).toBeVisible();
     },
   );

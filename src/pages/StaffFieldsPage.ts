@@ -96,12 +96,26 @@ export class StaffFieldsPage extends BasePage {
     await this.addAnimalSubmitBtn.click();
   }
 
+  async addAnimal(type: string, amount: number) {
+    await this.openAddAnimalModal();
+    await this.animalTypeSelect.selectOption(type);
+    await this.animalAmountInput.fill(String(amount));
+    await this.addAnimalSubmitBtn.click();
+  }
+
   async searchAnimals(query: string) {
     await this.searchAnimalsInput.fill(query);
   }
 
   getFieldByName(name: string): Locator {
     return this.page.getByRole("strong").filter({ hasText: name });
+  }
+
+  getAnimalByType(type: string): Locator {
+    return this.animalsList
+      .locator("li")
+      .filter({ hasText: new RegExp(type, "i") })
+      .first();
   }
 
   getAnimalGroupByTypeAndAmount(type: string, amount: number): Locator {
