@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { RegisterPage } from "../src/pages/RegisterPage";
+import { RegisterPage } from "../../src/pages/RegisterPage";
 
 test.describe("Registration Negative Tests", () => {
   test(

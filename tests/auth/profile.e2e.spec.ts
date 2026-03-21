@@ -1,20 +1,16 @@
 import { expect, test } from "@playwright/test";
-import { getEmptyUserData } from "../src/models/User";
-import { LoginPage } from "../src/pages/LoginPage";
-import { ProfilePage } from "../src/pages/ProfilePage";
+import { getDemoUserData } from "../../src/models/User";
+import { ProfilePage } from "../../src/pages/ProfilePage";
 
 test.describe("Profile Page E2E", () => {
   test(
-    "should display correct user information in profile sections after login",
+    "should display correct user information in profile sections",
     { tag: ["@auth", "@profile", "@happy-path"] },
     async ({ page }) => {
-      const user = getEmptyUserData();
-      const loginPage = new LoginPage(page);
+      const user = getDemoUserData();
       const profilePage = new ProfilePage(page);
 
-      await loginPage.goto();
-      await loginPage.login(user.email, user.password);
-      await expect.soft(page).toHaveURL(profilePage.PAGE_URL);
+      await profilePage.goto();
 
       await expect
         .soft(profilePage.welcomeMessage)

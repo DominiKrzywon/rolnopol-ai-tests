@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { generateUniqueEmail } from "../src/helpers/testDataHelpers";
-import { ApiDocsPage } from "../src/pages/ApiDocsPage";
-import { DocsPage } from "../src/pages/DocsPage";
-import { HomePage } from "../src/pages/HomePage";
-import { LoginPage } from "../src/pages/LoginPage";
-import { RegisterPage } from "../src/pages/RegisterPage";
+import { generateUniqueEmail } from "../../src/helpers/testDataHelpers";
+import { ApiDocsPage } from "../../src/pages/ApiDocsPage";
+import { DocsPage } from "../../src/pages/DocsPage";
+import { HomePage } from "../../src/pages/HomePage";
+import { LoginPage } from "../../src/pages/LoginPage";
+import { RegisterPage } from "../../src/pages/RegisterPage";
 
 test(
   "should display the correct page title 'Rolnopol' on homepage",

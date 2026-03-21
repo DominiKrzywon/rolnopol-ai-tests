@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
-import { getEmptyUserData } from "../src/models/User";
-import { HomePage } from "../src/pages/HomePage";
-import { LoginPage } from "../src/pages/LoginPage";
-import { ProfilePage } from "../src/pages/ProfilePage";
+import { getEmptyUserData } from "../../src/models/User";
+import { HomePage } from "../../src/pages/HomePage";
+import { LoginPage } from "../../src/pages/LoginPage";
+import { ProfilePage } from "../../src/pages/ProfilePage";
 
 test.describe("Login E2E", () => {
   test(
