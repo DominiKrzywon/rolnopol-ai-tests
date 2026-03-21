@@ -4,7 +4,7 @@ import { BasePage } from "./BasePage";
 
 /**
  * Page Object for the Staff & Fields Management page.
- * Provides locators and actions for managing fields and staff resources.
+ * Provides locators and actions for managing fields, staff, and animal resources.
  */
 export class StaffFieldsPage extends BasePage {
   readonly PAGE_URL = PAGE_URLS.STAFF_FIELDS;
@@ -22,6 +22,17 @@ export class StaffFieldsPage extends BasePage {
   readonly fieldDistrictSelect: Locator;
   readonly addFieldSubmitBtn: Locator;
   readonly closeAddFieldModalBtn: Locator;
+
+  readonly animalsHeading: Locator;
+  readonly animalsList: Locator;
+  readonly searchAnimalsInput: Locator;
+  readonly addAnimalBtn: Locator;
+
+  readonly addAnimalModal: Locator;
+  readonly animalTypeSelect: Locator;
+  readonly animalAmountInput: Locator;
+  readonly addAnimalSubmitBtn: Locator;
+  readonly closeAddAnimalModalBtn: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -42,6 +53,21 @@ export class StaffFieldsPage extends BasePage {
       "#addFieldModal button[type='submit']",
     );
     this.closeAddFieldModalBtn = page.locator("#closeAddFieldModal");
+
+    this.animalsHeading = page.getByRole("heading", {
+      name: "Animals (groups)",
+    });
+    this.animalsList = page.locator("#animalsList");
+    this.searchAnimalsInput = page.getByPlaceholder("Search animals...");
+    this.addAnimalBtn = page.locator("#openAddAnimalModal");
+
+    this.addAnimalModal = page.locator("#addAnimalModal");
+    this.animalTypeSelect = page.locator("#animalType");
+    this.animalAmountInput = page.locator("#animalAmount");
+    this.addAnimalSubmitBtn = page.locator(
+      "#addAnimalModal button[type='submit']",
+    );
+    this.closeAddAnimalModalBtn = page.locator("#closeAddAnimalModal");
   }
 
   async openAddFieldModal() {
@@ -62,5 +88,25 @@ export class StaffFieldsPage extends BasePage {
 
   getFieldByName(name: string): Locator {
     return this.page.getByRole("strong").filter({ hasText: name });
+  }
+
+  async openAddAnimalModal() {
+    await this.addAnimalBtn.click();
+  }
+
+  async addAnimal(type: string, amount: number) {
+    await this.openAddAnimalModal();
+    await this.animalTypeSelect.selectOption({ value: type });
+    await this.animalAmountInput.fill(String(amount));
+    await this.addAnimalSubmitBtn.click();
+  }
+
+  async searchAnimals(query: string) {
+    await this.searchAnimalsInput.click();
+    await this.searchAnimalsInput.pressSequentially(query);
+  }
+
+  getAnimalByType(type: string): Locator {
+    return this.animalsList.getByRole("strong").filter({ hasText: type }).first();
   }
 }
