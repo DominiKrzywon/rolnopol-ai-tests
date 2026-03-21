@@ -71,3 +71,9 @@ test("prevent purchase with insufficient funds", {
 ```
 
 Keep tags aligned with TEST_PLAN.md test cases for consistency.
+
+## Security: Environment Files
+
+**NEVER read or access the `.env` file.** It contains sensitive credentials that must not be exposed in conversations or code suggestions.
+
+When you need access to credentials or environment variables for AI purposes, use `#file:.env.ai` instead.
