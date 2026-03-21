@@ -1,17 +1,12 @@
-name: Playwright Tests
-
+name: Copilot Setup Steps
 on:
   workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
+    
 jobs:
-  test:
+  copilot-setup-steps:
     runs-on: ubuntu-latest
-    environment: dev
-    timeout-minutes: 10
+    timeout-minutes: 60
+    environment: copilot
     env:
       BASE_URL: ${{ vars.BASE_URL }}
       EMPTY_USER_EMAIL: ${{ secrets.EMPTY_USER_EMAIL }}
@@ -20,6 +15,8 @@ jobs:
       DEMO_USER_EMAIL: ${{ secrets.DEMO_USER_EMAIL }}
       DEMO_USER_PASSWORD: ${{ secrets.DEMO_USER_PASSWORD }}
       DEMO_USER_DISPLAY_NAME: ${{ vars.DEMO_USER_DISPLAY_NAME }}
+    permissions:
+      contents: read
     services:
       rolnopol:
         image: jaktestowac/rolnopol:latest
@@ -27,17 +24,14 @@ jobs:
           - 3000:3000
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-
+        uses: actions/checkout@v5
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "npm"
-
+          cache: npm
       - name: Install dependencies
         run: npm ci
-
       - name: Cache Playwright browsers
         id: cache-browsers
         uses: actions/cache@v4
@@ -46,41 +40,28 @@ jobs:
           key: ${{ runner.os }}-playwright-browsers-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-playwright-browsers-
-
       - name: Install Playwright browsers
         if: steps.cache-browsers.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
-
+        
       - name: Install Playwright browser dependencies
         if: steps.cache-browsers.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
 
       - name: Wait for rolnopol service
+        shell: bash
+        env:
+          BASE_URL: ${{ vars.BASE_URL }}
         run: |
-          if [ -z "$BASE_URL" ]; then
-            echo "BASE_URL is not set"
-            exit 1
-          fi
-          TARGET_URL="${BASE_URL%/}"
-          echo "Waiting for rolnopol service to be ready at ${TARGET_URL}..."
+          target_url="${BASE_URL%/}"
+          echo "Waiting for rolnopol service to be ready at ${target_url}..."
           for i in {1..30}; do
-            if curl -sSf "${TARGET_URL}/health" || curl -sSf "${TARGET_URL}"; then
+            if curl -sSf "${target_url}/health" >/dev/null || curl -sSf "${target_url}" >/dev/null; then
               echo "Service is ready!"
               exit 0
             fi
             echo "Attempt $i/30 failed, retrying in 2 seconds..."
             sleep 2
           done
-          echo "Service failed to become ready after 60 seconds"
+          echo "Service failed to become ready after 60 seconds" >&2
           exit 1
-
-      - name: Run Playwright tests
-        run: npm test
-
-      - name: Upload Playwright HTML Report
-        if: ${{ success() || failure() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: rolnopol-${{ github.run_id }}-${{ github.run_attempt }}
-          path: playwright-report/
-          retention-days: 30
