@@ -88,12 +88,17 @@ export class StaffFieldsPage extends BasePage {
     await this.addAnimalBtn.click();
   }
 
-  async addAnimalGroup(type: string, amount: number, fieldId: string = "") {
+  async addAnimalGroup(type: string, amount: number, fieldName?: string) {
     await this.openAddAnimalModal();
     await this.animalTypeSelect.selectOption(type);
     await this.animalAmountInput.fill(String(amount));
-    await this.animalFieldSelect.selectOption(fieldId);
+    if (fieldName) {
+      await this.animalFieldSelect.selectOption({ label: fieldName });
+    } else {
+      await this.animalFieldSelect.selectOption("");
+    }
     await this.addAnimalSubmitBtn.click();
+    await this.addAnimalModal.waitFor({ state: "hidden" });
   }
 
   async searchAnimals(query: string) {
@@ -104,10 +109,22 @@ export class StaffFieldsPage extends BasePage {
     return this.page.getByRole("strong").filter({ hasText: name });
   }
 
+  getFieldCardByName(name: string): Locator {
+    return this.page
+      .locator("li", {
+        has: this.page.locator("strong", { hasText: name }),
+      })
+      .first();
+  }
+
   getAnimalGroupByTypeAndAmount(type: string, amount: number): Locator {
     return this.animalsList
-      .locator("li")
-      .filter({ hasText: new RegExp(`${type}\\s+${amount}\\b`, "i") })
+      .locator("li", {
+        has: this.page.locator("strong", {
+          hasText: new RegExp(`^${type}$`, "i"),
+        }),
+      })
+      .filter({ hasText: new RegExp(`\\b${amount}\\b`) })
       .first();
   }
 }

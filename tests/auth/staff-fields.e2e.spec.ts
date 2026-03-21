@@ -11,7 +11,7 @@ function generateUniqueFieldName(): string {
 }
 
 function generateUniqueAnimalAmount(): number {
-  return 1_000_000 + (Date.now() % 9_000_000);
+  return 20_000 + (Date.now() % 50_000);
 }
 
 test.describe("Staff & Fields Management", () => {
@@ -42,6 +42,7 @@ test.describe("Staff & Fields Management", () => {
     { tag: ["@crud", "@farm", "@resources", "@happy-path"] },
     async ({ page }) => {
       const staffFieldsPage = new StaffFieldsPage(page);
+      const fieldName = generateUniqueFieldName();
       const animalAmount = generateUniqueAnimalAmount();
 
       await staffFieldsPage.goto();
@@ -50,42 +51,27 @@ test.describe("Staff & Fields Management", () => {
       await expect(staffFieldsPage.animalsHeading).toBeVisible();
       await expect(staffFieldsPage.addAnimalBtn).toBeVisible();
 
-      await staffFieldsPage.addAnimalGroup(ANIMAL_TYPE, animalAmount);
-
-      await staffFieldsPage.goto();
-      await staffFieldsPage.searchAnimals(ANIMAL_TYPE);
-      await expect(
-        staffFieldsPage.getAnimalGroupByTypeAndAmount(
-          ANIMAL_TYPE,
-          animalAmount,
-        ),
-      ).toBeVisible();
-    },
-  );
-});
-
-test.describe("Staff & Fields - Animal Management", () => {
-  test(
-    "should create a new animal herd in Staff & Fields view",
-    { tag: ["@crud", "@farm", "@resources", "@happy-path"] },
-    async ({ page }) => {
-      const staffFieldsPage = new StaffFieldsPage(page);
+      await staffFieldsPage.addField(fieldName, FIELD_AREA);
+      await expect(staffFieldsPage.fieldAddedMessage).toBeVisible();
 
       await staffFieldsPage.goto();
 
-      await expect(staffFieldsPage.pageHeading).toBeVisible();
-      await expect(staffFieldsPage.animalsHeading).toBeVisible();
-      await expect(staffFieldsPage.addAnimalBtn).toBeVisible();
-
-      await staffFieldsPage.addAnimal(ANIMAL_TYPE, ANIMAL_AMOUNT);
+      await staffFieldsPage.addAnimalGroup(
+        ANIMAL_TYPE,
+        animalAmount,
+        fieldName,
+      );
 
       await expect(staffFieldsPage.addAnimalModal).toBeHidden();
 
-      await staffFieldsPage.searchAnimals(ANIMAL_TYPE);
-      await expect(
-        staffFieldsPage.getAnimalByType(ANIMAL_TYPE),
-      ).toBeVisible();
+      await staffFieldsPage.goto();
+      await staffFieldsPage.searchFields(fieldName);
+
+      const createdFieldCard = staffFieldsPage.getFieldCardByName(fieldName);
+
+      await expect(createdFieldCard).toBeVisible();
+      await expect(createdFieldCard).toContainText(String(animalAmount));
+      await expect(createdFieldCard).toContainText(/goat/i);
     },
   );
 });
-
