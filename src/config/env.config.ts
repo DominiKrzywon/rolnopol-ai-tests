@@ -51,3 +51,8 @@ export const ENV = {
   DEMO_USER_PASSWORD: validated.DEMO_USER_PASSWORD,
   DEMO_USER_DISPLAY_NAME: validated.DEMO_USER_DISPLAY_NAME,
 } as const;
+
+/**
+ * API base URL for REST API endpoints (v1)
+ */
+export const BASE_API_URL = `${ENV.BASE_URL}/api/v1`;
