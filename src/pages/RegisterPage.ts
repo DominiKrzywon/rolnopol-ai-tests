@@ -30,7 +30,11 @@ export class RegisterPage extends BasePage {
       .getByText('Must be at least 3 characters');
   }
 
-  async register(email: string, password: string, displayName?: string) {
+  async register(
+    email: string,
+    password: string,
+    displayName?: string,
+  ): Promise<void> {
     await this.emailInput.fill(email);
     if (displayName) {
       await this.displayNameInput.fill(displayName);
