@@ -21,6 +21,7 @@ test.describe('Login E2E', () => {
 
       // If DEMO_USER storage state is active, login page redirects to profile.
       // Ensure we are on login page by logging out first if needed.
+      // eslint-disable-next-line playwright/no-conditional-in-test
       if (
         page.url().endsWith('/profile.html') ||
         page.url().endsWith('/profile')

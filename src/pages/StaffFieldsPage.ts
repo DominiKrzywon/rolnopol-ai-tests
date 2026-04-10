@@ -69,27 +69,31 @@ export class StaffFieldsPage extends BasePage {
     );
   }
 
-  async openAddFieldModal() {
+  async openAddFieldModal(): Promise<void> {
     await this.addFieldBtn.click();
   }
 
-  async addField(name: string, area: number) {
+  async addField(name: string, area: number): Promise<void> {
     await this.openAddFieldModal();
     await this.fieldNameInput.fill(name);
     await this.fieldAreaInput.fill(String(area));
     await this.addFieldSubmitBtn.click();
   }
 
-  async searchFields(query: string) {
+  async searchFields(query: string): Promise<void> {
     await this.searchFieldsInput.click();
     await this.searchFieldsInput.pressSequentially(query);
   }
 
-  async openAddAnimalModal() {
+  async openAddAnimalModal(): Promise<void> {
     await this.addAnimalBtn.click();
   }
 
-  async addAnimalGroup(type: string, amount: number, fieldName?: string) {
+  async addAnimalGroup(
+    type: string,
+    amount: number,
+    fieldName?: string,
+  ): Promise<void> {
     await this.openAddAnimalModal();
     await this.animalTypeSelect.selectOption(type);
     await this.animalAmountInput.fill(String(amount));
@@ -102,7 +106,7 @@ export class StaffFieldsPage extends BasePage {
     await this.addAnimalModal.waitFor({ state: 'hidden' });
   }
 
-  async searchAnimals(query: string) {
+  async searchAnimals(query: string): Promise<void> {
     await this.searchAnimalsInput.fill(query);
   }
 

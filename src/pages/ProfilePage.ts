@@ -59,7 +59,7 @@ export class ProfilePage extends BasePage {
     this.deleteAccountBtn = page.getByTestId('delete-account-btn');
   }
 
-  async logout() {
+  async logout(): Promise<void> {
     await this.logoutBtn.click();
   }
 }

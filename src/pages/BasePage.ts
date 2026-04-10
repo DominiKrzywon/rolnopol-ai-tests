@@ -12,7 +12,7 @@ export abstract class BasePage {
     this.page = page;
   }
 
-  async goto() {
+  async goto(): Promise<void> {
     await this.page.goto(this.PAGE_URL);
   }
 }

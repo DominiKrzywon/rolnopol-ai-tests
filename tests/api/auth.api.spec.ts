@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { APIResponse, expect, Page, test } from '@playwright/test';
 
 import { BASE_API_URL } from '../../src/config/env.config';
 import { getDemoUserData } from '../../src/models/User';
@@ -38,7 +38,10 @@ const authHelpers = {
   /**
    * Register a new user
    */
-  async registerUser(page: any, userData: RegistrationData) {
+  async registerUser(
+    page: Page,
+    userData: RegistrationData,
+  ): Promise<APIResponse> {
     return page.request.post(`${BASE_API_URL}/register`, {
       data: userData,
     });
@@ -47,7 +50,7 @@ const authHelpers = {
   /**
    * Login with credentials
    */
-  async login(page: any, credentials: LoginCredentials) {
+  async login(page: Page, credentials: LoginCredentials): Promise<APIResponse> {
     return page.request.post(`${BASE_API_URL}/login`, {
       data: credentials,
     });
@@ -56,7 +59,7 @@ const authHelpers = {
   /**
    * Extract token from login response
    */
-  async extractTokenFromResponse(response: any): Promise<string> {
+  async extractTokenFromResponse(response: APIResponse): Promise<string> {
     const body = await response.json();
     return body.data?.token || '';
   },
@@ -64,7 +67,10 @@ const authHelpers = {
   /**
    * Validate authorization with token (GET method)
    */
-  async validateAuthorizationGet(page: any, token: string) {
+  async validateAuthorizationGet(
+    page: Page,
+    token: string,
+  ): Promise<APIResponse> {
     return page.request.get(`${BASE_API_URL}/authorization`, {
       headers: { token },
     });
@@ -73,7 +79,10 @@ const authHelpers = {
   /**
    * Validate authorization with token (POST method)
    */
-  async validateAuthorizationPost(page: any, token: string) {
+  async validateAuthorizationPost(
+    page: Page,
+    token: string,
+  ): Promise<APIResponse> {
     return page.request.post(`${BASE_API_URL}/authorization`, {
       data: { token },
     });
@@ -82,7 +91,7 @@ const authHelpers = {
   /**
    * Logout user
    */
-  async logout(page: any) {
+  async logout(page: Page): Promise<APIResponse> {
     return page.request.post(`${BASE_API_URL}/logout`);
   },
 };
