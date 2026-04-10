@@ -1,4 +1,4 @@
-import { ENV } from "../config/env.config";
+import { ENV } from '../config/env.config';
 
 export interface User {
   email: string;

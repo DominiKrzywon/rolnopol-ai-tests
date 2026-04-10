@@ -1,9 +1,10 @@
-import { expect, test } from "@playwright/test";
-import { StaffFieldsPage } from "../../src/pages/StaffFieldsPage";
+import { expect, test } from '@playwright/test';
 
-const FIELD_NAME_PREFIX = "AutoField";
+import { StaffFieldsPage } from '../../src/pages/StaffFieldsPage';
+
+const FIELD_NAME_PREFIX = 'AutoField';
 const FIELD_AREA = 25;
-const ANIMAL_TYPE = "goat";
+const ANIMAL_TYPE = 'goat';
 
 function generateUniqueFieldName(): string {
   const timestamp = Date.now();
@@ -14,10 +15,10 @@ function generateUniqueAnimalAmount(): number {
   return 20_000 + (Date.now() % 50_000);
 }
 
-test.describe("Staff & Fields Management", () => {
+test.describe('Staff & Fields Management', () => {
   test(
-    "should create a new field in Staff & Fields view",
-    { tag: ["@crud", "@farm", "@resources", "@happy-path"] },
+    'should create a new field in Staff & Fields view',
+    { tag: ['@crud', '@farm', '@resources', '@happy-path'] },
     async ({ page }) => {
       const staffFieldsPage = new StaffFieldsPage(page);
       const fieldName = generateUniqueFieldName();
@@ -38,8 +39,8 @@ test.describe("Staff & Fields Management", () => {
   );
 
   test(
-    "should create a new animal herd in Staff & Fields view",
-    { tag: ["@crud", "@farm", "@resources", "@happy-path"] },
+    'should create a new animal herd in Staff & Fields view',
+    { tag: ['@crud', '@farm', '@resources', '@happy-path'] },
     async ({ page }) => {
       const staffFieldsPage = new StaffFieldsPage(page);
       const fieldName = generateUniqueFieldName();

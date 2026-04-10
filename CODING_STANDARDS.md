@@ -64,10 +64,10 @@ All tests should follow the **Arrange-Act-Assert (AAA)** pattern:
 ### Example
 
 ```typescript
-test("should register new user", async ({ page }) => {
+test('should register new user', async ({ page }) => {
   const registerPage = new RegisterPage(page);
-  const email = "user@example.com";
-  const password = "password123";
+  const email = 'user@example.com';
+  const password = 'password123';
 
   await registerPage.register(email, password);
 
@@ -98,11 +98,11 @@ export class PageName {
 
   constructor(page: Page) {
     this.page = page;
-    this.elementName = page.getByTestId("element-id");
+    this.elementName = page.getByTestId('element-id');
   }
 
   async goto() {
-    await this.page.goto("/page-path");
+    await this.page.goto('/page-path');
   }
 
   async performAction(param: string) {
@@ -140,12 +140,12 @@ async register(email: string, password: string) {
 **Test File (all `expect()` here):**
 
 ```typescript
-test("should register new user", async ({ page }) => {
+test('should register new user', async ({ page }) => {
   // Arrange
   const registerPage = new RegisterPage(page);
 
   // Act
-  await registerPage.register("user@example.com", "password123");
+  await registerPage.register('user@example.com', 'password123');
 
   // Assert
   await expect(registerPage.successMessage).toBeVisible();

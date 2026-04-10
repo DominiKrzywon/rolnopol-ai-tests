@@ -1,15 +1,16 @@
-import { expect, test } from "@playwright/test";
-import { getEmptyUserData } from "../../src/models/User";
-import { HomePage } from "../../src/pages/HomePage";
-import { LoginPage } from "../../src/pages/LoginPage";
-import { ProfilePage } from "../../src/pages/ProfilePage";
+import { expect, test } from '@playwright/test';
 
-test.describe("Login E2E", () => {
+import { getEmptyUserData } from '../../src/models/User';
+import { HomePage } from '../../src/pages/HomePage';
+import { LoginPage } from '../../src/pages/LoginPage';
+import { ProfilePage } from '../../src/pages/ProfilePage';
+
+test.describe('Login E2E', () => {
   test.use({ storageState: undefined });
 
   test(
-    "should login, verify profile sections, and logout successfully",
-    { tag: ["@auth", "@login", "@session", "@logout", "@happy-path"] },
+    'should login, verify profile sections, and logout successfully',
+    { tag: ['@auth', '@login', '@session', '@logout', '@happy-path'] },
     async ({ page }) => {
       const user = getEmptyUserData();
       const loginPage = new LoginPage(page);
@@ -21,8 +22,8 @@ test.describe("Login E2E", () => {
       // If DEMO_USER storage state is active, login page redirects to profile.
       // Ensure we are on login page by logging out first if needed.
       if (
-        page.url().endsWith("/profile.html") ||
-        page.url().endsWith("/profile")
+        page.url().endsWith('/profile.html') ||
+        page.url().endsWith('/profile')
       ) {
         await profilePage.logout();
         await loginPage.goto();

@@ -1,141 +1,141 @@
 - generic [active] [ref=e1]:
-  - navigation [ref=e2]:
-    - generic [ref=e3]:
-      - link " Rolnopol" [ref=e4] [cursor=pointer]:
-        - /url: /
-        - generic [ref=e5]: 
-        - text: Rolnopol
-      - list [ref=e6]:
-        - listitem [ref=e7]:
-          - link "Home" [ref=e8] [cursor=pointer]:
-            - /url: /
-            - generic [ref=e9]: 
-        - listitem [ref=e10]:
-          - link "Alerts" [ref=e11] [cursor=pointer]:
-            - /url: /alerts.html
-            - generic [ref=e12]: 
-        - listitem [ref=e13]:
-          - link "Documentation" [ref=e14] [cursor=pointer]:
-            - /url: /docs.html
-            - generic [ref=e15]: 
-        - listitem [ref=e16]:
-          - link "API Explorer" [ref=e17] [cursor=pointer]:
-            - /url: /swagger.html
-            - generic [ref=e18]: 
-        - listitem [ref=e19]:
-          - link "Register" [ref=e20] [cursor=pointer]:
-            - /url: /register.html
-            - generic [ref=e21]: 
-        - listitem [ref=e22]:
-          - link "Login" [ref=e23] [cursor=pointer]:
-            - /url: /login.html
-            - generic [ref=e24]: 
-  - generic [ref=e25]:
-    - banner [ref=e26]:
-      - generic [ref=e27]:
-        - heading "" [level=1] [ref=e28]:
-          - generic [ref=e30]: 
-        - generic [ref=e31]:
-          - generic [ref=e32]: Rolnopol
-          - generic [ref=e33]: Futuristic Farm & Resource Management
-    - main [ref=e34]:
-      - generic [ref=e35]:
-        - heading " Welcome to Rolnopol" [level=2] [ref=e36]:
-          - generic [ref=e37]: 
-          - text: Welcome to Rolnopol
-        - paragraph [ref=e38]: Manage your farms, resources, and transactions in a secure, modern environment. Empowering staff, admins, and superadmins for the future of agriculture.
-      - generic [ref=e39]:
-        - generic [ref=e41]:
-          - generic "Total number of registered users in the Rolnopol agricultural management system" [ref=e42]:
-            - generic [ref=e44]: 
-            - generic "21 registered users across all farms" [ref=e45]: "0"
-            - generic [ref=e46]: Active Users
-            - generic [ref=e47]:
-              - text: Growing Community
-              - generic [ref=e48]: 
-          - generic "Total number of farms and agricultural properties managed through the platform" [ref=e49]:
-            - generic [ref=e51]: 
-            - generic "21 managed farms and agricultural properties" [ref=e52]: "0"
-            - generic [ref=e53]: Managed Farms
-            - generic [ref=e54]:
-              - text: Digital Agriculture
-              - generic [ref=e55]: 
-          - generic "Total agricultural land area managed across all farms in hectares and acres" [ref=e56]:
-            - generic [ref=e58]: 
-            - generic "6480 hectares (16 012 acres) of agricultural land" [ref=e59]: 93,0 ha
-            - generic [ref=e60]: Total Area (ha)
-            - generic [ref=e61]:
-              - text: Land Management
-              - generic [ref=e62]: 
-          - generic "Total number of staff members and workers employed across all agricultural operations" [ref=e63]:
-            - generic [ref=e65]: 
-            - generic "16 staff members working in agriculture" [ref=e66]: "0"
-            - generic [ref=e67]: Total Staff
-            - generic [ref=e68]:
-              - text: Team Management
-              - generic [ref=e69]: 
-          - generic "Total number of livestock animals including cattle, pigs, chickens, and other farm animals" [ref=e70]:
-            - generic [ref=e72]: 
-            - generic "41 134 818 livestock animals across all farms" [ref=e73]: 586,9K
-            - generic [ref=e74]: Stock Animals
-            - generic [ref=e75]:
-              - text: Livestock Count
-              - generic [ref=e76]: 
-        - text: 
-        - generic [ref=e77]:
-          - paragraph [ref=e78]:
-            - generic [ref=e79]: 
-            - text: Join thousands of farmers already using Rolnopol to modernize their operations
-          - generic [ref=e81]:
-            - generic [ref=e82]: 
-            - text: There are about 1958801 animals per farm.
-          - generic [ref=e83]:
-            - generic [ref=e84]:
-              - link " Get Started Free" [ref=e85] [cursor=pointer]:
-                - /url: /register.html
-                - generic [ref=e86]: 
-                - text: Get Started Free
-              - link " Sign In" [ref=e87] [cursor=pointer]:
-                - /url: /login.html
-                - generic [ref=e88]: 
-                - text: Sign In
-            - paragraph [ref=e89]:
-              - generic [ref=e90]: 
-              - text: Setup takes less than 2 minutes
-    - text:          
-    - contentinfo [ref=e92]:
-      - paragraph
-      - navigation "Footer navigation" [ref=e93]:
-        - link "Contact us" [ref=e94] [cursor=pointer]:
-          - /url: /contact.html
-          - text: Contact
-      - text: © 2026 Rolnopol v1.0.120. build by
-      - link "jaktestowac.pl" [ref=e95] [cursor=pointer]:
-        - /url: https://jaktestowac.pl
-      - text: "|"
-      - link "GitHub Rolnopol repository" [ref=e96] [cursor=pointer]:
-        - /url: https://github.com/jaktestowac/rolnopol
-        - generic [ref=e97]: 
-      - text: "|"
-      - link "GitHub" [ref=e99] [cursor=pointer]:
-        - /url: https://github.com/jaktestowac
-        - generic [ref=e100]: 
-      - text: "|"
-      - link "YouTube" [ref=e102] [cursor=pointer]:
-        - /url: https://www.youtube.com/@jaktestowac?sub_confirmation=1
-        - generic [ref=e103]: 
-      - text: "|"
-      - link "LinkedIn jaktestowac.pl" [ref=e105] [cursor=pointer]:
-        - /url: https://www.linkedin.com/company/jaktestowac
-        - generic [ref=e106]: 
-      - link "AI_Testers" [ref=e108] [cursor=pointer]:
-        - /url: https://aitesters.pl
-      - text: "|"
-      - link "YouTube" [ref=e109] [cursor=pointer]:
-        - /url: https://www.youtube.com/@AITesterspl?sub_confirmation=1
-        - generic [ref=e110]: 
-      - text: "|"
-      - link "LinkedIn AI_Testers" [ref=e112] [cursor=pointer]:
-        - /url: https://www.linkedin.com/company/aitesters
-        - generic [ref=e113]: 
-      - paragraph
+    - navigation [ref=e2]:
+        - generic [ref=e3]:
+            - link " Rolnopol" [ref=e4] [cursor=pointer]:
+                - /url: /
+                - generic [ref=e5]: 
+                - text: Rolnopol
+            - list [ref=e6]:
+                - listitem [ref=e7]:
+                    - link "Home" [ref=e8] [cursor=pointer]:
+                        - /url: /
+                        - generic [ref=e9]: 
+                - listitem [ref=e10]:
+                    - link "Alerts" [ref=e11] [cursor=pointer]:
+                        - /url: /alerts.html
+                        - generic [ref=e12]: 
+                - listitem [ref=e13]:
+                    - link "Documentation" [ref=e14] [cursor=pointer]:
+                        - /url: /docs.html
+                        - generic [ref=e15]: 
+                - listitem [ref=e16]:
+                    - link "API Explorer" [ref=e17] [cursor=pointer]:
+                        - /url: /swagger.html
+                        - generic [ref=e18]: 
+                - listitem [ref=e19]:
+                    - link "Register" [ref=e20] [cursor=pointer]:
+                        - /url: /register.html
+                        - generic [ref=e21]: 
+                - listitem [ref=e22]:
+                    - link "Login" [ref=e23] [cursor=pointer]:
+                        - /url: /login.html
+                        - generic [ref=e24]: 
+    - generic [ref=e25]:
+        - banner [ref=e26]:
+            - generic [ref=e27]:
+                - heading "" [level=1] [ref=e28]:
+                    - generic [ref=e30]: 
+                - generic [ref=e31]:
+                    - generic [ref=e32]: Rolnopol
+                    - generic [ref=e33]: Futuristic Farm & Resource Management
+        - main [ref=e34]:
+            - generic [ref=e35]:
+                - heading " Welcome to Rolnopol" [level=2] [ref=e36]:
+                    - generic [ref=e37]: 
+                    - text: Welcome to Rolnopol
+                - paragraph [ref=e38]: Manage your farms, resources, and transactions in a secure, modern environment. Empowering staff, admins, and superadmins for the future of agriculture.
+            - generic [ref=e39]:
+                - generic [ref=e41]:
+                    - generic "Total number of registered users in the Rolnopol agricultural management system" [ref=e42]:
+                        - generic [ref=e44]: 
+                        - generic "21 registered users across all farms" [ref=e45]: '0'
+                        - generic [ref=e46]: Active Users
+                        - generic [ref=e47]:
+                            - text: Growing Community
+                            - generic [ref=e48]: 
+                    - generic "Total number of farms and agricultural properties managed through the platform" [ref=e49]:
+                        - generic [ref=e51]: 
+                        - generic "21 managed farms and agricultural properties" [ref=e52]: '0'
+                        - generic [ref=e53]: Managed Farms
+                        - generic [ref=e54]:
+                            - text: Digital Agriculture
+                            - generic [ref=e55]: 
+                    - generic "Total agricultural land area managed across all farms in hectares and acres" [ref=e56]:
+                        - generic [ref=e58]: 
+                        - generic "6480 hectares (16 012 acres) of agricultural land" [ref=e59]: 93,0 ha
+                        - generic [ref=e60]: Total Area (ha)
+                        - generic [ref=e61]:
+                            - text: Land Management
+                            - generic [ref=e62]: 
+                    - generic "Total number of staff members and workers employed across all agricultural operations" [ref=e63]:
+                        - generic [ref=e65]: 
+                        - generic "16 staff members working in agriculture" [ref=e66]: '0'
+                        - generic [ref=e67]: Total Staff
+                        - generic [ref=e68]:
+                            - text: Team Management
+                            - generic [ref=e69]: 
+                    - generic "Total number of livestock animals including cattle, pigs, chickens, and other farm animals" [ref=e70]:
+                        - generic [ref=e72]: 
+                        - generic "41 134 818 livestock animals across all farms" [ref=e73]: 586,9K
+                        - generic [ref=e74]: Stock Animals
+                        - generic [ref=e75]:
+                            - text: Livestock Count
+                            - generic [ref=e76]: 
+                - text: 
+                - generic [ref=e77]:
+                    - paragraph [ref=e78]:
+                        - generic [ref=e79]: 
+                        - text: Join thousands of farmers already using Rolnopol to modernize their operations
+                    - generic [ref=e81]:
+                        - generic [ref=e82]: 
+                        - text: There are about 1958801 animals per farm.
+                    - generic [ref=e83]:
+                        - generic [ref=e84]:
+                            - link " Get Started Free" [ref=e85] [cursor=pointer]:
+                                - /url: /register.html
+                                - generic [ref=e86]: 
+                                - text: Get Started Free
+                            - link " Sign In" [ref=e87] [cursor=pointer]:
+                                - /url: /login.html
+                                - generic [ref=e88]: 
+                                - text: Sign In
+                        - paragraph [ref=e89]:
+                            - generic [ref=e90]: 
+                            - text: Setup takes less than 2 minutes
+        - text:          
+        - contentinfo [ref=e92]:
+            - paragraph
+            - navigation "Footer navigation" [ref=e93]:
+                - link "Contact us" [ref=e94] [cursor=pointer]:
+                    - /url: /contact.html
+                    - text: Contact
+            - text: © 2026 Rolnopol v1.0.120. build by
+            - link "jaktestowac.pl" [ref=e95] [cursor=pointer]:
+                - /url: https://jaktestowac.pl
+            - text: '|'
+            - link "GitHub Rolnopol repository" [ref=e96] [cursor=pointer]:
+                - /url: https://github.com/jaktestowac/rolnopol
+                - generic [ref=e97]: 
+            - text: '|'
+            - link "GitHub" [ref=e99] [cursor=pointer]:
+                - /url: https://github.com/jaktestowac
+                - generic [ref=e100]: 
+            - text: '|'
+            - link "YouTube" [ref=e102] [cursor=pointer]:
+                - /url: https://www.youtube.com/@jaktestowac?sub_confirmation=1
+                - generic [ref=e103]: 
+            - text: '|'
+            - link "LinkedIn jaktestowac.pl" [ref=e105] [cursor=pointer]:
+                - /url: https://www.linkedin.com/company/jaktestowac
+                - generic [ref=e106]: 
+            - link "AI_Testers" [ref=e108] [cursor=pointer]:
+                - /url: https://aitesters.pl
+            - text: '|'
+            - link "YouTube" [ref=e109] [cursor=pointer]:
+                - /url: https://www.youtube.com/@AITesterspl?sub_confirmation=1
+                - generic [ref=e110]: 
+            - text: '|'
+            - link "LinkedIn AI_Testers" [ref=e112] [cursor=pointer]:
+                - /url: https://www.linkedin.com/company/aitesters
+                - generic [ref=e113]: 
+            - paragraph

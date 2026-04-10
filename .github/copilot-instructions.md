@@ -60,13 +60,13 @@ When creating or updating tests, always use appropriate tags from the Test Plan 
 
 ```typescript
 test('should display title "Rolnopol" on homepage', {
-  tag: ["@smoke", "@critical"],
+  tag: ['@smoke', '@critical'],
 });
-test("user registration with valid data", {
-  tag: ["@auth", "@registration", "@happy-path"],
+test('user registration with valid data', {
+  tag: ['@auth', '@registration', '@happy-path'],
 });
-test("prevent purchase with insufficient funds", {
-  tag: ["@marketplace", "@validation", "@edge-case"],
+test('prevent purchase with insufficient funds', {
+  tag: ['@marketplace', '@validation', '@edge-case'],
 });
 ```
 

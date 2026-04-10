@@ -1,6 +1,7 @@
-import { Locator, Page } from "@playwright/test";
-import { PAGE_URLS } from "../constants/pageUrls";
-import { BasePage } from "./BasePage";
+import { Locator, Page } from '@playwright/test';
+
+import { PAGE_URLS } from '../constants/pageUrls';
+import { BasePage } from './BasePage';
 
 export class LoginPage extends BasePage {
   readonly PAGE_URL = PAGE_URLS.LOGIN;
@@ -11,10 +12,10 @@ export class LoginPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.loginSubtitle = page.getByTestId("login-subtitle");
-    this.emailInput = page.getByTestId("email-input");
-    this.passwordInput = page.getByTestId("password-input");
-    this.loginSubmitBtn = page.getByTestId("login-submit-btn");
+    this.loginSubtitle = page.getByTestId('login-subtitle');
+    this.emailInput = page.getByTestId('email-input');
+    this.passwordInput = page.getByTestId('password-input');
+    this.loginSubmitBtn = page.getByTestId('login-submit-btn');
   }
 
   async login(email: string, password: string) {

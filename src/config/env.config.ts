@@ -1,4 +1,4 @@
-import "dotenv/config";
+import 'dotenv/config';
 
 /**
  * Centralized environment variable configuration.
@@ -7,13 +7,13 @@ import "dotenv/config";
  */
 
 const REQUIRED_ENV_VARS = [
-  "BASE_URL",
-  "EMPTY_USER_EMAIL",
-  "EMPTY_USER_PASSWORD",
-  "EMPTY_USER_DISPLAY_NAME",
-  "DEMO_USER_EMAIL",
-  "DEMO_USER_PASSWORD",
-  "DEMO_USER_DISPLAY_NAME",
+  'BASE_URL',
+  'EMPTY_USER_EMAIL',
+  'EMPTY_USER_PASSWORD',
+  'EMPTY_USER_DISPLAY_NAME',
+  'DEMO_USER_EMAIL',
+  'DEMO_USER_PASSWORD',
+  'DEMO_USER_DISPLAY_NAME',
 ] as const;
 
 type EnvVarName = (typeof REQUIRED_ENV_VARS)[number];
@@ -23,14 +23,14 @@ function validateEnvVars(): Record<EnvVarName, string> {
 
   for (const name of REQUIRED_ENV_VARS) {
     const value = process.env[name];
-    if (!value || value.trim() === "") {
+    if (!value || value.trim() === '') {
       missing.push(name);
     }
   }
 
   if (missing.length > 0) {
     throw new Error(
-      `Missing or empty environment variable(s): ${missing.join(", ")}. ` +
+      `Missing or empty environment variable(s): ${missing.join(', ')}. ` +
         `Ensure these are defined in your .env file or CI environment.`,
     );
   }
@@ -51,3 +51,8 @@ export const ENV = {
   DEMO_USER_PASSWORD: validated.DEMO_USER_PASSWORD,
   DEMO_USER_DISPLAY_NAME: validated.DEMO_USER_DISPLAY_NAME,
 } as const;
+
+/**
+ * API base URL for REST API endpoints (v1)
+ */
+export const BASE_API_URL = `${ENV.BASE_URL}/api/v1`;
