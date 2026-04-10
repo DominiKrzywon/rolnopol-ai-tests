@@ -1,6 +1,7 @@
-import { FrameLocator, Page } from "@playwright/test";
-import { PAGE_URLS } from "../constants/pageUrls";
-import { BasePage } from "./BasePage";
+import { FrameLocator, Page } from '@playwright/test';
+
+import { PAGE_URLS } from '../constants/pageUrls';
+import { BasePage } from './BasePage';
 
 export class ApiDocsPage extends BasePage {
   readonly PAGE_URL = PAGE_URLS.API_DOCS;
@@ -8,6 +9,6 @@ export class ApiDocsPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.iframe = page.frameLocator("iframe");
+    this.iframe = page.frameLocator('iframe');
   }
 }

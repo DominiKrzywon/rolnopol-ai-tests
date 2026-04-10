@@ -1,6 +1,7 @@
-import { Locator, Page } from "@playwright/test";
-import { PAGE_URLS } from "../constants/pageUrls";
-import { BasePage } from "./BasePage";
+import { Locator, Page } from '@playwright/test';
+
+import { PAGE_URLS } from '../constants/pageUrls';
+import { BasePage } from './BasePage';
 
 /**
  * Page Object for the Staff & Fields Management page.
@@ -35,34 +36,34 @@ export class StaffFieldsPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.pageHeading = page.getByRole("heading", {
-      name: "Staff & Fields Management",
+    this.pageHeading = page.getByRole('heading', {
+      name: 'Staff & Fields Management',
     });
-    this.fieldsHeading = page.getByRole("heading", { name: "Fields" });
-    this.animalsHeading = page.getByRole("heading", {
-      name: "Animals (groups)",
+    this.fieldsHeading = page.getByRole('heading', { name: 'Fields' });
+    this.animalsHeading = page.getByRole('heading', {
+      name: 'Animals (groups)',
     });
-    this.fieldsList = page.getByRole("list").first();
-    this.animalsList = page.locator("#animalsList");
-    this.searchFieldsInput = page.getByPlaceholder("Search fields...");
-    this.searchAnimalsInput = page.getByPlaceholder("Search animals...");
-    this.addFieldBtn = page.locator("#openAddFieldModal");
-    this.addAnimalBtn = page.locator("#openAddAnimalModal");
-    this.fieldAddedMessage = page.getByText("Field added!");
+    this.fieldsList = page.getByRole('list').first();
+    this.animalsList = page.locator('#animalsList');
+    this.searchFieldsInput = page.getByPlaceholder('Search fields...');
+    this.searchAnimalsInput = page.getByPlaceholder('Search animals...');
+    this.addFieldBtn = page.locator('#openAddFieldModal');
+    this.addAnimalBtn = page.locator('#openAddAnimalModal');
+    this.fieldAddedMessage = page.getByText('Field added!');
 
-    this.addFieldModal = page.locator("#addFieldModal");
-    this.fieldNameInput = page.locator("#fieldName");
-    this.fieldAreaInput = page.locator("#fieldArea");
-    this.fieldDistrictSelect = page.locator("#fieldDistrict");
+    this.addFieldModal = page.locator('#addFieldModal');
+    this.fieldNameInput = page.locator('#fieldName');
+    this.fieldAreaInput = page.locator('#fieldArea');
+    this.fieldDistrictSelect = page.locator('#fieldDistrict');
     this.addFieldSubmitBtn = page.locator(
       "#addFieldModal button[type='submit']",
     );
-    this.closeAddFieldModalBtn = page.locator("#closeAddFieldModal");
+    this.closeAddFieldModalBtn = page.locator('#closeAddFieldModal');
 
-    this.addAnimalModal = page.locator("#addAnimalModal");
-    this.animalTypeSelect = page.locator("#animalType");
-    this.animalAmountInput = page.locator("#animalAmount");
-    this.animalFieldSelect = page.locator("#animalField");
+    this.addAnimalModal = page.locator('#addAnimalModal');
+    this.animalTypeSelect = page.locator('#animalType');
+    this.animalAmountInput = page.locator('#animalAmount');
+    this.animalFieldSelect = page.locator('#animalField');
     this.addAnimalSubmitBtn = page.locator(
       "#addAnimalForm button[type='submit']",
     );
@@ -95,10 +96,10 @@ export class StaffFieldsPage extends BasePage {
     if (fieldName) {
       await this.animalFieldSelect.selectOption({ label: fieldName });
     } else {
-      await this.animalFieldSelect.selectOption("");
+      await this.animalFieldSelect.selectOption('');
     }
     await this.addAnimalSubmitBtn.click();
-    await this.addAnimalModal.waitFor({ state: "hidden" });
+    await this.addAnimalModal.waitFor({ state: 'hidden' });
   }
 
   async searchAnimals(query: string) {
@@ -106,22 +107,22 @@ export class StaffFieldsPage extends BasePage {
   }
 
   getFieldByName(name: string): Locator {
-    return this.page.getByRole("strong").filter({ hasText: name });
+    return this.page.getByRole('strong').filter({ hasText: name });
   }
 
   getFieldCardByName(name: string): Locator {
     return this.page
-      .locator("li", {
-        has: this.page.locator("strong", { hasText: name }),
+      .locator('li', {
+        has: this.page.locator('strong', { hasText: name }),
       })
       .first();
   }
 
   getAnimalGroupByTypeAndAmount(type: string, amount: number): Locator {
     return this.animalsList
-      .locator("li", {
-        has: this.page.locator("strong", {
-          hasText: new RegExp(`^${type}$`, "i"),
+      .locator('li', {
+        has: this.page.locator('strong', {
+          hasText: new RegExp(`^${type}$`, 'i'),
         }),
       })
       .filter({ hasText: new RegExp(`\\b${amount}\\b`) })

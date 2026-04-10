@@ -1,6 +1,7 @@
-import { expect, test } from "@playwright/test";
-import { BASE_API_URL } from "../../src/config/env.config";
-import { getDemoUserData } from "../../src/models/User";
+import { expect, test } from '@playwright/test';
+
+import { BASE_API_URL } from '../../src/config/env.config';
+import { getDemoUserData } from '../../src/models/User';
 
 /**
  * Helper interface for registration requests
@@ -29,8 +30,8 @@ const authHelpers = {
   generateTestUser(): RegistrationData {
     return {
       email: `test_${Date.now()}@example.com`,
-      password: "testPassword123",
-      displayedName: "Test User",
+      password: 'testPassword123',
+      displayedName: 'Test User',
     };
   },
 
@@ -57,7 +58,7 @@ const authHelpers = {
    */
   async extractTokenFromResponse(response: any): Promise<string> {
     const body = await response.json();
-    return body.data?.token || "";
+    return body.data?.token || '';
   },
 
   /**
@@ -86,11 +87,11 @@ const authHelpers = {
   },
 };
 
-test.describe("Authentication API", () => {
-  test.describe("Registration", () => {
+test.describe('Authentication API', () => {
+  test.describe('Registration', () => {
     test(
-      "should register new user successfully with valid data",
-      { tag: ["@api", "@auth", "@registration", "@happy-path"] },
+      'should register new user successfully with valid data',
+      { tag: ['@api', '@auth', '@registration', '@happy-path'] },
       async ({ page }) => {
         // Arrange
         const newUser = authHelpers.generateTestUser();
@@ -102,25 +103,25 @@ test.describe("Authentication API", () => {
         // Assert
         expect(
           response.status(),
-          "Registration should return 201 Created",
+          'Registration should return 201 Created',
         ).toBe(201);
-        expect(body.success, "Response success flag should be true").toBe(true);
+        expect(body.success, 'Response success flag should be true').toBe(true);
         expect(
           body.data,
-          "Response should contain user data in data field",
+          'Response should contain user data in data field',
         ).toBeDefined();
       },
     );
 
     test(
-      "should reject registration with invalid email format",
-      { tag: ["@api", "@auth", "@validation", "@negative"] },
+      'should reject registration with invalid email format',
+      { tag: ['@api', '@auth', '@validation', '@negative'] },
       async ({ page }) => {
         // Arrange
         const invalidUser: RegistrationData = {
-          email: "invalid-email",
-          password: "testPassword123",
-          displayedName: "Test User",
+          email: 'invalid-email',
+          password: 'testPassword123',
+          displayedName: 'Test User',
         };
 
         // Act
@@ -130,22 +131,22 @@ test.describe("Authentication API", () => {
         // Assert
         expect(
           response.status(),
-          "Invalid email should return 400 Bad Request",
+          'Invalid email should return 400 Bad Request',
         ).toBe(400);
         expect(
           body.success,
-          "Response success flag should be false for invalid email",
+          'Response success flag should be false for invalid email',
         ).toBe(false);
         expect(
           body.error,
-          "Response should contain error message",
+          'Response should contain error message',
         ).toBeDefined();
       },
     );
 
     test(
-      "should reject registration with duplicate email",
-      { tag: ["@api", "@auth", "@validation", "@negative"] },
+      'should reject registration with duplicate email',
+      { tag: ['@api', '@auth', '@validation', '@negative'] },
       async ({ page }) => {
         // Arrange
         const existingUser = getDemoUserData();
@@ -153,28 +154,28 @@ test.describe("Authentication API", () => {
         // Act
         const response = await authHelpers.registerUser(page, {
           email: existingUser.email,
-          password: "whatever123",
-          displayedName: "Whatever",
+          password: 'whatever123',
+          displayedName: 'Whatever',
         });
         const body = await response.json();
 
         // Assert
         expect(
           response.status(),
-          "Duplicate email should return 409 Conflict",
+          'Duplicate email should return 409 Conflict',
         ).toBe(409);
         expect(
           body.success,
-          "Response success flag should be false for duplicate email",
+          'Response success flag should be false for duplicate email',
         ).toBe(false);
       },
     );
   });
 
-  test.describe("Login", () => {
+  test.describe('Login', () => {
     test(
-      "should login successfully with valid credentials",
-      { tag: ["@api", "@auth", "@login", "@happy-path"] },
+      'should login successfully with valid credentials',
+      { tag: ['@api', '@auth', '@login', '@happy-path'] },
       async ({ page }) => {
         // Arrange
         const user = getDemoUserData();
@@ -188,34 +189,34 @@ test.describe("Authentication API", () => {
         const body = await response.json();
 
         // Assert
-        expect(response.status(), "Login should return 200 OK").toBe(200);
-        expect(body.success, "Response success flag should be true").toBe(true);
+        expect(response.status(), 'Login should return 200 OK').toBe(200);
+        expect(body.success, 'Response success flag should be true').toBe(true);
         expect(
           body.data.token,
-          "Response should contain authentication token",
+          'Response should contain authentication token',
         ).toBeDefined();
         expect(
           body.data.id,
-          "Response should contain numeric user ID",
+          'Response should contain numeric user ID',
         ).toBeDefined();
         expect(
           body.data.userId,
-          "Response should contain string user ID",
+          'Response should contain string user ID',
         ).toBeDefined();
-        expect(body.data.email, "Response email should match login email").toBe(
+        expect(body.data.email, 'Response email should match login email').toBe(
           user.email,
         );
       },
     );
 
     test(
-      "should reject login with non-existent email",
-      { tag: ["@api", "@auth", "@login", "@negative"] },
+      'should reject login with non-existent email',
+      { tag: ['@api', '@auth', '@login', '@negative'] },
       async ({ page }) => {
         // Arrange
         const invalidCredentials: LoginCredentials = {
-          email: "nonexistent@example.com",
-          password: "wrongPassword123",
+          email: 'nonexistent@example.com',
+          password: 'wrongPassword123',
         };
 
         // Act
@@ -225,24 +226,24 @@ test.describe("Authentication API", () => {
         // Assert
         expect(
           response.status(),
-          "Invalid credentials should return 401 Unauthorized",
+          'Invalid credentials should return 401 Unauthorized',
         ).toBe(401);
         expect(
           body.success,
-          "Response success flag should be false for invalid credentials",
+          'Response success flag should be false for invalid credentials',
         ).toBe(false);
       },
     );
 
     test(
-      "should reject login with wrong password",
-      { tag: ["@api", "@auth", "@login", "@negative"] },
+      'should reject login with wrong password',
+      { tag: ['@api', '@auth', '@login', '@negative'] },
       async ({ page }) => {
         // Arrange
         const user = getDemoUserData();
         const invalidCredentials: LoginCredentials = {
           email: user.email,
-          password: "wrongPassword123",
+          password: 'wrongPassword123',
         };
 
         // Act
@@ -252,20 +253,20 @@ test.describe("Authentication API", () => {
         // Assert
         expect(
           response.status(),
-          "Wrong password should return 401 Unauthorized",
+          'Wrong password should return 401 Unauthorized',
         ).toBe(401);
         expect(
           body.success,
-          "Response success flag should be false for wrong password",
+          'Response success flag should be false for wrong password',
         ).toBe(false);
       },
     );
   });
 
-  test.describe("Token Authorization", () => {
+  test.describe('Token Authorization', () => {
     test(
-      "should validate valid token via GET request",
-      { tag: ["@api", "@auth", "@authorization", "@happy-path"] },
+      'should validate valid token via GET request',
+      { tag: ['@api', '@auth', '@authorization', '@happy-path'] },
       async ({ page }) => {
         // Arrange
         const user = getDemoUserData();
@@ -283,24 +284,24 @@ test.describe("Authentication API", () => {
         const body = await response.json();
 
         // Assert
-        expect(response.status(), "Valid token should return 200 OK").toBe(200);
+        expect(response.status(), 'Valid token should return 200 OK').toBe(200);
         expect(
           body.success,
-          "Authorization response success flag should be true",
+          'Authorization response success flag should be true',
         ).toBe(true);
         expect(
           body.data,
-          "Authorization response should contain user data",
+          'Authorization response should contain user data',
         ).toBeDefined();
       },
     );
 
     test(
-      "should reject invalid token via GET request",
-      { tag: ["@api", "@auth", "@authorization", "@negative"] },
+      'should reject invalid token via GET request',
+      { tag: ['@api', '@auth', '@authorization', '@negative'] },
       async ({ page }) => {
         // Arrange
-        const invalidToken = "invalid_token_xyz";
+        const invalidToken = 'invalid_token_xyz';
 
         // Act
         const response = await authHelpers.validateAuthorizationGet(
@@ -312,18 +313,18 @@ test.describe("Authentication API", () => {
         // Assert
         expect(
           response.status(),
-          "Invalid token should return 401 Unauthorized",
+          'Invalid token should return 401 Unauthorized',
         ).toBe(401);
         expect(
           body.success,
-          "Response success flag should be false for invalid token",
+          'Response success flag should be false for invalid token',
         ).toBe(false);
       },
     );
 
     test(
-      "should validate valid token via POST request",
-      { tag: ["@api", "@auth", "@authorization", "@happy-path"] },
+      'should validate valid token via POST request',
+      { tag: ['@api', '@auth', '@authorization', '@happy-path'] },
       async ({ page }) => {
         // Arrange
         const user = getDemoUserData();
@@ -341,20 +342,20 @@ test.describe("Authentication API", () => {
         const body = await response.json();
 
         // Assert
-        expect(response.status(), "Valid token should return 200 OK").toBe(200);
+        expect(response.status(), 'Valid token should return 200 OK').toBe(200);
         expect(
           body.success,
-          "Authorization response success flag should be true",
+          'Authorization response success flag should be true',
         ).toBe(true);
       },
     );
 
     test(
-      "should reject invalid token via POST request",
-      { tag: ["@api", "@auth", "@authorization", "@negative"] },
+      'should reject invalid token via POST request',
+      { tag: ['@api', '@auth', '@authorization', '@negative'] },
       async ({ page }) => {
         // Arrange
-        const invalidToken = "invalid_token_xyz";
+        const invalidToken = 'invalid_token_xyz';
 
         // Act
         const response = await authHelpers.validateAuthorizationPost(
@@ -366,30 +367,30 @@ test.describe("Authentication API", () => {
         // Assert
         expect(
           response.status(),
-          "Invalid token should return 401 Unauthorized",
+          'Invalid token should return 401 Unauthorized',
         ).toBe(401);
         expect(
           body.success,
-          "Response success flag should be false for invalid token",
+          'Response success flag should be false for invalid token',
         ).toBe(false);
       },
     );
   });
 
-  test.describe("Logout", () => {
+  test.describe('Logout', () => {
     test(
-      "should logout successfully",
-      { tag: ["@api", "@auth", "@logout", "@happy-path"] },
+      'should logout successfully',
+      { tag: ['@api', '@auth', '@logout', '@happy-path'] },
       async ({ page }) => {
         // Act
         const response = await authHelpers.logout(page);
         const body = await response.json();
 
         // Assert
-        expect(response.status(), "Logout should return 200 OK").toBe(200);
+        expect(response.status(), 'Logout should return 200 OK').toBe(200);
         expect(
           body.success,
-          "Logout response success flag should be true",
+          'Logout response success flag should be true',
         ).toBe(true);
       },
     );

@@ -1,11 +1,12 @@
-import { expect, test } from "@playwright/test";
-import { getDemoUserData } from "../../src/models/User";
-import { ProfilePage } from "../../src/pages/ProfilePage";
+import { expect, test } from '@playwright/test';
 
-test.describe("Profile Page E2E", () => {
+import { getDemoUserData } from '../../src/models/User';
+import { ProfilePage } from '../../src/pages/ProfilePage';
+
+test.describe('Profile Page E2E', () => {
   test(
-    "should display correct user information in profile sections",
-    { tag: ["@auth", "@profile", "@happy-path"] },
+    'should display correct user information in profile sections',
+    { tag: ['@auth', '@profile', '@happy-path'] },
     async ({ page }) => {
       const user = getDemoUserData();
       const profilePage = new ProfilePage(page);

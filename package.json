@@ -9,7 +9,26 @@
     "test:debug": "npx playwright test --debug",
     "codegen": "npx playwright codegen",
     "test:report": "npx playwright show-report",
-    "install:drivers": "npx playwright install"
+    "install:drivers": "npx playwright install",
+    "check": "npm run format && npm run lint && npm run tsc:check",
+    "check:ci": "npm run format:check && npm run lint && npm run tsc:check",
+    "format": "npx prettier --write .",
+    "format:check": "npm run format:check:non-ts",
+    "format:check:non-ts": "npx prettier . --check \"!**.ts\"",
+    "lint": "npx eslint . --max-warnings=0",
+    "lint-staged": "npx lint-staged",
+    "tsc:check": "npx tsc --noEmit --pretty",
+    "prepare": "husky"
+  },
+  "engines": {
+    "node": "^18.0.0 || ^20.0.0 || >=22.0.0"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "npx prettier --write",
+      "npx eslint --fix --max-warnings=0"
+    ],
+    "*.{json,md,mjs,yml,yaml}": "npx prettier --write"
   },
   "repository": {
     "type": "git",
@@ -23,8 +42,22 @@
   },
   "homepage": "https://github.com/aiprzemo/rolnopol-atf#readme",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.55.0",
     "@types/node": "^24.12.0",
-    "dotenv": "^17.3.1"
+    "@typescript-eslint/parser": "^8.57.1",
+    "@typescript-eslint/eslint-plugin": "^8.57.1",
+    "dotenv": "^17.3.1",
+    "eslint": "^10.0.3",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-playwright": "^2.10.1",
+    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "globals": "^17.4.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.1"
   }
 }
