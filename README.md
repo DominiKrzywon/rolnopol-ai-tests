@@ -88,18 +88,21 @@ npm run tsc:check     # TypeScript type checking
 ### VS Code Integration
 
 Recommended extensions (see [.vscode/extensions.json](.vscode/extensions.json)):
+
 - **Playwright Test for VSCode** - Test execution and debugging
 - **Prettier** - Code formatting
 - **ESLint** - Real-time linting feedback
 - **Code Spell Checker** - Spelling validation
 
 VS Code settings (see [.vscode/settings.json](.vscode/settings.json)):
+
 - Format on save (Prettier)
 - import sorting handled by ESLint (not VS Code's organize imports)
 
 ### CI/CD Pipeline
 
 Quality checks run in GitHub Actions **before** any tests:
+
 1. **format:check** - Verify Prettier compliance (non-TS files)
 2. **lint** - ESLint validation
 3. **tsc:check** - TypeScript type checking
