@@ -84,17 +84,17 @@ If the user has NOT provided **BOTH** of the following, ask for clarification:
 **Arrange-Act-Assert Pattern:**
 
 ```typescript
-test("should create user with valid data", async ({ request }) => {
+test('should create user with valid data', async ({ request }) => {
   // ARRANGE: Prepare test data and setup
-  const userData = { name: "John", email: "john@example.com" };
+  const userData = { name: 'John', email: 'john@example.com' };
 
   // ACT: Execute the API call
-  const response = await request.post("/api/users", { data: userData });
+  const response = await request.post('/api/users', { data: userData });
 
   // ASSERT: Validate response with clear messages
-  expect(response.status(), "Status should be 201 Created").toBe(201);
+  expect(response.status(), 'Status should be 201 Created').toBe(201);
   const body = await response.json();
-  expect(body.name, "Returned name should match input").toBe(userData.name);
+  expect(body.name, 'Returned name should match input').toBe(userData.name);
 });
 ```
 
@@ -132,45 +132,45 @@ Create modular API tests following this pattern:
 
 ```typescript
 // tests/api/users.spec.ts
-import { test, expect } from "@playwright/test";
-import { UserApiClient } from "./helpers/apiClients";
+import { test, expect } from '@playwright/test';
+import { UserApiClient } from './helpers/apiClients';
 
-test.describe("User API", () => {
+test.describe('User API', () => {
   let apiClient: UserApiClient;
 
   test.beforeEach(({ request }) => {
     apiClient = new UserApiClient(request);
   });
 
-  test.describe("POST /users", () => {
-    test("should create user successfully", async () => {
+  test.describe('POST /users', () => {
+    test('should create user successfully', async () => {
       const response = await apiClient.createUser({
-        name: "Alice",
+        name: 'Alice',
         email: `alice-${Date.now()}@example.com`,
       });
 
-      expect(response.status, "Should return 201").toBe(201);
-      expect(response.body.id, "Should return user ID").toBeTruthy();
+      expect(response.status, 'Should return 201').toBe(201);
+      expect(response.body.id, 'Should return user ID').toBeTruthy();
     });
 
-    test("should reject invalid email", async () => {
+    test('should reject invalid email', async () => {
       const response = await apiClient.createUser({
-        name: "Bob",
-        email: "invalid-email",
+        name: 'Bob',
+        email: 'invalid-email',
       });
 
-      expect(response.status, "Should return 400").toBe(400);
-      expect(response.body.message, "Error message present").toContain("email");
+      expect(response.status, 'Should return 400').toBe(400);
+      expect(response.body.message, 'Error message present').toContain('email');
     });
   });
 
-  test.describe("GET /users/:id", () => {
-    test("should fetch user by ID", async () => {
-      const created = await apiClient.createUser({ name: "Charlie" });
+  test.describe('GET /users/:id', () => {
+    test('should fetch user by ID', async () => {
+      const created = await apiClient.createUser({ name: 'Charlie' });
       const response = await apiClient.getUser(created.body.id);
 
-      expect(response.status, "Should return 200").toBe(200);
-      expect(response.body.id, "Should match user ID").toBe(created.body.id);
+      expect(response.status, 'Should return 200').toBe(200);
+      expect(response.body.id, 'Should match user ID').toBe(created.body.id);
     });
   });
 });

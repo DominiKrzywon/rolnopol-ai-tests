@@ -1,9 +1,9 @@
 ---
-description: "Generate REST API tests for specified endpoints or modules using Playwright and Organize Act Assert pattern"
-name: "Generate REST API Tests"
+description: 'Generate REST API tests for specified endpoints or modules using Playwright and Organize Act Assert pattern'
+name: 'Generate REST API Tests'
 argument-hint: "Specify endpoint (e.g., 'POST /api/auth/login') or module name (e.g., 'auth', 'users')"
-agent: "agent"
-tools: ["search", "web"]
+agent: 'agent'
+tools: ['search', 'web']
 ---
 
 # Generate REST API Tests
