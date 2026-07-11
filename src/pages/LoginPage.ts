@@ -9,6 +9,8 @@ export class LoginPage extends BasePage {
   readonly emailInput: Locator;
   readonly passwordInput: Locator;
   readonly loginSubmitBtn: Locator;
+  readonly notificationMessage: Locator;
+  readonly header: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -16,6 +18,10 @@ export class LoginPage extends BasePage {
     this.emailInput = page.getByTestId('email-input');
     this.passwordInput = page.getByTestId('password-input');
     this.loginSubmitBtn = page.getByTestId('login-submit-btn');
+    this.notificationMessage = page.locator('.notification-message');
+    this.header = page.getByRole('heading', {
+      name: 'Login to Your User Account',
+    });
   }
 
   async login(email: string, password: string): Promise<void> {

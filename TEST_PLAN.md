@@ -25,8 +25,8 @@ Testing strategy for Rolnopol agricultural management system based on http://loc
 #### Positive Cases
 
 - [x] User registration with valid data `@auth` `@registration` `@happy-path`
-- [ ] User login `@auth` `@login`
-- [ ] Session management and logout `@auth` `@session` `@logout`
+- [x] User login `@auth` `@login`
+- [x] Session management and logout `@auth` `@session` `@logout`
 - [ ] Role-based access (farmer, admin, superadmin) `@auth` `@rbac` `@permissions`
 
 #### Negative Cases

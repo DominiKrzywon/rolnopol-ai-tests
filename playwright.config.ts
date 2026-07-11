@@ -49,5 +49,10 @@ export default defineConfig({
         storageState: DEMO_USER_AUTH_FILE,
       },
     },
+    {
+      name: 'no-auth-test',
+      testMatch: ['**/auth/**/*.noauth.spec.ts'],
+      use: { ...devices['Desktop Chrome'] },
+    },
   ],
 });
