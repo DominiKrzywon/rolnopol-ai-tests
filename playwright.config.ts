@@ -10,7 +10,7 @@ export const DEMO_USER_AUTH_FILE = 'playwright/.auth/user.json';
 export default defineConfig({
   testDir: './tests',
   timeout: 30 * 1000,
-  fullyParallel: false,
+  fullyParallel: true,
   reporter: process.env.CI
     ? [['github'], ['html']]
     : [['html', { open: 'never' }]],

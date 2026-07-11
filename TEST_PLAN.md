@@ -35,7 +35,7 @@ Testing strategy for Rolnopol agricultural management system based on http://loc
 - [x] Registration with password less than 3 characters `@auth` `@registration` `@validation` `@negative`
 - [x] Registration with empty required fields `@auth` `@registration` `@validation` `@negative`
 - [x] Registration with multiple validation errors (invalid email + short password) `@auth` `@registration` `@validation` `@negative`
-- [ ] Registration with already existing email `@auth` `@registration` `@validation` `@negative`
+- [x] Registration with already existing email `@auth` `@registration` `@validation` `@negative`
 
 ### 3. Farm Management
 
@@ -48,7 +48,7 @@ Testing strategy for Rolnopol agricultural management system based on http://loc
 - [x] Create offers for unassigned resources `@marketplace` `@offers` `@crud`
 - [x] Purchase offers with sufficient funds `@marketplace` `@purchase` `@happy-path`
 - [x] Block purchases with insufficient funds `@marketplace` `@purchase` `@validation` `@edge-case`
-- [ ] Transfer ownership after successful purchase `@marketplace` `@ownership` `@business-logic`
+- [x] Transfer ownership after successful purchase `@marketplace` `@ownership` `@business-logic`
 
 ### 5. Financial Operations
 

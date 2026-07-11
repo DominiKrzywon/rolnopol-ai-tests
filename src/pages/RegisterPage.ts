@@ -13,6 +13,7 @@ export class RegisterPage extends BasePage {
   readonly successMessage: Locator;
   readonly emailValidationError: Locator;
   readonly passwordValidationError: Locator;
+  readonly notificationMessage: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -28,6 +29,7 @@ export class RegisterPage extends BasePage {
     this.passwordValidationError = page
       .getByTestId('register-form')
       .getByText('Must be at least 3 characters');
+    this.notificationMessage = page.locator('.notification-message');
   }
 
   async register(

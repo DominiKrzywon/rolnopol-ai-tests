@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { generateUniqueEmail } from 'src/helpers/testDataHelpers';
 
 import { RegisterPage } from '../../src/pages/RegisterPage';
 
@@ -76,6 +77,26 @@ test.describe('Registration Negative Tests', () => {
         await expect.soft(registerPage.successMessage).toBeHidden();
         await expect.soft(page).toHaveURL(/register\.html$/);
       }
+    },
+  );
+
+  test(
+    'should return error for duplicate user',
+    { tag: ['@auth', '@registration', '@validation', '@negative'] },
+    async ({ page }) => {
+      const registerPage = new RegisterPage(page);
+      const expectedErrorMessage = 'User with this email already exists';
+      await registerPage.goto();
+
+      const uniqueEmail = generateUniqueEmail();
+      const password = 'Test123.';
+      await registerPage.register(uniqueEmail, password);
+
+      await registerPage.register(uniqueEmail, 'Test1234.');
+
+      await expect(registerPage.notificationMessage).toHaveText(
+        expectedErrorMessage,
+      );
     },
   );
 });
