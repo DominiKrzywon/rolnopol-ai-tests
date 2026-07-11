@@ -6,6 +6,8 @@
   },
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "cSpell.userWords": ["Rolnopol"],
+  "playwright.reuseBrowser": false,
+  "playwright.env": {},
   "terminal.integrated.defaultProfile.windows": "Git Bash",
   "chat.tools.terminal.autoApprove": {
     "/^node -e \"const \\{ chromium \\} = require\\('@playwright/test'\\); \\(async \\(\\) => \\{ const browser = await chromium\\.launch\\(\\{ headless: true \\}\\); const context = await browser\\.newContext\\(\\{ baseURL: 'http://localhost:3000', storageState: 'playwright/\\.auth/user\\.json' \\}\\); const page = await context\\.newPage\\(\\); await page\\.goto\\('/staff-fields-main\\.html'\\); await page\\.waitForLoadState\\('networkidle'\\); const value = await page\\.getByText\\('Animals', \\{ exact: true \\}\\)\\.locator\\('xpath=preceding-sibling::\\*\\[1\\]'\\)\\.textContent\\(\\); console\\.log\\(JSON\\.stringify\\(value\\)\\); await browser\\.close\\(\\); \\}\\)\\(\\);\"$/": {

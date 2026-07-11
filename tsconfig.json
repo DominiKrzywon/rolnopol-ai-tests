@@ -9,7 +9,10 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "noEmit": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "src/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*", "tests/**/*", "playwright/**/*", "*.config.mjs"],
   "exclude": ["node_modules", "playwright-report", "test-results"]

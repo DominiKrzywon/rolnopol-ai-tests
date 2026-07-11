@@ -6,10 +6,6 @@ export interface User {
   displayName: string;
 }
 
-/**
- * Returns Empty User test data sourced from environment variables.
- * Allows partial overrides for flexibility in individual tests.
- */
 export function getEmptyUserData(overrides: Partial<User> = {}): User {
   return {
     email: ENV.EMPTY_USER_EMAIL,

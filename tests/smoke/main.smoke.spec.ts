@@ -1,4 +1,6 @@
 import { expect, test } from '@playwright/test';
+import { BASE_API_URL } from 'src/config/env.config';
+import { MarketplacePage } from 'src/pages/MarketplacePage';
 
 import { generateUniqueEmail } from '../../src/helpers/testDataHelpers';
 import { ApiDocsPage } from '../../src/pages/ApiDocsPage';
@@ -56,6 +58,19 @@ test(
 );
 
 test(
+  'should not display marketplace for non-logged user',
+  {
+    tag: ['@smoke', '@critical'],
+  },
+  async ({ page }) => {
+    const marketPlace = new MarketplacePage(page);
+    await marketPlace.goto();
+
+    expect(page.url()).toContain('/login');
+  },
+);
+
+test(
   'should load register page successfully',
   { tag: ['@smoke', '@auth', '@registration'] },
   async ({ page }) => {
@@ -79,5 +94,18 @@ test(
 
     await expect(registerPage.successMessage).toBeVisible();
     await expect(page).toHaveURL('/login.html');
+  },
+);
+
+test(
+  'api app health check',
+  { tag: ['@smoke', '@auth', '@health'] },
+  async ({ page }) => {
+    const response = await page.request.get(`${BASE_API_URL}/healthcheck`);
+
+    const data = await response.json();
+
+    expect(data.success).toBeTruthy();
+    expect(data.data.status).toEqual('healthy');
   },
 );

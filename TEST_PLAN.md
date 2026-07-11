@@ -17,8 +17,8 @@ Testing strategy for Rolnopol agricultural management system based on http://loc
 - [x] Register page loads successfully `@smoke` `@auth` `@registration`
 - [x] API documentation page loads successfully `@smoke` `@documentation`
 - [x] Documentation page loads successfully `@smoke` `@documentation`
-- [ ] Marketplace page accessible `@smoke` `@navigation`
-- [ ] API health check responds `@smoke` `@api`
+- [x] Marketplace page accessible `@smoke` `@navigation`
+- [x] API health check responds `@smoke` `@api`
 
 ### 2. Authentication
 
@@ -45,9 +45,9 @@ Testing strategy for Rolnopol agricultural management system based on http://loc
 
 ### 4. Marketplace
 
-- [ ] Create offers for unassigned resources `@marketplace` `@offers` `@crud`
-- [ ] Purchase offers with sufficient funds `@marketplace` `@purchase` `@happy-path`
-- [ ] Block purchases with insufficient funds `@marketplace` `@purchase` `@validation` `@edge-case`
+- [x] Create offers for unassigned resources `@marketplace` `@offers` `@crud`
+- [x] Purchase offers with sufficient funds `@marketplace` `@purchase` `@happy-path`
+- [x] Block purchases with insufficient funds `@marketplace` `@purchase` `@validation` `@edge-case`
 - [ ] Transfer ownership after successful purchase `@marketplace` `@ownership` `@business-logic`
 
 ### 5. Financial Operations

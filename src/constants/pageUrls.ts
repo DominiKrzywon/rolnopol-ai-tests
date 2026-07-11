@@ -9,6 +9,7 @@ export const PAGE_URLS = {
   DOCS: '/docs.html',
   API_DOCS: '/swagger.html',
   STAFF_FIELDS: '/staff-fields-main.html',
+  MARKETPLACE: '/marketplace.html',
 } as const;
 
 export type PageUrl = (typeof PAGE_URLS)[keyof typeof PAGE_URLS];
