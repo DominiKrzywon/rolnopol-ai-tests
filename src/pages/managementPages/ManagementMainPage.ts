@@ -41,6 +41,14 @@ export class ManagementPage extends BasePage {
   readonly animalAddModalButton: Locator;
   readonly animalAmountModalError: Locator;
 
+  readonly closeButtons = {
+    addField: this.page.locator('#closeAddFieldModal'),
+    addStaff: this.page.locator('#closeAddStaffModal'),
+    addAnimal: this.page.locator('#closeAddAnimalModal'),
+    editAnimal: this.page.locator('#closeEditAnimalModal'),
+    confirm: this.page.locator('#closeConfirmModal'),
+  };
+
   constructor(page: Page) {
     super(page);
     this.header = page.getByRole('heading', {

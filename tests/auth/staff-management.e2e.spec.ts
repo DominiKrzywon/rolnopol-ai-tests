@@ -29,10 +29,16 @@ test.describe('Staff & Fields Management', () => {
 
       await managementPage.goto();
 
-      await expect(managementPage.fieldHeading).toBeVisible();
       await expect(managementPage.header).toBeVisible();
       await expect(managementPage.addFieldModal).toBeVisible();
 
+      await managementPage.addFieldModal.click();
+      await managementPage.addFieldModalButton.click();
+
+      await expect(managementPage.fieldNameModalError).toBeVisible();
+      await expect(managementPage.fieldAreaModalError).toBeVisible();
+
+      await managementPage.closeButtons.addField.click();
       await managementPage.addField(fieldName, FIELD_AREA);
 
       await expect(managementPage.fieldAddedMessage).toBeVisible();
@@ -50,6 +56,7 @@ test.describe('Staff & Fields Management', () => {
       const managementPage = new ManagementPage(page);
       const fieldName = generateUniqueFieldName();
       const animalAmount = generateUniqueAnimalAmount();
+      const expectedErrorMessage = 'Amount is required.';
 
       await managementPage.goto();
 
@@ -57,13 +64,20 @@ test.describe('Staff & Fields Management', () => {
       await expect(managementPage.animalHeading).toBeVisible();
       await expect(managementPage.addAnimal).toBeVisible();
 
+      await managementPage.addAnimal.click();
+      await managementPage.animalAddModalButton.click();
+
+      await expect(managementPage.animalAmountModalError).toHaveText(
+        expectedErrorMessage,
+      );
+
+      await managementPage.closeButtons.addAnimal.click();
+
       await managementPage.addField(fieldName, FIELD_AREA);
       await expect(managementPage.fieldAddedMessage).toBeVisible();
 
       await managementPage.goto();
-
       await managementPage.addAnimalGroup(ANIMAL_TYPE, animalAmount, fieldName);
-
       await managementPage.goto();
       await managementPage.searchFields(fieldName);
 
@@ -85,8 +99,15 @@ test.describe('Staff & Fields Management', () => {
       const STAFF_AGE = generateRandomNumber(1, 100);
 
       await managementPage.goto();
-      await managementPage.addStaff(uniqueName, uniqueSurname, STAFF_AGE);
+      await managementPage.addStaffModal.click();
+      await managementPage.staffModalButton.click();
 
+      await expect(managementPage.staffNameModalError).toBeVisible();
+      await expect(managementPage.staffSurnameModalError).toBeVisible();
+      await expect(managementPage.staffAgeModalError).toBeVisible();
+
+      await managementPage.closeButtons.addStaff.click();
+      await managementPage.addStaff(uniqueName, uniqueSurname, STAFF_AGE);
       await expect(managementPage.staffAddedMessage).toBeVisible();
 
       await managementPage.goto();
