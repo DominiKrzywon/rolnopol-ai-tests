@@ -41,18 +41,13 @@ export default defineConfig({
       },
     },
     {
-      name: 'demo-user-tests-vscode',
-      dependencies: ['setup-demo-user'],
-      testMatch: ['**/auth/**/*.e2e.spec.ts'],
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: DEMO_USER_AUTH_FILE,
-      },
-    },
-    {
-      name: 'no-auth-test',
+      name: 'no-auth-tests',
       testMatch: ['**/auth/**/*.noauth.spec.ts'],
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'api-tests',
+      testMatch: ['**/api/**/*.spec.ts'],
     },
   ],
 });
