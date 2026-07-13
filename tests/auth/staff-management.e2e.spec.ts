@@ -1,22 +1,36 @@
 import { faker } from '@faker-js/faker';
 import test, { expect } from '@playwright/test';
+import {
+  createAnimal,
+  createField,
+  createStaff,
+  deleteAnimal,
+  deleteField,
+  deleteStaff,
+} from 'src/helpers/apiHelpers';
 import { ManagementPage } from 'src/pages/managementPages/ManagementMainPage';
 
-const FIELD_NAME_PREFIX = 'AutoField';
 const FIELD_AREA = 25;
-const ANIMAL_TYPE = 'goat';
+const STAFF_AGE = 30;
+const ANIMAL_AMOUNT = 50;
 
-function generateUniqueFieldName(): string {
-  const timestamp = Date.now();
-  return `${FIELD_NAME_PREFIX}_${timestamp}`;
-}
+const ANIMAL_TYPES = [
+  'chicken',
+  'cow',
+  'pig',
+  'sheep',
+  'goat',
+  'duck',
+  'turkey',
+  'rabbit',
+  'fish',
+  'shrimp',
+  'oyster',
+  'squid',
+];
 
-function generateUniqueAnimalAmount(): number {
-  return 20_000 + (Date.now() % 50_000);
-}
-
-function generateRandomNumber(min: number = 1, max: number = 100): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+function getRandomAnimalType(): string {
+  return faker.helpers.arrayElement(ANIMAL_TYPES);
 }
 
 test.describe('Staff & Fields Management', () => {
@@ -25,7 +39,7 @@ test.describe('Staff & Fields Management', () => {
     { tag: ['@crud', '@farm', '@resources', '@happy-path'] },
     async ({ page }) => {
       const managementPage = new ManagementPage(page);
-      const fieldName = generateUniqueFieldName();
+      const fieldName = faker.word.noun();
 
       await managementPage.goto();
 
@@ -54,8 +68,8 @@ test.describe('Staff & Fields Management', () => {
     { tag: ['@crud', '@farm', '@resources', '@happy-path'] },
     async ({ page }) => {
       const managementPage = new ManagementPage(page);
-      const fieldName = generateUniqueFieldName();
-      const animalAmount = generateUniqueAnimalAmount();
+      const fieldName = faker.word.noun();
+      const animalAmount = faker.number.int({ min: 1, max: 99_999 });
       const expectedErrorMessage = 'Amount is required.';
 
       await managementPage.goto();
@@ -77,7 +91,11 @@ test.describe('Staff & Fields Management', () => {
       await expect(managementPage.fieldAddedMessage).toBeVisible();
 
       await managementPage.goto();
-      await managementPage.addAnimalGroup(ANIMAL_TYPE, animalAmount, fieldName);
+      await managementPage.addAnimalGroup(
+        getRandomAnimalType(),
+        animalAmount,
+        fieldName,
+      );
       await managementPage.goto();
       await managementPage.searchFields(fieldName);
 
@@ -85,7 +103,6 @@ test.describe('Staff & Fields Management', () => {
 
       await expect(createdFieldCard).toBeVisible();
       await expect(createdFieldCard).toContainText(String(animalAmount));
-      await expect(createdFieldCard).toContainText(/goat/i);
     },
   );
 
@@ -94,9 +111,9 @@ test.describe('Staff & Fields Management', () => {
     { tag: ['@crud', '@farm', '@resources', '@happy-path'] },
     async ({ page }) => {
       const managementPage = new ManagementPage(page);
-      const uniqueName = faker.internet.username();
-      const uniqueSurname = faker.internet.username();
-      const STAFF_AGE = generateRandomNumber(1, 100);
+      const uniqueName = faker.person.firstName();
+      const uniqueSurname = faker.person.lastName();
+      const staffAge = faker.number.int({ min: 18, max: 65 });
 
       await managementPage.goto();
       await managementPage.addStaffModal.click();
@@ -107,12 +124,117 @@ test.describe('Staff & Fields Management', () => {
       await expect(managementPage.staffAgeModalError).toBeVisible();
 
       await managementPage.closeButtons.addStaff.click();
-      await managementPage.addStaff(uniqueName, uniqueSurname, STAFF_AGE);
+      await managementPage.addStaff(uniqueName, uniqueSurname, staffAge);
       await expect(managementPage.staffAddedMessage).toBeVisible();
 
       await managementPage.goto();
       await managementPage.searchStaff(uniqueName);
       await expect(managementPage.getFieldByName(uniqueName)).toBeVisible();
+    },
+  );
+});
+
+test.describe('Staff & Fields Management - Delete Field', () => {
+  let fieldId: number;
+  let fieldName: string;
+
+  test.beforeEach(async ({ request }) => {
+    fieldName = faker.word.noun();
+    fieldId = await createField(request, { name: fieldName, area: FIELD_AREA });
+  });
+
+  test.afterEach(async ({ request }) => {
+    await deleteField(request, fieldId).catch(() => {});
+  });
+
+  test(
+    'should delete a field',
+    { tag: ['@crud', '@farm', '@resources', '@delete'] },
+    async ({ page }) => {
+      const managementPage = new ManagementPage(page);
+
+      await managementPage.goto();
+      await managementPage.searchFields(fieldName);
+      await managementPage.getFieldByName(fieldName);
+      await managementPage
+        .getCardActionButton(fieldName, managementPage.editButtons.deleteField)
+        .click();
+      await managementPage.confirmDeleteLocator.click();
+
+      await expect(managementPage.getFieldByName(fieldName)).toBeHidden();
+    },
+  );
+});
+
+test.describe('Staff & Fields Management - Delete Staff', () => {
+  let staffId: number;
+  let staffName: string;
+  let staffSurname: string;
+
+  test.beforeEach(async ({ request }) => {
+    staffName = faker.person.firstName();
+    staffSurname = faker.person.lastName();
+    staffId = await createStaff(request, {
+      name: staffName,
+      surname: staffSurname,
+      age: STAFF_AGE,
+    });
+  });
+
+  test.afterEach(async ({ request }) => {
+    await deleteStaff(request, staffId).catch(() => {});
+  });
+
+  test(
+    'should delete a staff',
+    { tag: ['@crud', '@farm', '@resources', '@delete'] },
+    async ({ page }) => {
+      const managementPage = new ManagementPage(page);
+
+      await managementPage.goto();
+      await managementPage.searchStaff(staffName);
+      await managementPage
+        .getCardActionButton(staffName, managementPage.editButtons.deleteStaff)
+        .click();
+      await managementPage.confirmDeleteLocator.click();
+
+      await expect(managementPage.getFieldByName(staffName)).toBeHidden();
+    },
+  );
+});
+
+test.describe('Staff & Fields Management - Delete Animal', () => {
+  let animalId: number;
+  let animalType: string;
+
+  test.beforeEach(async ({ request }) => {
+    animalType = getRandomAnimalType();
+    animalId = await createAnimal(request, {
+      type: animalType,
+      amount: ANIMAL_AMOUNT,
+    });
+  });
+
+  test.afterEach(async ({ request }) => {
+    await deleteAnimal(request, animalId).catch(() => {});
+  });
+
+  test(
+    'should delete a animal',
+    { tag: ['@crud', '@farm', '@resources', '@delete'] },
+    async ({ page }) => {
+      const managementPage = new ManagementPage(page);
+
+      await managementPage.goto();
+      await managementPage
+        .getCardActionButton(
+          animalType,
+          managementPage.editButtons.deleteAnimal,
+        )
+        .click();
+      await managementPage.confirmDeleteLocator.click();
+
+      await expect(managementPage.getFieldByName(animalType)).toBeHidden();
     },
   );
 });

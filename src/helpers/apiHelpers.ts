@@ -69,3 +69,63 @@ export async function getAnimals(request: APIRequestContext): Promise<unknown> {
   const response = await request.get(`${BASE_API_URL}/animals`);
   return response.json();
 }
+
+export async function createField(
+  request: APIRequestContext,
+  data: { name: string; area: number; district?: string },
+): Promise<number> {
+  const response = await request.post(`${BASE_API_URL}/fields`, { data });
+  const body = await response.json();
+  return body.id;
+}
+
+export async function deleteField(
+  request: APIRequestContext,
+  id: number,
+): Promise<void> {
+  const response = await request.delete(`${BASE_API_URL}/fields/${id}`);
+
+  if (!response.ok()) {
+    throw new Error(`Failed to delete field: ${response.statusText()}`);
+  }
+}
+
+export async function createStaff(
+  request: APIRequestContext,
+  data: { name: string; surname: string; age: number },
+): Promise<number> {
+  const response = await request.post(`${BASE_API_URL}/staff`, { data });
+  const body = await response.json();
+  return body.id;
+}
+
+export async function deleteStaff(
+  request: APIRequestContext,
+  id: number,
+): Promise<void> {
+  const response = await request.delete(`${BASE_API_URL}/staff/${id}`);
+
+  if (!response.ok()) {
+    throw new Error(`Failed to delete staff: ${response.statusText()}`);
+  }
+}
+
+export async function createAnimal(
+  request: APIRequestContext,
+  data: { type: string; amount: number; fieldId?: number },
+): Promise<number> {
+  const response = await request.post(`${BASE_API_URL}/animals`, { data });
+  const body = await response.json();
+  return body.id;
+}
+
+export async function deleteAnimal(
+  request: APIRequestContext,
+  id: number,
+): Promise<void> {
+  const response = await request.delete(`${BASE_API_URL}/animals/${id}`);
+
+  if (!response.ok()) {
+    throw new Error(`Failed to delete animals: ${response.statusText()}`);
+  }
+}

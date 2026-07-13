@@ -41,12 +41,23 @@ export class ManagementPage extends BasePage {
   readonly animalAddModalButton: Locator;
   readonly animalAmountModalError: Locator;
 
+  readonly confirmDeleteLocator: Locator;
+
   readonly closeButtons = {
     addField: this.page.locator('#closeAddFieldModal'),
     addStaff: this.page.locator('#closeAddStaffModal'),
     addAnimal: this.page.locator('#closeAddAnimalModal'),
     editAnimal: this.page.locator('#closeEditAnimalModal'),
     confirm: this.page.locator('#closeConfirmModal'),
+  };
+
+  readonly editButtons = {
+    editField: this.page.locator('button[title="Edit Field"]'),
+    editStaff: this.page.locator('button[title="Edit Staff"]'),
+    editAnimal: this.page.locator('button[title="Edit Animal"]'),
+    deleteField: this.page.locator('button[title="Delete Field"]'),
+    deleteStaff: this.page.locator('button[title="Delete Staff"]'),
+    deleteAnimal: this.page.locator('button[title="Delete Animal"]'),
   };
 
   constructor(page: Page) {
@@ -99,6 +110,8 @@ export class ManagementPage extends BasePage {
       })
       .last();
     this.animalAmountModalError = page.locator('#animalAmountError');
+
+    this.confirmDeleteLocator = page.locator('#confirmConfirmModal');
   }
 
   async openAddFieldModal(): Promise<void> {
@@ -162,5 +175,9 @@ export class ManagementPage extends BasePage {
 
   async searchStaff(query: string): Promise<void> {
     await this.searchStaffInput.fill(query);
+  }
+
+  getCardActionButton(name: string, button: Locator): Locator {
+    return this.getFieldCardByName(name).locator(button);
   }
 }
