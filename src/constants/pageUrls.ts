@@ -11,6 +11,8 @@ export const PAGE_URLS = {
   STAFF_FIELDS: '/staff-fields-main.html',
   MARKETPLACE: '/marketplace.html',
   MANAGEMENT: '/staff-fields-main.html',
+  ASSIGN: '/staff-fields-assign.html',
+  CHARTS: '/staff-fields-charts.html',
 } as const;
 
 export type PageUrl = (typeof PAGE_URLS)[keyof typeof PAGE_URLS];

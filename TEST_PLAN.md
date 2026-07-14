@@ -39,7 +39,7 @@ Testing strategy for Rolnopol agricultural management system based on http://loc
 
 ### 3. Farm Management
 
-- [ ] Add/edit/delete fields, animals, staff `@crud` `@farm` `@resources`
+- [x] Add/edit/delete fields, animals, staff `@crud` `@farm` `@resources`
 - [ ] Create assignments between staff and fields `@farm` `@assignments` `@business-logic`
 - [ ] Prevent operations on assigned resources `@farm` `@validation` `@edge-case`
 
