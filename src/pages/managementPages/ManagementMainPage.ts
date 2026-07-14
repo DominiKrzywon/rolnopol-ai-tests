@@ -40,6 +40,20 @@ export class ManagementPage extends BasePage {
   readonly animalFieldModal: Locator;
   readonly animalAddModalButton: Locator;
   readonly animalAmountModalError: Locator;
+  readonly searchAnimalInput: Locator;
+
+  readonly editFieldNameModal: Locator;
+  readonly editFieldAreaModal: Locator;
+  readonly editFieldSaveButton: Locator;
+
+  readonly editStaffNameModal: Locator;
+  readonly editStaffSurnameModal: Locator;
+  readonly editStaffAgeModal: Locator;
+  readonly editStaffSaveButton: Locator;
+
+  readonly editAnimalTypeModal: Locator;
+  readonly editAnimalAmountModal: Locator;
+  readonly editAnimalSaveButton: Locator;
 
   readonly confirmDeleteLocator: Locator;
 
@@ -110,6 +124,26 @@ export class ManagementPage extends BasePage {
       })
       .last();
     this.animalAmountModalError = page.locator('#animalAmountError');
+    this.searchAnimalInput = page.locator('#animalsSearch');
+
+    this.editFieldNameModal = page.locator('#editFieldName');
+    this.editFieldAreaModal = page.locator('#editFieldArea');
+    this.editFieldSaveButton = page.locator(
+      '#editFieldForm button[type="submit"]',
+    );
+
+    this.editStaffNameModal = page.locator('#editStaffName');
+    this.editStaffSurnameModal = page.locator('#editStaffSurname');
+    this.editStaffAgeModal = page.locator('#editStaffAge');
+    this.editStaffSaveButton = page.locator(
+      '#editStaffForm button[type="submit"]',
+    );
+
+    this.editAnimalTypeModal = page.locator('#editAnimalType');
+    this.editAnimalAmountModal = page.locator('#editAnimalAmount');
+    this.editAnimalSaveButton = page.locator(
+      '#editAnimalForm button[type="submit"]',
+    );
 
     this.confirmDeleteLocator = page.locator('#confirmConfirmModal');
   }
@@ -177,7 +211,23 @@ export class ManagementPage extends BasePage {
     await this.searchStaffInput.fill(query);
   }
 
+  async searchAnimals(query: string): Promise<void> {
+    await this.searchAnimalInput.fill(query);
+  }
+
   getCardActionButton(name: string, button: Locator): Locator {
     return this.getFieldCardByName(name).locator(button);
+  }
+
+  getAnimalCardByAmount(amount: number): Locator {
+    return this.page.locator('li', { hasText: String(amount) }).first();
+  }
+
+  async editStaff(name: string, surname: string, age: number): Promise<void> {
+    await this.editButtons.editStaff.click();
+    await this.editStaffNameModal.fill(name);
+    await this.editStaffSurnameModal.fill(surname);
+    await this.editStaffAgeModal.fill(String(age));
+    await this.editStaffSaveButton.click();
   }
 }

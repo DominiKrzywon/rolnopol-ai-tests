@@ -12,7 +12,6 @@ import { ManagementPage } from 'src/pages/managementPages/ManagementMainPage';
 
 const FIELD_AREA = 25;
 const STAFF_AGE = 30;
-const ANIMAL_AMOUNT = 50;
 
 const ANIMAL_TYPES = [
   'chicken',
@@ -148,6 +147,28 @@ test.describe('Staff & Fields Management - Delete Field', () => {
   });
 
   test(
+    'should edit a field name',
+    { tag: ['@crud', '@farm', '@resources', '@edit'] },
+    async ({ page }) => {
+      const managementPage = new ManagementPage(page);
+      const newFieldName = faker.word.noun();
+
+      await managementPage.goto();
+      await managementPage.searchFields(fieldName);
+      await managementPage
+        .getCardActionButton(fieldName, managementPage.editButtons.editField)
+        .click();
+
+      await managementPage.editFieldNameModal.clear();
+      await managementPage.editFieldNameModal.fill(newFieldName);
+      await managementPage.editFieldSaveButton.click();
+
+      await managementPage.searchFields(newFieldName);
+      await expect(managementPage.getFieldByName(newFieldName)).toBeVisible();
+    },
+  );
+
+  test(
     'should delete a field',
     { tag: ['@crud', '@farm', '@resources', '@delete'] },
     async ({ page }) => {
@@ -186,6 +207,29 @@ test.describe('Staff & Fields Management - Delete Staff', () => {
   });
 
   test(
+    'should update a staff',
+    {
+      tag: ['@crud', '@farm', '@resources', '@edit'],
+    },
+    async ({ page }) => {
+      const managementPage = new ManagementPage(page);
+      const newName = faker.internet.username();
+      const newSurname = faker.internet.username();
+      const card = managementPage.getFieldCardByName(newName);
+
+      await managementPage.goto();
+      await managementPage.searchStaff(staffName);
+      await managementPage.editStaff(newName, newSurname, STAFF_AGE);
+
+      await managementPage.searchStaff(newName);
+      await expect(managementPage.getFieldByName(newName)).toBeVisible();
+      await expect(managementPage.getFieldByName(newSurname)).toBeVisible();
+
+      await expect(card).toContainText(`age: ${STAFF_AGE}`);
+    },
+  );
+
+  test(
     'should delete a staff',
     { tag: ['@crud', '@farm', '@resources', '@delete'] },
     async ({ page }) => {
@@ -205,19 +249,51 @@ test.describe('Staff & Fields Management - Delete Staff', () => {
 
 test.describe('Staff & Fields Management - Delete Animal', () => {
   let animalId: number;
+  let animalAmount: number;
   let animalType: string;
 
   test.beforeEach(async ({ request }) => {
     animalType = getRandomAnimalType();
+
+    animalAmount = faker.number.int({ min: 10_000, max: 99_999 });
     animalId = await createAnimal(request, {
       type: animalType,
-      amount: ANIMAL_AMOUNT,
+      amount: animalAmount,
     });
   });
 
   test.afterEach(async ({ request }) => {
     await deleteAnimal(request, animalId).catch(() => {});
   });
+
+  test(
+    'should edit a animal',
+    {
+      tag: ['@crud', '@farm', '@resources', '@edit'],
+    },
+    async ({ page }) => {
+      const managementPage = new ManagementPage(page);
+      const newType = getRandomAnimalType();
+      const newAmount = faker.number.int({ min: 10_000, max: 99_999 });
+
+      await managementPage.goto();
+      await managementPage.searchAnimals(animalType);
+      const card = managementPage.getAnimalCardByAmount(animalAmount);
+      await expect(card).toBeVisible();
+
+      await card.locator(managementPage.editButtons.editAnimal).click();
+      await managementPage.editAnimalTypeModal.selectOption(newType);
+      await managementPage.editAnimalAmountModal.clear();
+      await managementPage.editAnimalAmountModal.fill(String(newAmount));
+      await managementPage.editAnimalSaveButton.click();
+
+      await managementPage.searchAnimals(newType);
+
+      await expect(
+        managementPage.getAnimalCardByAmount(newAmount),
+      ).toBeVisible();
+    },
+  );
 
   test(
     'should delete a animal',
@@ -234,7 +310,9 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
         .click();
       await managementPage.confirmDeleteLocator.click();
 
-      await expect(managementPage.getFieldByName(animalType)).toBeHidden();
+      await expect(
+        managementPage.getAnimalCardByAmount(animalAmount),
+      ).toBeHidden();
     },
   );
 });

@@ -116,7 +116,7 @@ export async function createAnimal(
 ): Promise<number> {
   const response = await request.post(`${BASE_API_URL}/animals`, { data });
   const body = await response.json();
-  return body.id;
+  return body.data.id;
 }
 
 export async function deleteAnimal(
