@@ -8,10 +8,8 @@ import {
   deleteField,
   deleteStaff,
 } from 'src/helpers/apiHelpers';
+import { FIELD_AREA, STAFF_AGE } from 'src/helpers/testDataHelpers';
 import { ManagementPage } from 'src/pages/managementPages/ManagementMainPage';
-
-const FIELD_AREA = 25;
-const STAFF_AGE = 30;
 
 const ANIMAL_TYPES = [
   'chicken',

@@ -76,7 +76,7 @@ export async function createField(
 ): Promise<number> {
   const response = await request.post(`${BASE_API_URL}/fields`, { data });
   const body = await response.json();
-  return body.id;
+  return body.data.id;
 }
 
 export async function deleteField(
@@ -96,7 +96,7 @@ export async function createStaff(
 ): Promise<number> {
   const response = await request.post(`${BASE_API_URL}/staff`, { data });
   const body = await response.json();
-  return body.id;
+  return body.data.id;
 }
 
 export async function deleteStaff(
@@ -128,4 +128,33 @@ export async function deleteAnimal(
   if (!response.ok()) {
     throw new Error(`Failed to delete animals: ${response.statusText()}`);
   }
+}
+
+export async function createAssignment(
+  request: APIRequestContext,
+  data: { fieldId: number; staffId: number },
+): Promise<number> {
+  const response = await request.post(`${BASE_API_URL}/fields/assign`, {
+    data,
+  });
+  const body = await response.json();
+  return body.data.id;
+}
+
+export async function deleteAssignment(
+  request: APIRequestContext,
+  id: number,
+): Promise<void> {
+  const response = await request.delete(`${BASE_API_URL}/fields/assign/${id}`);
+
+  if (!response.ok()) {
+    throw new Error(`Failed to delete assignment: ${response.statusText()}`);
+  }
+}
+
+export async function getAssignments(
+  request: APIRequestContext,
+): Promise<unknown> {
+  const response = await request.get(`${BASE_API_URL}/fields/assign`);
+  return response.json();
 }
