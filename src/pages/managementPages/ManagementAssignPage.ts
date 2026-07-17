@@ -22,6 +22,7 @@ export class AssignPage extends BasePage {
   readonly closeAssignButton: Locator;
 
   readonly assignTree;
+  readonly assignmentsNodeTree: Locator;
   readonly treeFieldName: Locator;
   readonly staffForFieldTree: Locator;
   readonly nameStaffOnFieldTree: Locator;
@@ -50,6 +51,7 @@ export class AssignPage extends BasePage {
     this.closeAssignButton = page.locator('#closeAssignModal');
 
     this.assignTree = page.getByRole('button', { name: 'Tree' });
+    this.assignmentsNodeTree = page.locator('#assignmentsTree');
     this.treeFieldName = page.locator('.tree-node-title');
     this.staffForFieldTree = page.locator('.tree-node-staff-count');
     this.nameStaffOnFieldTree = page.locator('.tree-child-name');
@@ -64,16 +66,32 @@ export class AssignPage extends BasePage {
     staffLabel: string,
   ): Promise<void> {
     await this.openNewAssignmentModal();
-    await this.fieldSelectModal
-      .locator('option', { hasText: fieldLabel })
-      .waitFor({ state: 'attached' });
-    await this.staffSelectModal
-      .locator('option', { hasText: staffLabel })
-      .waitFor({ state: 'attached' });
+
+    const fieldOption = this.fieldSelectModal.locator('option', {
+      hasText: fieldLabel,
+    });
+    await fieldOption.waitFor({ state: 'attached' });
+
+    const fieldValue = await fieldOption.getAttribute('value');
+    await this.fieldSelectModal.selectOption({ value: fieldValue! });
+
+    const staffOption = this.staffSelectModal.locator('option', {
+      hasText: staffLabel,
+    });
+    await staffOption.waitFor({ state: 'attached' });
+    const staffValue = await staffOption.getAttribute('value');
+    await this.staffSelectModal.selectOption({ value: staffValue! });
+
     await this.assignSubmitButton.click();
   }
 
   unassign(assignmentId: string | number): Promise<void> {
     return this.page.locator(`[data-unassign="${assignmentId}"]`).click();
+  }
+
+  getTreeNodeByField(fieldName: string): Locator {
+    return this.page.locator('.tree-node').filter({
+      has: this.page.locator('.tree-node-title', { hasText: fieldName }),
+    });
   }
 }
