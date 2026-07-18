@@ -15,10 +15,11 @@ test.describe('Staff Assignment Management', () => {
   let fieldName: string;
   let staffName: string;
   let staffSurname: string;
+  let assignPage: AssignPage;
 
   const expectedMessage = 'Staff assigned successfully!';
 
-  test.beforeEach(async ({ request }) => {
+  test.beforeEach(async ({ request, page }) => {
     fieldName = faker.word.noun();
     staffName = faker.person.firstName();
     staffSurname = faker.person.lastName();
@@ -33,6 +34,8 @@ test.describe('Staff Assignment Management', () => {
       name: fieldName,
       area: FIELD_AREA,
     });
+
+    assignPage = new AssignPage(page);
   });
 
   test.afterEach(async ({ request }) => {
@@ -45,9 +48,7 @@ test.describe('Staff Assignment Management', () => {
     {
       tag: ['@crud', '@farm', '@assignment'],
     },
-    async ({ page }) => {
-      const assignPage = new AssignPage(page);
-
+    async () => {
       await assignPage.goto();
       await assignPage.assignStaffToField(fieldName, staffName);
 
@@ -60,8 +61,7 @@ test.describe('Staff Assignment Management', () => {
     {
       tag: ['@crud', '@farm', '@assignment'],
     },
-    async ({ page }) => {
-      const assignPage = new AssignPage(page);
+    async () => {
       const fullName = `${staffName} ${staffSurname}`;
 
       await assignPage.goto();
@@ -77,7 +77,6 @@ test.describe('Staff Assignment Management', () => {
     'should unassigned works correctly',
     { tag: ['@crud', '@farm', '@assignment'] },
     async ({ page }) => {
-      const assignPage = new AssignPage(page);
       const expectedSuccessMessage = 'Staff unassigned successfully!';
       const fullName = `${staffName} ${staffSurname}`;
 
@@ -122,9 +121,7 @@ test.describe('Staff Assignment Management', () => {
       {
         tag: ['@crud', '@farm', '@assignment'],
       },
-      async ({ page }) => {
-        const assignPage = new AssignPage(page);
-
+      async () => {
         await assignPage.goto();
         await assignPage.assignStaffToField(
           fieldName,
