@@ -34,12 +34,23 @@ export async function addTransaction(
   request: APIRequestContext,
   payload: TransactionPayload,
 ): Promise<TransactionResponse> {
+  let requestData: unknown = { ...payload };
+
+  if (payload.type === 'income') {
+    requestData = {
+      ...payload,
+      cardNumber: '4111111111111111',
+      cvv: '123',
+    };
+  }
+
   const response = await request.post(
     `${BASE_API_URL}/financial/transactions`,
     {
-      data: payload,
+      data: requestData,
     },
   );
+
   return response.json();
 }
 
