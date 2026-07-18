@@ -33,7 +33,7 @@ export class AssignPage extends BasePage {
       name: 'Staff Assignment Management',
     });
     this.notification = page.locator('.notification-message');
-    this.unassignedStaffCount = page.locator('.unassignedStaffCount');
+    this.unassignedStaffCount = page.locator('#unassignedStaffCount');
     this.totalStaffCount = page.locator('.totalStaffCount');
     this.newAssignButton = page.locator('#openAssignModal');
 
@@ -85,6 +85,18 @@ export class AssignPage extends BasePage {
     await this.assignSubmitButton.click();
   }
 
+  async openAssignForm(fieldName: string): Promise<void> {
+    await this.openNewAssignmentModal();
+
+    const fieldOption = this.fieldSelectModal.locator('option', {
+      hasText: fieldName,
+    });
+    await fieldOption.waitFor({ state: 'attached' });
+
+    const fieldValue = await fieldOption.getAttribute('value');
+    await this.fieldSelectModal.selectOption({ value: fieldValue! });
+  }
+
   unassign(assignmentId: string | number): Promise<void> {
     return this.page.locator(`[data-unassign="${assignmentId}"]`).click();
   }
@@ -92,6 +104,12 @@ export class AssignPage extends BasePage {
   getTreeNodeByField(fieldName: string): Locator {
     return this.page.locator('.tree-node').filter({
       has: this.page.locator('.tree-node-title', { hasText: fieldName }),
+    });
+  }
+
+  getAssignmentGridByField(fieldName: string): Locator {
+    return this.page.locator('#assignmentsGrid .grid-item').filter({
+      has: this.page.locator('.grid-subtitle', { hasText: fieldName }),
     });
   }
 }

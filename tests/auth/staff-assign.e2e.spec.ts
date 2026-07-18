@@ -55,12 +55,57 @@ test.describe('Staff Assignment Management', () => {
     },
   );
 
+  test(
+    'should not show assigned staff in select dropdown',
+    {
+      tag: ['@crud', '@farm', '@assignment'],
+    },
+    async ({ page }) => {
+      const assignPage = new AssignPage(page);
+      const fullName = `${staffName} ${staffSurname}`;
+
+      await assignPage.goto();
+      await assignPage.assignStaffToField(fieldName, fullName);
+
+      await assignPage.openAssignForm(fieldName);
+
+      await expect(assignPage.staffSelectModal).not.toContainText(fullName);
+    },
+  );
+
+  test(
+    'should unassigned works correctly',
+    { tag: ['@crud', '@farm', '@assignment'] },
+    async ({ page }) => {
+      const assignPage = new AssignPage(page);
+      const expectedSuccessMessage = 'Staff unassigned successfully!';
+      const fullName = `${staffName} ${staffSurname}`;
+
+      await assignPage.goto();
+      await assignPage.assignStaffToField(fieldName, fullName);
+
+      const countBefore = parseInt(
+        await assignPage.unassignedStaffCount.innerText(),
+      );
+
+      const assignmentGrid = assignPage.getAssignmentGridByField(fieldName);
+      await assignmentGrid.getByTitle('Unassign').click();
+
+      await expect(page.getByText(expectedSuccessMessage)).toBeVisible();
+      await expect(assignPage.unassignedStaffCount).toHaveText(
+        String(countBefore + 1),
+      );
+    },
+  );
+
   test.describe('Tree view with 2 farmer', () => {
     let staffId2: number;
-    const staffName2: string = '';
-    const staffSurname2: string = '';
+    let staffName2: string;
+    let staffSurname2: string;
 
     test.beforeEach(async ({ request }) => {
+      staffName2 = faker.person.firstName();
+      staffSurname2 = faker.person.lastName();
       staffId2 = await createStaff(request, {
         name: staffName2,
         surname: staffSurname2,
