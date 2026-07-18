@@ -158,3 +158,31 @@ export async function getAssignments(
   const response = await request.get(`${BASE_API_URL}/fields/assign`);
   return response.json();
 }
+
+export async function transferFunds(
+  request: APIRequestContext,
+  data: {
+    toUserId: number;
+    amount: number;
+    description: string;
+  },
+): Promise<{
+  success: boolean;
+  error?: string;
+  data?: { success: boolean; amount: number };
+}> {
+  const response = await request.post(`${BASE_API_URL}/financial/transfer`, {
+    data,
+  });
+  return response.json();
+}
+
+export async function getTransactions(
+  request: APIRequestContext,
+  params?: string,
+): Promise<unknown> {
+  const response = await request.get(
+    `${BASE_API_URL}/financial/transactions${params ? '?' + params : ''}`,
+  );
+  return response.json();
+}

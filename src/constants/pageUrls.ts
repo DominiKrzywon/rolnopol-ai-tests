@@ -13,6 +13,7 @@ export const PAGE_URLS = {
   MANAGEMENT: '/staff-fields-main.html',
   ASSIGN: '/staff-fields-assign.html',
   CHARTS: '/staff-fields-charts.html',
+  FINANCIAL: '/financial.html',
 } as const;
 
 export type PageUrl = (typeof PAGE_URLS)[keyof typeof PAGE_URLS];
