@@ -2,6 +2,21 @@ import { Locator, Page } from '@playwright/test';
 import { PAGE_URLS } from 'src/constants/pageUrls';
 import { BasePage } from 'src/pages/BasePage';
 
+export type TransactionType = '' | 'income' | 'expense' | 'transfer';
+export type TransactionCategory =
+  | ''
+  | 'general'
+  | 'crops'
+  | 'equipment'
+  | 'livestock'
+  | 'maintenance'
+  | 'transfer'
+  | 'system';
+export type FilterOptions = {
+  type?: TransactionType;
+  category?: TransactionCategory;
+};
+
 export class FinancialPage extends BasePage {
   readonly PAGE_URL = PAGE_URLS.FINANCIAL;
   readonly header: Locator;
@@ -103,5 +118,21 @@ export class FinancialPage extends BasePage {
     await this.transactionCategory.selectOption(data.category);
     await this.transactionDescription.fill(data.description);
     await this.transactionSubmit.click();
+  }
+
+  async getBalance(): Promise<number> {
+    const balance = await this.currentBalance.innerText();
+
+    return Number(
+      balance
+        .replace(',', '.')
+        .replace(/\s/g, '')
+        .replace(/[^\d.]/g, ''),
+    );
+  }
+
+  async filterBy({ type, category }: FilterOptions): Promise<void> {
+    await this.filterType.selectOption(type ?? '');
+    await this.filterCategory.selectOption(category ?? '');
   }
 }

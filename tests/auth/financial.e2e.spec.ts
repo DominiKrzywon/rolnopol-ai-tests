@@ -24,12 +24,16 @@ test.describe('Financial functionality tests', () => {
     async () => {
       const randomDescription = `Crops expense ${Date.now()}`;
       const expectedSuccessMessage = 'Transaction added successfully';
+      const amount = 25.5;
 
       await financialPage.goto();
 
+      const balanceBefore = await financialPage.getBalance();
+      expect(balanceBefore).toBeGreaterThanOrEqual(0);
+
       await financialPage.addTransaction({
         type: 'expense',
-        amount: 25.5,
+        amount: amount,
         category: 'crops',
         description: randomDescription,
       });
@@ -37,6 +41,9 @@ test.describe('Financial functionality tests', () => {
       await expect(financialPage.notificationMessage).toHaveText(
         expectedSuccessMessage,
       );
+
+      const balanceAfter = await financialPage.getBalance();
+      expect(balanceAfter).toBeCloseTo(balanceBefore - amount, 1);
 
       await expect(financialPage.currentBalance).toContainText('ROL');
       await expect(financialPage.totalIncome).not.toBeEmpty();
@@ -50,6 +57,25 @@ test.describe('Financial functionality tests', () => {
       await expect(row).toBeVisible();
       await expect(row).toContainText('expense');
       await expect(row).toContainText('crops');
+
+      await financialPage.filterBy({
+        category: 'crops',
+      });
+
+      await expect(row).toBeVisible();
+
+      await financialPage.filterBy({
+        type: 'income',
+        category: '',
+      });
+      await expect(row).toHaveCount(0);
+
+      await financialPage.filterBy({
+        type: '',
+        category: '',
+      });
+
+      await expect(row).toBeVisible();
     },
   );
 });
