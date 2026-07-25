@@ -17,6 +17,12 @@ export type FilterOptions = {
   category?: TransactionCategory;
 };
 
+export type TransferFundsOptions = {
+  toUserId: number;
+  amount: number;
+  description: string;
+};
+
 export class FinancialPage extends BasePage {
   readonly PAGE_URL = PAGE_URLS.FINANCIAL;
   readonly header: Locator;
@@ -30,6 +36,7 @@ export class FinancialPage extends BasePage {
   readonly totalNetIncome: Locator;
 
   readonly transferFundsHeader: Locator;
+  readonly transferFormContent: Locator;
   readonly transferToUserId: Locator;
   readonly transferAmount: Locator;
   readonly transferDescription: Locator;
@@ -69,6 +76,7 @@ export class FinancialPage extends BasePage {
     this.totalNetIncome = page.locator('#net-income');
 
     this.transferFundsHeader = page.locator('#transfer-form-header');
+    this.transferFormContent = page.locator('#transfer-form-content');
     this.transferToUserId = page.locator('#transfer-toUserId');
     this.transferAmount = page.locator('#transfer-amount');
     this.transferDescription = page.locator('#transfer-description');
@@ -94,6 +102,27 @@ export class FinancialPage extends BasePage {
     this.filterCategory = page.locator('#filter-category');
     this.prevTransactionPage = page.locator('#prev-page');
     this.nextTransactionPage = page.locator('#next-page');
+  }
+
+  async expandTransferForm(): Promise<void> {
+    const isCollapsed = await this.transferFormContent.evaluate((element) =>
+      element.classList.contains('collapsed'),
+    );
+    if (isCollapsed) {
+      await this.transferFundsHeader.click();
+    }
+  }
+
+  async transferFunds({
+    toUserId,
+    amount,
+    description,
+  }: TransferFundsOptions): Promise<void> {
+    await this.expandTransferForm();
+    await this.transferToUserId.fill(String(toUserId));
+    await this.transferAmount.fill(String(amount));
+    await this.transferDescription.fill(description);
+    await this.transferSubmit.click();
   }
 
   async expandTransactionForm(): Promise<void> {

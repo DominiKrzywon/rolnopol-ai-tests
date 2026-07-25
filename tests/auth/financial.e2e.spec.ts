@@ -1,8 +1,31 @@
-import test, { expect } from '@playwright/test';
+import { expect, request as playwrightRequest, test } from '@playwright/test';
+import { BASE_API_URL } from 'src/config/env.config';
 import { addTransaction } from 'src/helpers/apiHelpers';
+import { getEmptyUserData } from 'src/models/User';
 import { FinancialPage } from 'src/pages/FinancialPage';
 
 test.describe('Financial functionality tests', () => {
+  async function getEmptyUserId(): Promise<number> {
+    const api = await playwrightRequest.newContext({ baseURL: BASE_API_URL });
+    const user = getEmptyUserData();
+    try {
+      const response = await api.post(`${BASE_API_URL}/login`, {
+        data: { email: user.email, password: user.password },
+      });
+      const body = await response.json();
+      const userId = body.data?.user?.id;
+
+      if (typeof userId !== 'number') {
+        throw new Error(
+          `Failed to get USER id: ${body.error ?? JSON.stringify(body)}`,
+        );
+      }
+      return userId;
+    } finally {
+      await api.dispose();
+    }
+  }
+
   let financialPage: FinancialPage;
 
   test.beforeEach(async ({ request, page }) => {
@@ -76,6 +99,38 @@ test.describe('Financial functionality tests', () => {
       });
 
       await expect(row).toBeVisible();
+    },
+  );
+
+  test(
+    'verify funds transfer between users',
+    {
+      tag: ['@financial', '@transfer', '@business-logic'],
+    },
+    async ({ page }) => {
+      const toUserId = await getEmptyUserId();
+      const amount = 10;
+      const description = `E2E transfer ${Date.now()}`;
+      const expectedSuccessMessage = 'Transfer completed successfully!';
+
+      await financialPage.goto();
+      const balanceBefore = await financialPage.getBalance();
+      await financialPage.transferFunds({ toUserId, amount, description });
+      await expect(financialPage.transferSuccess).toHaveText(
+        expectedSuccessMessage,
+      );
+
+      await page.reload();
+
+      const balanceAfter = await financialPage.getBalance();
+
+      expect(balanceAfter).toBeCloseTo(balanceBefore - amount);
+
+      const row = financialPage.transactionRows.filter({
+        hasText: description,
+      });
+
+      await expect(row).toContainText('transfer');
     },
   );
 });

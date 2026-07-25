@@ -53,7 +53,7 @@ Testing strategy for Rolnopol agricultural management system based on http://loc
 ### 5. Financial Operations
 
 - [x] View account balance and transaction history `@financial` `@balance` `@history`
-- [ ] Fund transfers between users `@financial` `@transfer` `@business-logic`
+- [x] Fund transfers between users `@financial` `@transfer` `@business-logic`
 - [ ] Prevent overdraft (negative balances) `@financial` `@validation` `@edge-case`
 
 ### 6. End-to-End Scenarios
