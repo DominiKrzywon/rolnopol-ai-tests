@@ -8,27 +8,13 @@ import {
   deleteField,
   deleteStaff,
 } from 'src/helpers/apiHelpers';
-import { FIELD_AREA, STAFF_AGE } from 'src/helpers/testDataHelpers';
+import {
+  FIELD_AREA,
+  getRandomAnimalType,
+  newAmount,
+  STAFF_AGE,
+} from 'src/helpers/testDataHelpers';
 import { ManagementPage } from 'src/pages/managementPages/ManagementMainPage';
-
-const ANIMAL_TYPES = [
-  'chicken',
-  'cow',
-  'pig',
-  'sheep',
-  'goat',
-  'duck',
-  'turkey',
-  'rabbit',
-  'fish',
-  'shrimp',
-  'oyster',
-  'squid',
-];
-
-function getRandomAnimalType(): string {
-  return faker.helpers.arrayElement(ANIMAL_TYPES);
-}
 
 test.describe('Staff & Fields Management', () => {
   let managementPage: ManagementPage;
@@ -275,7 +261,6 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
     },
     async () => {
       const newType = getRandomAnimalType();
-      const newAmount = faker.number.int({ min: 10_000, max: 99_999 });
 
       await managementPage.goto();
       await managementPage.searchAnimals(animalType);
@@ -285,13 +270,13 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
       await card.locator(managementPage.editButtons.editAnimal).click();
       await managementPage.editAnimalTypeModal.selectOption(newType);
       await managementPage.editAnimalAmountModal.clear();
-      await managementPage.editAnimalAmountModal.fill(String(newAmount));
+      await managementPage.editAnimalAmountModal.fill(String(newAmount()));
       await managementPage.editAnimalSaveButton.click();
 
       await managementPage.searchAnimals(newType);
 
       await expect(
-        managementPage.getAnimalCardByAmount(newAmount),
+        managementPage.getAnimalCardByAmount(newAmount()),
       ).toBeVisible();
     },
   );
