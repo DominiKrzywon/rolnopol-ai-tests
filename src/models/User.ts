@@ -3,7 +3,7 @@ import { ENV } from '../config/env.config';
 export interface User {
   email: string;
   password: string;
-  displayName: string;
+  displayName?: string;
 }
 
 export function getEmptyUserData(overrides: Partial<User> = {}): User {

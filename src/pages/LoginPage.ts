@@ -1,4 +1,6 @@
 import { Locator, Page } from '@playwright/test';
+import { User } from 'src/models/User';
+import { ProfilePage } from 'src/pages/ProfilePage';
 
 import { PAGE_URLS } from '../constants/pageUrls';
 import { BasePage } from './BasePage';
@@ -24,9 +26,16 @@ export class LoginPage extends BasePage {
     });
   }
 
-  async login(email: string, password: string): Promise<void> {
-    await this.emailInput.fill(email);
-    await this.passwordInput.fill(password);
+  // async login(email: string, password: string): Promise<void> {
+  //   await this.emailInput.fill(email);
+  //   await this.passwordInput.fill(password);
+  //   await this.loginSubmitBtn.click();
+  // }
+
+  async login(user: User): Promise<ProfilePage> {
+    await this.emailInput.fill(user.email);
+    await this.passwordInput.fill(user.password);
     await this.loginSubmitBtn.click();
+    return new ProfilePage(this.page);
   }
 }

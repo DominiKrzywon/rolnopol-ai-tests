@@ -9,10 +9,15 @@ test.describe('Registration Positive Tests', () => {
     { tag: ['@auth', '@registration', '@positive'] },
     async ({ page }) => {
       const registerPage = new RegisterPage(page);
+      const uniqueEmail = generateUniqueEmail();
+      const user = {
+        email: uniqueEmail,
+        password: 'TestPassword123',
+        displayName: 'Test User',
+      };
       await registerPage.goto();
 
-      const uniqueEmail = generateUniqueEmail();
-      await registerPage.register(uniqueEmail, 'TestPassword123', 'Test User');
+      await registerPage.register(user);
 
       await expect(registerPage.successMessage).toBeVisible();
       await expect(page).toHaveURL(/login\.html$/);

@@ -87,10 +87,15 @@ test(
   { tag: ['@smoke', '@auth', '@registration'] },
   async ({ page }) => {
     const registerPage = new RegisterPage(page);
-    await registerPage.goto();
     const uniqueEmail = generateUniqueEmail();
+    const user = {
+      email: uniqueEmail,
+      password: 'testpassword123',
+      displayName: 'Test User',
+    };
+    await registerPage.goto();
 
-    await registerPage.register(uniqueEmail, 'testpassword123', 'Test User');
+    await registerPage.register(user);
 
     await expect(registerPage.successMessage).toBeVisible();
     await expect(page).toHaveURL('/login.html');

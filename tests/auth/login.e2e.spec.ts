@@ -30,7 +30,7 @@ test.describe('Login E2E', () => {
         await loginPage.goto();
       }
 
-      await loginPage.login(user.email, user.password);
+      await loginPage.login(user);
 
       await expect.soft(page).toHaveURL(profilePage.PAGE_URL);
       await expect.soft(profilePage.profileInformationHeading).toBeVisible();

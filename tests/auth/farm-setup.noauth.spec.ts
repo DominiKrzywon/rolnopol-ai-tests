@@ -1,54 +1,37 @@
 import { faker } from '@faker-js/faker';
 import test, { expect } from '@playwright/test';
 import {
-  FIELD_AREA,
-  getRandomAnimalType,
-  newAmount,
-} from 'src/helpers/testDataHelpers';
-import { LoginPage } from 'src/pages/LoginPage';
+  assignStaff,
+  createAnimalGroup,
+  createField,
+  createStaff,
+} from 'src/actions/farm.actions';
+import { prepareRandomUser } from 'src/factories/user.factory';
 import { AssignPage } from 'src/pages/managementPages/ManagementAssignPage';
 import { ManagementPage } from 'src/pages/managementPages/ManagementMainPage';
 import { RegisterPage } from 'src/pages/RegisterPage';
 
-test.describe('New Farm Setup e2e', () => {
-  test.use({ storageState: undefined });
+test.use({ storageState: undefined });
 
+test.describe('E2E user journeys', () => {
   test(
     'should create assignment for new farmer',
     {
       tag: ['@e2e', '@farm-setup', '@user-journey'],
     },
     async ({ page }) => {
-      const email = faker.internet.email();
-      const password = faker.word.noun({ length: 9 });
-      const displayName = faker.person.fullName();
+      let field: { name: string; area: number };
+      let staff: { name: string; surname: string; fullName: string };
+      let animal: { type: string; amount: number };
       const fieldName = faker.word.noun();
-      const staffName = faker.person.firstName();
-      const staffSurname = faker.person.lastName();
-      const fullName = `${staffName} ${staffSurname}`;
-      const staffAge = faker.number.int({ min: 18, max: 65 });
-      const animalType = getRandomAnimalType();
-      const animalAmount = newAmount();
 
-      await test.step('register new user', async () => {
+      await test.step('register and login new user', async () => {
         const registerPage = new RegisterPage(page);
-        const expectedSuccessMessage = 'Registration successful!';
+        const user = prepareRandomUser();
 
         await registerPage.goto();
-        await registerPage.register(email, password, displayName);
-
-        await expect(registerPage.successMessage).toBeVisible();
-        await expect(registerPage.notificationMessage).toHaveText(
-          expectedSuccessMessage,
-        );
-        await expect(page).toHaveURL(/login.html/);
-      });
-
-      await test.step('login', async () => {
-        const loginPage = new LoginPage(page);
-
-        await expect(page).toHaveURL(/login.html/);
-        await loginPage.login(email, password);
+        const loginPage = await registerPage.register(user);
+        await loginPage.login(user);
 
         await expect(page).toHaveURL(/profile.html/);
       });
@@ -58,39 +41,32 @@ test.describe('New Farm Setup e2e', () => {
         const managementPage = new ManagementPage(page);
 
         await managementPage.goto();
-        await managementPage.addField(fieldName, FIELD_AREA);
-
+        field = await createField(page);
         await expect(managementPage.fieldAddedMessage).toBeVisible();
 
         await managementPage.goto();
         await expect(managementPage.getFieldByName(fieldName)).toBeVisible();
 
         //add staff
-        await managementPage.addStaff(staffName, staffSurname, staffAge);
-
+        staff = await createStaff(page);
         await expect(managementPage.staffAddedMessage).toBeVisible();
 
         await managementPage.goto();
-        await managementPage.searchStaff(staffName);
+        await managementPage.searchStaff(staff.name);
 
         await expect(
-          managementPage.getFieldCardByName(staffName),
-        ).toContainText(staffSurname);
+          managementPage.getFieldCardByName(staff.name),
+        ).toContainText(staff.surname);
 
         //add animal
-        await managementPage.addAnimalGroup(
-          animalType,
-          animalAmount,
-          fieldName,
-        );
+        animal = await createAnimalGroup(page, { fieldName: field.name });
 
         await managementPage.goto();
-
-        await managementPage.searchFields(fieldName);
-        await managementPage.searchAnimals(animalType);
+        await managementPage.searchFields(field.name);
+        await managementPage.searchAnimals(animal.type);
 
         await expect(
-          managementPage.getAnimalCardByAmount(animalAmount),
+          managementPage.getAnimalCardByAmount(animal.amount),
         ).toBeVisible();
       });
 
@@ -101,17 +77,16 @@ test.describe('New Farm Setup e2e', () => {
         await assignPage.goto();
         await expect(assignPage.unassignedStaffCount).toHaveText('1');
 
-        await assignPage.assignStaffToField(fieldName, fullName);
+        await assignStaff(page, field.name, staff.fullName);
+
         await expect(assignPage.notification).toHaveText(
           expectedSuccessMessage,
         );
-
         await expect(assignPage.unassignedStaffCount).toHaveText('0');
         await assignPage.assignTree.click();
-
         const fieldNode = assignPage.getTreeNodeByField(fieldName);
         await expect(fieldNode.locator('.tree-child-name')).toHaveText(
-          fullName,
+          staff.fullName,
         );
       });
     },

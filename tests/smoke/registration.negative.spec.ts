@@ -86,13 +86,13 @@ test.describe('Registration Negative Tests', () => {
     async ({ page }) => {
       const registerPage = new RegisterPage(page);
       const expectedErrorMessage = 'User with this email already exists';
+      const uniqueEmail = generateUniqueEmail();
+      const user = { email: uniqueEmail, password: 'Test123.' };
       await registerPage.goto();
 
-      const uniqueEmail = generateUniqueEmail();
-      const password = 'Test123.';
-      await registerPage.register(uniqueEmail, password);
+      await registerPage.register(user);
 
-      await registerPage.register(uniqueEmail, 'Test1234.');
+      await registerPage.register({ ...user, password: 'Test1234.' });
 
       await expect(registerPage.notificationMessage).toHaveText(
         expectedErrorMessage,

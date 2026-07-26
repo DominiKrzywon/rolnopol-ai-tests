@@ -15,7 +15,7 @@ test.describe('Login E2E', () => {
       const user = getEmptyUserData();
 
       await loginPage.goto();
-      await loginPage.login(user.email, user.password);
+      await loginPage.login(user);
 
       await expect.soft(page).toHaveURL(profilePage.PAGE_URL);
       await expect(profilePage.emailValue).toHaveText(user.email);
@@ -33,12 +33,12 @@ test.describe('Login E2E', () => {
       const expectedLoginHeaderText = 'Rolnopol';
 
       await loginPage.goto();
-      await loginPage.login(user.email, user.password);
+      await loginPage.login(user);
 
-      await expect(profilePage.displayedName).toHaveText(user.displayName);
+      await expect(profilePage.displayedName).toHaveText(user.displayName!);
 
       await page.reload();
-      await expect(profilePage.displayedName).toHaveText(user.displayName);
+      await expect(profilePage.displayedName).toHaveText(user.displayName!);
 
       await profilePage.logout();
 

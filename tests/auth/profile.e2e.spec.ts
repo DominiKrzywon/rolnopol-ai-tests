@@ -17,7 +17,9 @@ test.describe('Profile Page E2E', () => {
         .soft(profilePage.welcomeMessage)
         .toContainText(`Welcome, ${user.displayName}`);
 
-      await expect.soft(profilePage.displayedName).toHaveText(user.displayName);
+      await expect
+        .soft(profilePage.displayedName)
+        .toHaveText(user.displayName!);
       await expect.soft(profilePage.emailValue).toHaveText(user.email);
       await expect.soft(profilePage.userId).not.toBeEmpty();
       await expect.soft(profilePage.createdAt).not.toBeEmpty();
@@ -26,7 +28,7 @@ test.describe('Profile Page E2E', () => {
       await expect.soft(profilePage.displayNameInput).toBeVisible();
       await expect
         .soft(profilePage.displayNameInput)
-        .toHaveValue(user.displayName);
+        .toHaveValue(user.displayName!);
       await expect.soft(profilePage.newPasswordInput).toBeVisible();
       await expect.soft(profilePage.confirmPasswordInput).toBeVisible();
       await expect.soft(profilePage.saveChangesBtn).toBeVisible();
