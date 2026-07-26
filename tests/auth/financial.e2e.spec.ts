@@ -31,7 +31,7 @@ test.describe('Financial functionality tests', () => {
   test.beforeEach(async ({ request, page }) => {
     const seed = await addTransaction(request, {
       type: 'income',
-      amount: 1000,
+      amount: 9500,
       description: 'Test setup funds',
       category: 'general',
     });
@@ -131,6 +131,51 @@ test.describe('Financial functionality tests', () => {
       });
 
       await expect(row).toContainText('transfer');
+    },
+  );
+
+  test(
+    'verify prevent overdraft',
+    {
+      tag: [`@financial`, `@validation`, `@edge-case`],
+    },
+    async ({ request, page }) => {
+      await addTransaction(request, {
+        type: 'expense',
+        amount: 9000,
+        description: 'Take a money',
+        category: 'general',
+      });
+
+      const expectedErrorMessage = 'Insufficient funds for transfer';
+      const toUserId = await getEmptyUserId();
+      const leave = 50;
+      const maxTransfer = 999.99;
+
+      await financialPage.goto();
+      let balanceBefore = await financialPage.getBalance();
+
+      // eslint-disable-next-line playwright/no-conditional-in-test
+      if (balanceBefore >= maxTransfer) {
+        const drain = await addTransaction(request, {
+          type: 'expense',
+          amount: balanceBefore - leave,
+          description: `Drain ${Date.now()}`,
+          category: 'general',
+        });
+        // eslint-disable-next-line playwright/no-conditional-expect
+        expect(drain.success, drain.error).toBe(true);
+        await page.reload();
+        balanceBefore = await financialPage.getBalance();
+      }
+
+      const amount = balanceBefore + 1;
+      const description = `Negative ${Date.now()}`;
+
+      await financialPage.transferFunds({ toUserId, amount, description });
+      await expect(financialPage.notificationMessage).toHaveText(
+        expectedErrorMessage,
+      );
     },
   );
 });
