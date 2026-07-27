@@ -97,9 +97,15 @@ export class MarketplacePage extends BasePage {
     return parseFloat(priceValue);
   }
 
+  async getOfferItemType(offerCard: Locator): Promise<'field' | 'animal'> {
+    const badge = await offerCard.locator('.offer-badge').innerText();
+    return badge.trim().toLowerCase() === 'field' ? 'field' : 'animal';
+  }
+
   async clickRandomBuyNow(): Promise<{
     price: number;
     name: string;
+    itemType: ItemType;
   }> {
     await this.showAllOffers();
     const balance = await this.getBalance();
@@ -128,7 +134,9 @@ export class MarketplacePage extends BasePage {
     await randomCard.locator('.btn-buy').click();
     await this.confirmBuyButton.click();
 
-    return { price, name };
+    const itemType = await this.getOfferItemType(randomCard);
+
+    return { price, name, itemType };
   }
 
   async attemptToBuyMostExpensiveOffer(): Promise<void> {
@@ -146,11 +154,6 @@ export class MarketplacePage extends BasePage {
         mostExpensiveCard = card;
       }
     }
-
-    // const hasBuyButton = (await card.locator('.btn-buy').count()) > 0;
-    // if (price <= balance && price > 0 && hasBuyButton) {
-    //   affordableCards.push(card);
-    // }
 
     if (!mostExpensiveCard) {
       throw new Error('No offers found on the marketplace');

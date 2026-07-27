@@ -3,6 +3,25 @@ import { BASE_API_URL } from 'src/config/env.config';
 
 type TransactionType = 'income' | 'expense';
 
+export interface Field {
+  id: number;
+  name: string;
+  area: number;
+}
+
+export interface Animal {
+  id: number;
+  type: string;
+  amount: number;
+}
+
+interface ApiEnvelope<T> {
+  success: boolean;
+  timestamp: string;
+  error?: string;
+  data?: T;
+}
+
 interface TransactionPayload {
   type: TransactionType;
   amount: number;
@@ -54,6 +73,21 @@ export async function addTransaction(
   return response.json();
 }
 
+export async function getAccountBalance(
+  request: APIRequestContext,
+): Promise<number> {
+  const response = await request.get(`${BASE_API_URL}/financial/account`);
+  const body = (await response.json()) as ApiEnvelope<{
+    account: { balance: number };
+  }>;
+
+  if (!body.data) {
+    throw new Error(`Failed to read account balance ${body.error}`);
+  }
+
+  return body.data.account.balance;
+}
+
 export async function deleteOneOffer(
   offerId: string,
   request: APIRequestContext,
@@ -71,14 +105,18 @@ export async function cancelAllMyOffers(
   }
 }
 
-export async function getFields(request: APIRequestContext): Promise<unknown> {
+export async function getFields(request: APIRequestContext): Promise<Field[]> {
   const response = await request.get(`${BASE_API_URL}/fields`);
-  return response.json();
+  const body = (await response.json()) as ApiEnvelope<Field[]>;
+  return body.data ?? [];
 }
 
-export async function getAnimals(request: APIRequestContext): Promise<unknown> {
+export async function getAnimals(
+  request: APIRequestContext,
+): Promise<Animal[]> {
   const response = await request.get(`${BASE_API_URL}/animals`);
-  return response.json();
+  const body = (await response.json()) as ApiEnvelope<Animal[]>;
+  return body.data ?? [];
 }
 
 export async function createField(
