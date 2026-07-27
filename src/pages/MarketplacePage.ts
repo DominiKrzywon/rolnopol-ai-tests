@@ -102,6 +102,19 @@ export class MarketplacePage extends BasePage {
     return badge.trim().toLowerCase() === 'field' ? 'field' : 'animal';
   }
 
+  async buyOfferByDescription(description: string): Promise<void> {
+    await this.browseOffers.click();
+    await this.filterFields.selectOption('description');
+    await this.search.fill(description);
+
+    const offerCard = this.page.locator('.offer-card', {
+      has: this.page.locator('.offer-description', { hasText: description }),
+    });
+
+    await offerCard.locator('.btn-buy').click();
+    await this.confirmBuyButton.click();
+  }
+
   async clickRandomBuyNow(): Promise<{
     price: number;
     name: string;

@@ -59,7 +59,7 @@ Testing strategy for Rolnopol agricultural management system based on http://loc
 ### 6. End-to-End Scenarios
 
 - [x] **New Farm Setup**: Register → Login → Add resources → Create assignments `@e2e` `@farm-setup` `@user-journey`
-- [ ] **Marketplace Trade**: Create offer → Browse → Purchase → Verify ownership transfer `@e2e` `@marketplace-flow` `@user-journey`
+- [x] **Marketplace Trade**: Create offer → Browse → Purchase → Verify ownership transfer `@e2e` `@marketplace-flow` `@user-journey`
 - [ ] **Insufficient Funds**: Attempt expensive purchase → Verify blocked transaction `@e2e` `@edge-case` `@validation`
 
 ## Test Priorities
