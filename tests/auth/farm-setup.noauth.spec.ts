@@ -188,4 +188,30 @@ test.describe('E2E user journeys', () => {
       }
     },
   );
+
+  test(
+    'verify blocked transaction',
+    { tag: [`@e2e`, `@edge-case`, `@validation`] },
+    async ({ page }) => {
+      await test.step('register and login new user', async () => {
+        await registerAndLogin(page, prepareRandomUser());
+        await expect(page).toHaveURL(/profile.html/);
+      });
+
+      await test.step('verify zero user balance', async () => {
+        const marketplacePage = new MarketplacePage(page);
+
+        await marketplacePage.goto();
+        const balance = await marketplacePage.getBalance();
+
+        expect(balance).toEqual(0);
+      });
+
+      await test.step('verify purchase with empty balance', async () => {
+        const marketplacePage = new MarketplacePage(page);
+
+        await marketplacePage.goto();
+      });
+    },
+  );
 });

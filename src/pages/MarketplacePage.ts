@@ -123,56 +123,59 @@ export class MarketplacePage extends BasePage {
     await this.showAllOffers();
     const balance = await this.getBalance();
 
-    const allCards = await this.page.locator('.offer-card.offer-active').all();
+    const cards = await this.page.locator('.offer-card.offer-active').all();
 
-    const affordableCards: Locator[] = [];
-    for (const card of allCards) {
-      const price = await this.getOfferPrice(card);
-      const hasBuyButton = (await card.locator('.btn-buy').count()) > 0;
-      if (price <= balance && price > 0 && hasBuyButton) {
-        affordableCards.push(card);
-      }
-    }
+    const offers = await Promise.all(
+      cards.map(async (card) => ({
+        card,
+        price: await this.getOfferPrice(card),
+        isBuyable: (await card.locator('.btn-buy').count()) > 0,
+      })),
+    );
 
-    if (affordableCards.length === 0) {
+    const affordableOffers = offers.filter(
+      ({ price, isBuyable }) => isBuyable && price > 0 && price <= balance,
+    );
+
+    if (affordableOffers.length === 0) {
       throw new Error('No affordable offers found on the marketplace');
     }
 
-    const randomIndex = Math.floor(Math.random() * affordableCards.length);
-    const randomCard = affordableCards[randomIndex];
+    const randomOffer =
+      affordableOffers[Math.floor(Math.random() * affordableOffers.length)];
 
-    const price = await this.getOfferPrice(randomCard);
-    const name = await randomCard.locator('.offer-name').innerText();
+    const name = await randomOffer.card.locator('.offer-name').innerText();
 
-    await randomCard.locator('.btn-buy').click();
+    await randomOffer.card.locator('.btn-buy').click();
     await this.confirmBuyButton.click();
 
-    const itemType = await this.getOfferItemType(randomCard);
+    const itemType = await this.getOfferItemType(randomOffer.card);
 
-    return { price, name, itemType };
+    return { price: randomOffer.price, name, itemType };
   }
 
   async attemptToBuyMostExpensiveOffer(): Promise<void> {
     await this.showAllOffers();
-    const allCards = await this.page.locator('.offer-card.offer-active').all();
+    const cards = await this.page.locator('.offer-card.offer-active').all();
 
-    let mostExpensiveCard: Locator | null = null;
-    let highestPrice = -1;
+    const offers = await Promise.all(
+      cards.map(async (card) => ({
+        card,
+        price: await this.getOfferPrice(card),
+        isBuyable: (await card.locator('.btn-buy').count()) > 0,
+      })),
+    );
 
-    for (const card of allCards) {
-      const price = await this.getOfferPrice(card);
-      const hasBuyButton = (await card.locator('.btn-buy').count()) > 0;
-      if (price > highestPrice && price > 0 && hasBuyButton) {
-        highestPrice = price;
-        mostExpensiveCard = card;
-      }
-    }
+    const mostExpensive = offers
+      .filter(({ price, isBuyable }) => isBuyable && price > 0)
+      .sort((a, b) => b.price - a.price)
+      .at(0);
 
-    if (!mostExpensiveCard) {
+    if (!mostExpensive) {
       throw new Error('No offers found on the marketplace');
     }
 
-    await mostExpensiveCard.locator('.btn-buy').click();
+    await mostExpensive.card.locator('.btn-buy').click();
     await this.confirmBuyButton.click();
   }
 
