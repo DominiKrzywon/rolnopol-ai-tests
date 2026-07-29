@@ -2,6 +2,8 @@ import { APIRequestContext } from '@playwright/test';
 import { BASE_API_URL } from 'src/config/env.config';
 
 type TransactionType = 'income' | 'expense';
+type OfferStatus = 'active' | 'cancelled';
+export type ItemType = 'field' | 'animal';
 
 export interface Field {
   id: number;
@@ -13,6 +15,14 @@ export interface Animal {
   id: number;
   type: string;
   amount: number;
+}
+
+export interface MarketplaceOffer {
+  itemType: ItemType;
+  id: number;
+  price: number;
+  description: string;
+  status: OfferStatus;
 }
 
 interface ApiEnvelope<T> {
@@ -234,4 +244,15 @@ export async function getTransactions(
     `${BASE_API_URL}/financial/transactions${params ? '?' + params : ''}`,
   );
   return response.json();
+}
+
+export async function getMarketplaceOffers(
+  request: APIRequestContext,
+): Promise<MarketplaceOffer[]> {
+  const response = await request.get(`${BASE_API_URL}/marketplace/offers`);
+  const body = (await response.json()) as ApiEnvelope<{
+    offers: MarketplaceOffer[];
+  }>;
+
+  return body.data?.offers ?? [];
 }

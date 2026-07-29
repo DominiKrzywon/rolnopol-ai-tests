@@ -1,8 +1,7 @@
 import { Locator, Page } from '@playwright/test';
 import { PAGE_URLS } from 'src/constants/pageUrls';
+import { ItemType } from 'src/helpers/apiHelpers';
 import { BasePage } from 'src/pages/BasePage';
-
-export type ItemType = 'field' | 'animal';
 
 export class MarketplacePage extends BasePage {
   readonly PAGE_URL = PAGE_URLS.MARKETPLACE;
@@ -174,9 +173,6 @@ export class MarketplacePage extends BasePage {
     if (!mostExpensive) {
       throw new Error('No offers found on the marketplace');
     }
-
-    await mostExpensive.card.locator('.btn-buy').click();
-    await this.confirmBuyButton.click();
   }
 
   async createNewOffer(

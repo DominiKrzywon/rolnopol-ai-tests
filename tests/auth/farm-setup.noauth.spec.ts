@@ -7,7 +7,13 @@ import {
 } from 'src/actions/farm.actions';
 import { createMarketplaceOffer } from 'src/actions/marketplace.actions';
 import { prepareRandomUser } from 'src/factories/user.factory';
-import { addTransaction, getFields } from 'src/helpers/apiHelpers';
+import {
+  addTransaction,
+  getAccountBalance,
+  getAnimals,
+  getFields,
+  getMarketplaceOffers,
+} from 'src/helpers/apiHelpers';
 import { User } from 'src/models/User';
 import { AssignPage } from 'src/pages/managementPages/ManagementAssignPage';
 import { ManagementPage } from 'src/pages/managementPages/ManagementMainPage';
@@ -193,24 +199,47 @@ test.describe('E2E user journeys', () => {
     'verify blocked transaction',
     { tag: [`@e2e`, `@edge-case`, `@validation`] },
     async ({ page }) => {
+      const marketplacePage = new MarketplacePage(page);
+      const expectedErrorMessage =
+        'Insufficient funds to complete purchase (no overdraft allowed)';
+
       await test.step('register and login new user', async () => {
         await registerAndLogin(page, prepareRandomUser());
         await expect(page).toHaveURL(/profile.html/);
       });
 
       await test.step('verify zero user balance', async () => {
-        const marketplacePage = new MarketplacePage(page);
-
         await marketplacePage.goto();
-        const balance = await marketplacePage.getBalance();
-
-        expect(balance).toEqual(0);
+        expect(await marketplacePage.getBalance()).toBe(0);
+        expect(await getAccountBalance(page.request)).toBe(0);
       });
 
-      await test.step('verify purchase with empty balance', async () => {
-        const marketplacePage = new MarketplacePage(page);
-
+      await test.step('attempt expensive purchase with empty balance', async () => {
         await marketplacePage.goto();
+
+        const mostExpensive = (await getMarketplaceOffers(page.request))
+          .filter((offer) => offer.price > 0 && offer.status === 'active')
+          .sort((a, b) => b.price - a.price)
+          .at(0);
+
+        const [buyResponse] = await Promise.all([
+          page.waitForResponse('**/api/v1/marketplace/buy'),
+          marketplacePage.buyOfferByDescription(mostExpensive!.description),
+        ]);
+
+        expect(buyResponse.status()).toBe(400);
+        await expect(marketplacePage.notificationMessage).toHaveText(
+          expectedErrorMessage,
+        );
+
+        await test.step('verify transaction was blocked', async () => {
+          expect(await getAccountBalance(page.request)).toBe(0);
+          expect(await getFields(page.request)).toEqual([]);
+          expect(await getAnimals(page.request)).toEqual([]);
+
+          await marketplacePage.transactionHistory.click();
+          await expect(marketplacePage.transactionType).toHaveCount(0);
+        });
       });
     },
   );
