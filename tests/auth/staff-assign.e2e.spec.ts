@@ -14,6 +14,7 @@ test.describe('Staff Assignment Management', () => {
   let fieldId: number;
   let fieldName: string;
   let staffName: string;
+  let fullName: string;
   let staffSurname: string;
   let assignPage: AssignPage;
 
@@ -23,6 +24,7 @@ test.describe('Staff Assignment Management', () => {
     fieldName = faker.word.noun();
     staffName = faker.person.firstName();
     staffSurname = faker.person.lastName();
+    fullName = `${staffName} ${staffSurname}`;
 
     staffId = await createStaff(request, {
       name: staffName,
@@ -50,7 +52,7 @@ test.describe('Staff Assignment Management', () => {
     },
     async () => {
       await assignPage.goto();
-      await assignPage.assignStaffToField(fieldName, staffName);
+      await assignPage.assignStaffToField(fieldName, fullName);
 
       await expect(assignPage.notification).toHaveText(expectedMessage);
     },
@@ -62,8 +64,6 @@ test.describe('Staff Assignment Management', () => {
       tag: ['@crud', '@farm', '@assignment'],
     },
     async () => {
-      const fullName = `${staffName} ${staffSurname}`;
-
       await assignPage.goto();
       await assignPage.assignStaffToField(fieldName, fullName);
 
@@ -78,7 +78,6 @@ test.describe('Staff Assignment Management', () => {
     { tag: ['@crud', '@farm', '@assignment'] },
     async ({ page }) => {
       const expectedSuccessMessage = 'Staff unassigned successfully!';
-      const fullName = `${staffName} ${staffSurname}`;
 
       await assignPage.goto();
       await assignPage.assignStaffToField(fieldName, fullName);
@@ -123,10 +122,7 @@ test.describe('Staff Assignment Management', () => {
       },
       async () => {
         await assignPage.goto();
-        await assignPage.assignStaffToField(
-          fieldName,
-          `${staffName} ${staffSurname}`,
-        );
+        await assignPage.assignStaffToField(fieldName, `${fullName}`);
 
         await assignPage.assignStaffToField(
           fieldName,
@@ -145,7 +141,7 @@ test.describe('Staff Assignment Management', () => {
           '2',
         );
         await expect(fieldNode.locator('.tree-child-name').nth(0)).toHaveText(
-          `${staffName} ${staffSurname}`,
+          `${fullName}`,
         );
         await expect(fieldNode.locator('.tree-child-name').nth(1)).toHaveText(
           `${staffName2} ${staffSurname2}`,

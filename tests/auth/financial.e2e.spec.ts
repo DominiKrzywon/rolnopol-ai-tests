@@ -13,7 +13,7 @@ test.describe('Financial functionality tests', () => {
         data: { email: user.email, password: user.password },
       });
       const body = await response.json();
-      const userId = body.data?.user?.id;
+      const userId = body.data?.id;
 
       if (typeof userId !== 'number') {
         throw new Error(

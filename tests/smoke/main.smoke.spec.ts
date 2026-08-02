@@ -66,7 +66,7 @@ test(
     const marketPlace = new MarketplacePage(page);
     await marketPlace.goto();
 
-    expect(page.url()).toContain('/login');
+    await expect(page).toHaveURL('/login.html');
   },
 );
 

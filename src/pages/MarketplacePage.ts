@@ -67,8 +67,6 @@ export class MarketplacePage extends BasePage {
     this.descriptionNewOffer = page.getByPlaceholder('Describe your item...');
     this.createOfferButton = page.locator('.btn-create');
 
-    page.locator('.offer-card').last();
-
     this.myOfferCardOne = page.locator('.offer-card.offer-active');
     this.myOfferSeller = page.locator('.offer-seller');
     this.myOfferName = page.locator('.offer-name');
@@ -173,6 +171,9 @@ export class MarketplacePage extends BasePage {
     if (!mostExpensive) {
       throw new Error('No offers found on the marketplace');
     }
+
+    await mostExpensive.card.locator('.btn-buy').click();
+    await this.confirmBuyButton.click();
   }
 
   async createNewOffer(

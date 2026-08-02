@@ -265,18 +265,19 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
       await managementPage.goto();
       await managementPage.searchAnimals(animalType);
       const card = managementPage.getAnimalCardByAmount(animalAmount);
+      const newAnimalAmount = newAmount();
       await expect(card).toBeVisible();
 
       await card.locator(managementPage.editButtons.editAnimal).click();
       await managementPage.editAnimalTypeModal.selectOption(newType);
       await managementPage.editAnimalAmountModal.clear();
-      await managementPage.editAnimalAmountModal.fill(String(newAmount()));
+      await managementPage.editAnimalAmountModal.fill(String(newAnimalAmount));
       await managementPage.editAnimalSaveButton.click();
 
       await managementPage.searchAnimals(newType);
 
       await expect(
-        managementPage.getAnimalCardByAmount(newAmount()),
+        managementPage.getAnimalCardByAmount(newAnimalAmount),
       ).toBeVisible();
     },
   );

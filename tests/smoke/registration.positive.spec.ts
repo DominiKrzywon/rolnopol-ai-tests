@@ -20,7 +20,7 @@ test.describe('Registration Positive Tests', () => {
       await registerPage.register(user);
 
       await expect(registerPage.successMessage).toBeVisible();
-      await expect(page).toHaveURL(/login\.html$/);
+      await expect(page).toHaveURL('/login.html');
     },
   );
 });
