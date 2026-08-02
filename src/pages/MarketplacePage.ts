@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker';
 import { Locator, Page } from '@playwright/test';
 import { PAGE_URLS } from 'src/constants/pageUrls';
 import { ItemType } from 'src/helpers/apiHelpers';
@@ -190,20 +191,19 @@ export class MarketplacePage extends BasePage {
 
     const options = await this.specificItemSelect.locator('option').all();
 
-    const validOptions = [];
-    for (const option of options) {
-      const value = await option.getAttribute('value');
-      if (value && value !== '') {
-        validOptions.push(value);
-      }
-    }
+    const values = await Promise.all(
+      options.map((option) => option.getAttribute('value')),
+    );
+
+    const validOptions = values.filter(
+      (value) => value !== null && value !== '',
+    );
 
     if (validOptions.length === 0) {
       throw new Error(`No available ${type} items to create an offer`);
     }
 
-    const randomValue =
-      validOptions[Math.floor(Math.random() * validOptions.length)];
+    const randomValue = faker.helpers.arrayElement(validOptions);
     await this.specificItemSelect.selectOption(randomValue);
 
     await this.priceInput.fill(String(price));

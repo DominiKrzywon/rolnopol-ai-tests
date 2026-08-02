@@ -19,14 +19,9 @@ const REQUIRED_ENV_VARS = [
 type EnvVarName = (typeof REQUIRED_ENV_VARS)[number];
 
 function validateEnvVars(): Record<EnvVarName, string> {
-  const missing: string[] = [];
-
-  for (const name of REQUIRED_ENV_VARS) {
-    const value = process.env[name];
-    if (!value || value.trim() === '') {
-      missing.push(name);
-    }
-  }
+  const missing = REQUIRED_ENV_VARS.filter(
+    (name) => !process.env[name]?.trim(),
+  );
 
   if (missing.length > 0) {
     throw new Error(
@@ -40,17 +35,7 @@ function validateEnvVars(): Record<EnvVarName, string> {
   ) as Record<EnvVarName, string>;
 }
 
-const validated = validateEnvVars();
-
-export const ENV = {
-  BASE_URL: validated.BASE_URL,
-  EMPTY_USER_EMAIL: validated.EMPTY_USER_EMAIL,
-  EMPTY_USER_PASSWORD: validated.EMPTY_USER_PASSWORD,
-  EMPTY_USER_DISPLAY_NAME: validated.EMPTY_USER_DISPLAY_NAME,
-  DEMO_USER_EMAIL: validated.DEMO_USER_EMAIL,
-  DEMO_USER_PASSWORD: validated.DEMO_USER_PASSWORD,
-  DEMO_USER_DISPLAY_NAME: validated.DEMO_USER_DISPLAY_NAME,
-} as const;
+export const ENV = validateEnvVars();
 
 /**
  * API base URL for REST API endpoints (v1)
