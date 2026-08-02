@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { registerAndLogin } from 'src/actions/auth.actions';
 import {
   assignStaff,
   createAnimalGroup,
@@ -6,28 +6,19 @@ import {
   createStaff,
 } from 'src/actions/farm.actions';
 import { createMarketplaceOffer } from 'src/actions/marketplace.actions';
+import { topUpAmount } from 'src/actions/user.actions';
 import { prepareRandomUser } from 'src/factories/user.factory';
 import { expect, test } from 'src/fixtures/test.fixture';
 import {
-  addTransaction,
   getAccountBalance,
   getAnimals,
   getFields,
   getMarketplaceOffers,
 } from 'src/helpers/apiHelpers';
-import { User } from 'src/models/User';
 import { ManagementPage } from 'src/pages/managementPages/ManagementMainPage';
 import { MarketplacePage } from 'src/pages/MarketplacePage';
-import { RegisterPage } from 'src/pages/RegisterPage';
 
 test.use({ storageState: undefined });
-
-async function registerAndLogin(page: Page, user: User): Promise<void> {
-  const registerPage = new RegisterPage(page);
-  await registerPage.goto();
-  const loginPage = await registerPage.register(user);
-  await loginPage.login(user);
-}
 
 test.describe('E2E user journeys', () => {
   test(
@@ -41,8 +32,9 @@ test.describe('E2E user journeys', () => {
       let animal: { type: string; amount: number };
 
       await test.step('register and login new user', async () => {
-        await registerAndLogin(page, prepareRandomUser());
-        await expect(page).toHaveURL(/profile.html/);
+        const user = prepareRandomUser();
+        const profilePage = await registerAndLogin(page, user);
+        await expect(profilePage.profileInformationHeading).toBeVisible();
       });
 
       await test.step('add resources', async () => {
@@ -120,12 +112,12 @@ test.describe('E2E user journeys', () => {
 
       try {
         await test.step('register and login seller & buyer in parallel', async () => {
-          await Promise.all([
+          const [sellerProfile, buyerProfile] = await Promise.all([
             registerAndLogin(sellerPage, seller),
             registerAndLogin(buyerPage, buyer),
           ]);
-          await expect(sellerPage).toHaveURL(/profile.html/);
-          await expect(buyerPage).toHaveURL(/profile.html/);
+          await expect(sellerProfile.profileInformationHeading).toBeVisible();
+          await expect(buyerProfile.profileInformationHeading).toBeVisible();
         });
 
         await test.step('seller: add resource and create offer', async () => {
@@ -158,12 +150,7 @@ test.describe('E2E user journeys', () => {
           const marketplaceBuyer = new MarketplacePage(buyerPage);
           const expectedPurchaseMessage = 'Purchase completed successfully!';
 
-          await addTransaction(buyerPage.request, {
-            type: 'income',
-            amount: offerPrice * 4,
-            description: 'E2E marketplace purchase funds',
-            category: 'general',
-          });
+          await topUpAmount(buyerPage.request, offerPrice * 4);
 
           await marketplaceBuyer.goto();
           await marketplaceBuyer.buyOfferByDescription(offerDescription);
@@ -201,8 +188,9 @@ test.describe('E2E user journeys', () => {
         'Insufficient funds to complete purchase (no overdraft allowed)';
 
       await test.step('register and login new user', async () => {
-        await registerAndLogin(page, prepareRandomUser());
-        await expect(page).toHaveURL(/profile.html/);
+        const user = await prepareRandomUser();
+        const profilePage = await registerAndLogin(page, user);
+        await expect(profilePage.profileInformationHeading).toBeVisible();
       });
 
       await test.step('verify zero user balance', async () => {

@@ -1,4 +1,5 @@
-import test, { expect } from '@playwright/test';
+import { topUpAmount } from 'src/actions/user.actions';
+import { expect, test } from 'src/fixtures/test.fixture';
 import {
   addTransaction,
   cancelAllMyOffers,
@@ -6,66 +7,52 @@ import {
   getAnimals,
   getFields,
 } from 'src/helpers/apiHelpers';
-import { MarketplacePage } from 'src/pages/MarketplacePage';
-
-let marketPlace: MarketplacePage;
-
-test.describe.configure({ mode: 'serial' });
+import { PurchasedOffer } from 'src/pages/MarketplacePage';
 
 test.describe('Marketplace e2e tests', () => {
-  test.beforeEach('verify marketplace', async ({ page, request }) => {
-    await addTransaction(request, {
-      type: 'income',
-      amount: 10000,
-      description: 'Test setup funds',
-      category: 'general',
-    });
-    marketPlace = new MarketplacePage(page);
-    await marketPlace.goto();
+  test.beforeEach(async ({ request, marketplacePage }) => {
+    await topUpAmount(request, 10000);
+    await marketplacePage.goto();
   });
 
   test(
     'should buy random offer and verify transaction history',
     { tag: ['@marketplace', '@purchase', '@happy-path'] },
-    async ({ request }) => {
-      let purchasedItemPrice: number;
-      let purchasedItemName: string;
-      let purchasedItemType: 'field' | 'animal';
+    async ({ request, marketplacePage }) => {
+      let purchasedOffer: PurchasedOffer;
       let ownedIdsBeforePurchase: number[];
 
       await test.step('should buy random offer', async () => {
         const expectedSuccessMessage = 'Purchase completed successfully!';
         const fieldsBefore = await getFields(request);
         const animalsBefore = await getAnimals(request);
-        ({
-          price: purchasedItemPrice,
-          name: purchasedItemName,
-          itemType: purchasedItemType,
-        } = await marketPlace.clickRandomBuyNow());
+
+        purchasedOffer = await marketplacePage.clickRandomBuyNow();
+
         ownedIdsBeforePurchase =
           // eslint-disable-next-line playwright/no-conditional-in-test
-          purchasedItemType === 'field'
+          purchasedOffer.itemType === 'field'
             ? fieldsBefore.map((f) => f.id)
             : animalsBefore.map((a) => a.id);
-        await expect(marketPlace.notificationMessage).toHaveText(
+        await expect(marketplacePage.notificationMessage).toHaveText(
           expectedSuccessMessage,
         );
       });
 
       await test.step('verify purchase in transaction history', async () => {
-        await marketPlace.transactionHistory.click();
-        await expect(marketPlace.transactionType.last()).toHaveText(
-          `Purchase: ${purchasedItemName}`,
+        await marketplacePage.transactionHistory.click();
+        await expect(marketplacePage.transactionType.last()).toHaveText(
+          `Purchase: ${purchasedOffer.name}`,
         );
-        expect(await marketPlace.getLastTransactionAmount()).toEqual(
-          -purchasedItemPrice,
+        expect(await marketplacePage.getLastTransactionAmount()).toEqual(
+          -purchasedOffer.price,
         );
       });
 
       await test.step('verify ownership transfer', async () => {
         const ownedAfterPurchase =
           // eslint-disable-next-line playwright/no-conditional-in-test
-          purchasedItemType === 'field'
+          purchasedOffer.itemType === 'field'
             ? await getFields(request)
             : await getAnimals(request);
         const newlyOwnedIds = ownedAfterPurchase
@@ -73,7 +60,7 @@ test.describe('Marketplace e2e tests', () => {
           .filter((id) => !ownedIdsBeforePurchase.includes(id));
         expect(
           newlyOwnedIds,
-          `buyer should own exactly one new ${purchasedItemType} after buying "${purchasedItemName}"`,
+          `buyer should own exactly one new ${purchasedOffer.itemType} after buying "${purchasedOffer.name}"`,
         ).toHaveLength(1);
       });
     },
@@ -82,7 +69,7 @@ test.describe('Marketplace e2e tests', () => {
   test(
     'should return error when offer is to expensive',
     { tag: ['@marketplace', '@offers', '@crud'] },
-    async ({ request }) => {
+    async ({ request, marketplacePage }) => {
       const balance = await getAccountBalance(request);
 
       await addTransaction(request, {
@@ -95,9 +82,9 @@ test.describe('Marketplace e2e tests', () => {
       const expectedErrorMessage =
         'Insufficient funds to complete purchase (no overdraft allowed)';
 
-      await marketPlace.attemptToBuyMostExpensiveOffer();
+      await marketplacePage.attemptToBuyMostExpensiveOffer();
 
-      await expect(marketPlace.notificationMessage).toHaveText(
+      await expect(marketplacePage.notificationMessage).toHaveText(
         expectedErrorMessage,
       );
     },
@@ -108,7 +95,7 @@ test.describe('Marketplace e2e tests', () => {
     {
       tag: ['@marketplace', '@offers', '@crud'],
     },
-    async ({ request }) => {
+    async ({ request, marketplacePage }) => {
       let createdOffer: {
         price: number;
         description?: string;
@@ -121,21 +108,21 @@ test.describe('Marketplace e2e tests', () => {
       await test.step('create offer', async () => {
         const expectedSuccessMessage = 'Offer created successfully!';
 
-        createdOffer = await marketPlace.createNewOffer(
+        createdOffer = await marketplacePage.createNewOffer(
           'animal',
           250,
           'Random text',
         );
 
-        await expect(marketPlace.notificationMessage).toHaveText(
+        await expect(marketplacePage.notificationMessage).toHaveText(
           expectedSuccessMessage,
         );
       });
 
       await test.step('verify offer in My Offers page', async () => {
-        await marketPlace.myOffers.click();
+        await marketplacePage.myOffers.click();
 
-        const firstOffer = marketPlace.myOfferCardLast;
+        const firstOffer = marketplacePage.myOfferCardLast;
 
         await expect(firstOffer.locator('.offer-price')).toContainText(
           String(createdOffer.price),

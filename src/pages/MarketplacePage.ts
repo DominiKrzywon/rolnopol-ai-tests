@@ -4,6 +4,12 @@ import { PAGE_URLS } from 'src/constants/pageUrls';
 import { ItemType } from 'src/helpers/apiHelpers';
 import { BasePage } from 'src/pages/BasePage';
 
+export interface PurchasedOffer {
+  price: number;
+  name: string;
+  itemType: 'field' | 'animal';
+}
+
 export class MarketplacePage extends BasePage {
   readonly PAGE_URL = PAGE_URLS.MARKETPLACE;
   readonly marketplaceHeading: Locator;

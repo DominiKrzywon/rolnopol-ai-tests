@@ -1,5 +1,7 @@
 import { APIRequestContext } from '@playwright/test';
 import { BASE_API_URL } from 'src/config/env.config';
+import { ApiEnvelope } from 'src/models/ApiResponse';
+import { TransactionResponse } from 'src/models/TransactionResponse';
 
 type TransactionType = 'income' | 'expense';
 type OfferStatus = 'active' | 'cancelled';
@@ -25,13 +27,6 @@ export interface MarketplaceOffer {
   status: OfferStatus;
 }
 
-interface ApiEnvelope<T> {
-  success: boolean;
-  timestamp: string;
-  error?: string;
-  data?: T;
-}
-
 interface TransactionPayload {
   type: TransactionType;
   amount: number;
@@ -39,30 +34,10 @@ interface TransactionPayload {
   category: string;
 }
 
-interface TransactionResponse {
-  success: boolean;
-  timestamp: string;
-  message?: string;
-  error?: string;
-  data?: {
-    transaction: {
-      id: string;
-      type: TransactionType;
-      amount: number;
-      description: string;
-      category: string;
-      referenceId: string | null;
-      timestamp: string;
-      balanceBefore: number;
-      balanceAfter: number;
-    };
-  };
-}
-
 export async function addTransaction(
   request: APIRequestContext,
   payload: TransactionPayload,
-): Promise<TransactionResponse> {
+): Promise<ApiEnvelope<TransactionResponse>> {
   let requestData: unknown = { ...payload };
 
   if (payload.type === 'income') {

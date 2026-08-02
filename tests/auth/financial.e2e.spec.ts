@@ -1,4 +1,5 @@
 import { request as playwrightRequest } from '@playwright/test';
+import { topUpAmount } from 'src/actions/user.actions';
 import { BASE_API_URL } from 'src/config/env.config';
 import { expect, test } from 'src/fixtures/test.fixture';
 import { addTransaction } from 'src/helpers/apiHelpers';
@@ -27,13 +28,7 @@ test.describe('Financial functionality tests', () => {
   }
 
   test.beforeEach(async ({ request }) => {
-    const seed = await addTransaction(request, {
-      type: 'income',
-      amount: 9500,
-      description: 'Test setup funds',
-      category: 'general',
-    });
-    expect(seed.success, seed.error).toBe(true);
+    await topUpAmount(request, 9500);
   });
 
   test(
@@ -41,7 +36,7 @@ test.describe('Financial functionality tests', () => {
     {
       tag: ['@financial', '@balance', '@history'],
     },
-    async ({ financialPage }) => {
+    async ({ financialPage, request }) => {
       const randomDescription = `Crops expense ${Date.now()}`;
       const expectedSuccessMessage = 'Transaction added successfully';
       const amount = 25.5;
@@ -51,12 +46,7 @@ test.describe('Financial functionality tests', () => {
       const balanceBefore = await financialPage.getBalance();
       expect(balanceBefore).toBeGreaterThanOrEqual(0);
 
-      await financialPage.addTransaction({
-        type: 'expense',
-        amount: amount,
-        category: 'crops',
-        description: randomDescription,
-      });
+      await topUpAmount(request, amount);
 
       await expect(financialPage.notificationMessage).toHaveText(
         expectedSuccessMessage,
@@ -137,12 +127,7 @@ test.describe('Financial functionality tests', () => {
       tag: [`@financial`, `@validation`, `@edge-case`],
     },
     async ({ request, financialPage, page }) => {
-      await addTransaction(request, {
-        type: 'expense',
-        amount: 9000,
-        description: 'Take a money',
-        category: 'general',
-      });
+      await topUpAmount(request, 9000);
 
       const expectedErrorMessage = 'Insufficient funds for transfer';
       const toUserId = await getEmptyUserId();
