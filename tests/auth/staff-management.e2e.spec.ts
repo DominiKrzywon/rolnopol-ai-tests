@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import test, { expect } from '@playwright/test';
+import { expect, test } from 'src/fixtures/test.fixture';
 import {
   createAnimal,
   createField,
@@ -14,19 +14,12 @@ import {
   newAmount,
   STAFF_AGE,
 } from 'src/helpers/testDataHelpers';
-import { ManagementPage } from 'src/pages/managementPages/ManagementMainPage';
 
 test.describe('Staff & Fields Management', () => {
-  let managementPage: ManagementPage;
-
-  test.beforeEach('verify management page', async ({ page }) => {
-    managementPage = new ManagementPage(page);
-  });
-
   test(
     'should create a new field in Staff & Fields view',
     { tag: ['@crud', '@farm', '@resources', '@happy-path'] },
-    async () => {
+    async ({ managementPage }) => {
       const fieldName = faker.word.noun();
 
       await managementPage.goto();
@@ -54,7 +47,7 @@ test.describe('Staff & Fields Management', () => {
   test(
     'should create a new animal herd in Staff & Fields view',
     { tag: ['@crud', '@farm', '@resources', '@happy-path'] },
-    async () => {
+    async ({ managementPage }) => {
       const fieldName = faker.word.noun();
       const animalAmount = faker.number.int({ min: 1, max: 99_999 });
       const expectedErrorMessage = 'Amount is required.';
@@ -96,7 +89,7 @@ test.describe('Staff & Fields Management', () => {
   test(
     'should create a new staff  in Staff & Fields view',
     { tag: ['@crud', '@farm', '@resources', '@happy-path'] },
-    async () => {
+    async ({ managementPage }) => {
       const uniqueName = faker.person.firstName();
       const uniqueSurname = faker.person.lastName();
       const staffAge = faker.number.int({ min: 18, max: 65 });
@@ -123,13 +116,10 @@ test.describe('Staff & Fields Management', () => {
 test.describe('Staff & Fields Management - Delete Field', () => {
   let fieldId: number;
   let fieldName: string;
-  let managementPage: ManagementPage;
 
-  test.beforeEach(async ({ request, page }) => {
+  test.beforeEach(async ({ request }) => {
     fieldName = faker.word.noun();
     fieldId = await createField(request, { name: fieldName, area: FIELD_AREA });
-
-    managementPage = new ManagementPage(page);
   });
 
   test.afterEach(async ({ request }) => {
@@ -139,7 +129,7 @@ test.describe('Staff & Fields Management - Delete Field', () => {
   test(
     'should edit a field name',
     { tag: ['@crud', '@farm', '@resources', '@edit'] },
-    async () => {
+    async ({ managementPage }) => {
       const newFieldName = faker.word.noun();
 
       await managementPage.goto();
@@ -160,7 +150,7 @@ test.describe('Staff & Fields Management - Delete Field', () => {
   test(
     'should delete a field',
     { tag: ['@crud', '@farm', '@resources', '@delete'] },
-    async () => {
+    async ({ managementPage }) => {
       await managementPage.goto();
       await managementPage.searchFields(fieldName);
       await managementPage.getFieldByName(fieldName);
@@ -178,9 +168,8 @@ test.describe('Staff & Fields Management - Delete Staff', () => {
   let staffId: number;
   let staffName: string;
   let staffSurname: string;
-  let managementPage: ManagementPage;
 
-  test.beforeEach(async ({ request, page }) => {
+  test.beforeEach(async ({ request }) => {
     staffName = faker.person.firstName();
     staffSurname = faker.person.lastName();
     staffId = await createStaff(request, {
@@ -188,7 +177,6 @@ test.describe('Staff & Fields Management - Delete Staff', () => {
       surname: staffSurname,
       age: STAFF_AGE,
     });
-    managementPage = new ManagementPage(page);
   });
 
   test.afterEach(async ({ request }) => {
@@ -200,7 +188,7 @@ test.describe('Staff & Fields Management - Delete Staff', () => {
     {
       tag: ['@crud', '@farm', '@resources', '@edit'],
     },
-    async () => {
+    async ({ managementPage }) => {
       const newName = faker.internet.username();
       const newSurname = faker.internet.username();
       const card = managementPage.getFieldCardByName(newName);
@@ -220,15 +208,18 @@ test.describe('Staff & Fields Management - Delete Staff', () => {
   test(
     'should delete a staff',
     { tag: ['@crud', '@farm', '@resources', '@delete'] },
-    async () => {
+    async ({ managementPage }) => {
       await managementPage.goto();
       await managementPage.searchStaff(staffName);
       await managementPage
         .getCardActionButton(staffName, managementPage.editButtons.deleteStaff)
         .click();
       await managementPage.confirmDeleteLocator.click();
+      await managementPage.searchStaff(`${staffName} ${staffSurname}`);
 
-      await expect(managementPage.getFieldByName(staffName)).toBeHidden();
+      await expect(
+        managementPage.getFieldByName(`${staffName} ${staffSurname}`),
+      ).toBeHidden();
     },
   );
 });
@@ -237,9 +228,8 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
   let animalId: number;
   let animalAmount: number;
   let animalType: string;
-  let managementPage: ManagementPage;
 
-  test.beforeEach(async ({ request, page }) => {
+  test.beforeEach(async ({ request }) => {
     animalType = getRandomAnimalType();
 
     animalAmount = faker.number.int({ min: 10_000, max: 99_999 });
@@ -247,7 +237,6 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
       type: animalType,
       amount: animalAmount,
     });
-    managementPage = new ManagementPage(page);
   });
 
   test.afterEach(async ({ request }) => {
@@ -259,7 +248,7 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
     {
       tag: ['@crud', '@farm', '@resources', '@edit'],
     },
-    async () => {
+    async ({ managementPage }) => {
       const newType = getRandomAnimalType();
 
       await managementPage.goto();
@@ -285,7 +274,7 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
   test(
     'should delete a animal',
     { tag: ['@crud', '@farm', '@resources', '@delete'] },
-    async () => {
+    async ({ managementPage }) => {
       await managementPage.goto();
       await managementPage
         .getCardActionButton(

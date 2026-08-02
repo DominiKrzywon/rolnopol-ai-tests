@@ -99,8 +99,8 @@ export async function getAccountBalance(
 }
 
 export async function deleteOneOffer(
-  offerId: string,
   request: APIRequestContext,
+  offerId: string,
 ): Promise<void> {
   await request.delete(`${BASE_API_URL}/marketplace/offers/${offerId}`);
 }
@@ -109,10 +109,15 @@ export async function cancelAllMyOffers(
   request: APIRequestContext,
 ): Promise<void> {
   const response = await request.get(`${BASE_API_URL}/marketplace/my-offers`);
-  const offers = await response.json();
-  for (const offer of offers.data.offers) {
-    await deleteOneOffer(offer.id, request);
-  }
+  const body = (await response.json()) as ApiEnvelope<{
+    offers: MarketplaceOffer[];
+  }>;
+
+  await Promise.all(
+    (body.data?.offers ?? []).map((offer) =>
+      deleteOneOffer(request, String(offer.id)),
+    ),
+  );
 }
 
 export async function getFields(request: APIRequestContext): Promise<Field[]> {

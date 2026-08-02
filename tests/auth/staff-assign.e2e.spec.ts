@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import test, { expect } from '@playwright/test';
+import { expect, test } from 'src/fixtures/test.fixture';
 import {
   createField,
   createStaff,
@@ -7,7 +7,6 @@ import {
   deleteStaff,
 } from 'src/helpers/apiHelpers';
 import { FIELD_AREA, STAFF_AGE } from 'src/helpers/testDataHelpers';
-import { AssignPage } from 'src/pages/managementPages/ManagementAssignPage';
 
 test.describe('Staff Assignment Management', () => {
   let staffId: number;
@@ -16,11 +15,10 @@ test.describe('Staff Assignment Management', () => {
   let staffName: string;
   let fullName: string;
   let staffSurname: string;
-  let assignPage: AssignPage;
 
   const expectedMessage = 'Staff assigned successfully!';
 
-  test.beforeEach(async ({ request, page }) => {
+  test.beforeEach(async ({ request }) => {
     fieldName = faker.word.noun();
     staffName = faker.person.firstName();
     staffSurname = faker.person.lastName();
@@ -36,8 +34,6 @@ test.describe('Staff Assignment Management', () => {
       name: fieldName,
       area: FIELD_AREA,
     });
-
-    assignPage = new AssignPage(page);
   });
 
   test.afterEach(async ({ request }) => {
@@ -50,7 +46,7 @@ test.describe('Staff Assignment Management', () => {
     {
       tag: ['@crud', '@farm', '@assignment'],
     },
-    async () => {
+    async ({ assignPage }) => {
       await assignPage.goto();
       await assignPage.assignStaffToField(fieldName, fullName);
 
@@ -63,7 +59,7 @@ test.describe('Staff Assignment Management', () => {
     {
       tag: ['@crud', '@farm', '@assignment'],
     },
-    async () => {
+    async ({ assignPage }) => {
       await assignPage.goto();
       await assignPage.assignStaffToField(fieldName, fullName);
 
@@ -76,7 +72,7 @@ test.describe('Staff Assignment Management', () => {
   test(
     'should unassigned works correctly',
     { tag: ['@crud', '@farm', '@assignment'] },
-    async ({ page }) => {
+    async ({ assignPage, page }) => {
       const expectedSuccessMessage = 'Staff unassigned successfully!';
 
       await assignPage.goto();
@@ -120,7 +116,7 @@ test.describe('Staff Assignment Management', () => {
       {
         tag: ['@crud', '@farm', '@assignment'],
       },
-      async () => {
+      async ({ assignPage }) => {
         await assignPage.goto();
         await assignPage.assignStaffToField(fieldName, `${fullName}`);
 

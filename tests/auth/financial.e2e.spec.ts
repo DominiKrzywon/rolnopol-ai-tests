@@ -1,8 +1,8 @@
-import { expect, request as playwrightRequest, test } from '@playwright/test';
+import { request as playwrightRequest } from '@playwright/test';
 import { BASE_API_URL } from 'src/config/env.config';
+import { expect, test } from 'src/fixtures/test.fixture';
 import { addTransaction } from 'src/helpers/apiHelpers';
 import { getEmptyUserData } from 'src/models/User';
-import { FinancialPage } from 'src/pages/FinancialPage';
 
 test.describe('Financial functionality tests', () => {
   async function getEmptyUserId(): Promise<number> {
@@ -26,9 +26,7 @@ test.describe('Financial functionality tests', () => {
     }
   }
 
-  let financialPage: FinancialPage;
-
-  test.beforeEach(async ({ request, page }) => {
+  test.beforeEach(async ({ request }) => {
     const seed = await addTransaction(request, {
       type: 'income',
       amount: 9500,
@@ -36,7 +34,6 @@ test.describe('Financial functionality tests', () => {
       category: 'general',
     });
     expect(seed.success, seed.error).toBe(true);
-    financialPage = new FinancialPage(page);
   });
 
   test(
@@ -44,7 +41,7 @@ test.describe('Financial functionality tests', () => {
     {
       tag: ['@financial', '@balance', '@history'],
     },
-    async () => {
+    async ({ financialPage }) => {
       const randomDescription = `Crops expense ${Date.now()}`;
       const expectedSuccessMessage = 'Transaction added successfully';
       const amount = 25.5;
@@ -107,7 +104,7 @@ test.describe('Financial functionality tests', () => {
     {
       tag: ['@financial', '@transfer', '@business-logic'],
     },
-    async ({ page }) => {
+    async ({ financialPage, page }) => {
       const toUserId = await getEmptyUserId();
       const amount = 10;
       const description = `E2E transfer ${Date.now()}`;
@@ -139,7 +136,7 @@ test.describe('Financial functionality tests', () => {
     {
       tag: [`@financial`, `@validation`, `@edge-case`],
     },
-    async ({ request, page }) => {
+    async ({ request, financialPage, page }) => {
       await addTransaction(request, {
         type: 'expense',
         amount: 9000,

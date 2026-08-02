@@ -1,9 +1,6 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from 'src/fixtures/test.fixture';
 
 import { getEmptyUserData } from '../../src/models/User';
-import { HomePage } from '../../src/pages/HomePage';
-import { LoginPage } from '../../src/pages/LoginPage';
-import { ProfilePage } from '../../src/pages/ProfilePage';
 
 test.describe('Login E2E', () => {
   test.use({ storageState: undefined });
@@ -11,11 +8,8 @@ test.describe('Login E2E', () => {
   test(
     'should login, verify profile sections, and logout successfully',
     { tag: ['@auth', '@login', '@session', '@logout', '@happy-path'] },
-    async ({ page }) => {
+    async ({ loginPage, profilePage, homePage, page }) => {
       const user = getEmptyUserData();
-      const loginPage = new LoginPage(page);
-      const profilePage = new ProfilePage(page);
-      const homePage = new HomePage(page);
 
       await loginPage.goto();
 

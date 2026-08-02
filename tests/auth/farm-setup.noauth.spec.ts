@@ -1,4 +1,4 @@
-import test, { expect, Page } from '@playwright/test';
+import { Page } from '@playwright/test';
 import {
   assignStaff,
   createAnimalGroup,
@@ -7,6 +7,7 @@ import {
 } from 'src/actions/farm.actions';
 import { createMarketplaceOffer } from 'src/actions/marketplace.actions';
 import { prepareRandomUser } from 'src/factories/user.factory';
+import { expect, test } from 'src/fixtures/test.fixture';
 import {
   addTransaction,
   getAccountBalance,
@@ -15,7 +16,6 @@ import {
   getMarketplaceOffers,
 } from 'src/helpers/apiHelpers';
 import { User } from 'src/models/User';
-import { AssignPage } from 'src/pages/managementPages/ManagementAssignPage';
 import { ManagementPage } from 'src/pages/managementPages/ManagementMainPage';
 import { MarketplacePage } from 'src/pages/MarketplacePage';
 import { RegisterPage } from 'src/pages/RegisterPage';
@@ -35,7 +35,7 @@ test.describe('E2E user journeys', () => {
     {
       tag: ['@e2e', '@farm-setup', '@user-journey'],
     },
-    async ({ page }) => {
+    async ({ page, managementPage, assignPage }) => {
       let field: { name: string; area: number };
       let staff: { name: string; surname: string; fullName: string };
       let animal: { type: string; amount: number };
@@ -47,7 +47,6 @@ test.describe('E2E user journeys', () => {
 
       await test.step('add resources', async () => {
         //add field
-        const managementPage = new ManagementPage(page);
 
         await managementPage.goto();
         field = await createField(page);
@@ -80,7 +79,6 @@ test.describe('E2E user journeys', () => {
       });
 
       await test.step('assign staff to field', async () => {
-        const assignPage = new AssignPage(page);
         const expectedSuccessMessage = 'Staff assigned successfully!';
 
         await assignPage.goto();
@@ -198,8 +196,7 @@ test.describe('E2E user journeys', () => {
   test(
     'verify blocked transaction',
     { tag: [`@e2e`, `@edge-case`, `@validation`] },
-    async ({ page }) => {
-      const marketplacePage = new MarketplacePage(page);
+    async ({ page, marketplacePage }) => {
       const expectedErrorMessage =
         'Insufficient funds to complete purchase (no overdraft allowed)';
 

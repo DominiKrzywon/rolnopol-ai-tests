@@ -1,17 +1,12 @@
-import { expect, test } from '@playwright/test';
-import { HomePage } from 'src/pages/HomePage';
+import { expect, test } from 'src/fixtures/test.fixture';
 
 import { getEmptyUserData } from '../../src/models/User';
-import { LoginPage } from '../../src/pages/LoginPage';
-import { ProfilePage } from '../../src/pages/ProfilePage';
 
 test.describe('Login E2E', () => {
   test(
     'should display correct user data after login',
     { tag: ['@auth', '@login', '@session', '@happy-path'] },
-    async ({ page }) => {
-      const loginPage = new LoginPage(page);
-      const profilePage = new ProfilePage(page);
+    async ({ loginPage, profilePage, page }) => {
       const user = getEmptyUserData();
 
       await loginPage.goto();
@@ -25,10 +20,7 @@ test.describe('Login E2E', () => {
   test(
     'session management should work correctly',
     { tag: ['@auth', '@session', '@logout'] },
-    async ({ page }) => {
-      const loginPage = new LoginPage(page);
-      const homePage = new HomePage(page);
-      const profilePage = new ProfilePage(page);
+    async ({ loginPage, profilePage, page, homePage }) => {
       const user = getEmptyUserData();
       const expectedLoginHeaderText = 'Rolnopol';
 
