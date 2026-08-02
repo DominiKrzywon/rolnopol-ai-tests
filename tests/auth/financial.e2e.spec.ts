@@ -36,7 +36,7 @@ test.describe('Financial functionality tests', () => {
     {
       tag: ['@financial', '@balance', '@history'],
     },
-    async ({ financialPage, request }) => {
+    async ({ financialPage }) => {
       const randomDescription = `Crops expense ${Date.now()}`;
       const expectedSuccessMessage = 'Transaction added successfully';
       const amount = 25.5;
@@ -46,7 +46,12 @@ test.describe('Financial functionality tests', () => {
       const balanceBefore = await financialPage.getBalance();
       expect(balanceBefore).toBeGreaterThanOrEqual(0);
 
-      await topUpAmount(request, amount);
+      await financialPage.addTransaction({
+        type: 'expense',
+        amount,
+        category: 'crops',
+        description: randomDescription,
+      });
 
       await expect(financialPage.notificationMessage).toHaveText(
         expectedSuccessMessage,

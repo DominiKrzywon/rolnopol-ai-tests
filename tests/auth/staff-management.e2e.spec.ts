@@ -1,13 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { expect, test } from 'src/fixtures/test.fixture';
-import {
-  createAnimal,
-  createField,
-  createStaff,
-  deleteAnimal,
-  deleteField,
-  deleteStaff,
-} from 'src/helpers/apiHelpers';
+import { expect, test } from 'src/fixtures/data.fixture';
 import {
   FIELD_AREA,
   getRandomAnimalType,
@@ -114,22 +106,11 @@ test.describe('Staff & Fields Management', () => {
 });
 
 test.describe('Staff & Fields Management - Delete Field', () => {
-  let fieldId: number;
-  let fieldName: string;
-
-  test.beforeEach(async ({ request }) => {
-    fieldName = faker.word.noun();
-    fieldId = await createField(request, { name: fieldName, area: FIELD_AREA });
-  });
-
-  test.afterEach(async ({ request }) => {
-    await deleteField(request, fieldId).catch(() => {});
-  });
-
   test(
     'should edit a field name',
     { tag: ['@crud', '@farm', '@resources', '@edit'] },
-    async ({ managementPage }) => {
+    async ({ managementPage, createdField }) => {
+      const { name: fieldName } = createdField;
       const newFieldName = faker.word.noun();
 
       await managementPage.goto();
@@ -150,7 +131,9 @@ test.describe('Staff & Fields Management - Delete Field', () => {
   test(
     'should delete a field',
     { tag: ['@crud', '@farm', '@resources', '@delete'] },
-    async ({ managementPage }) => {
+    async ({ managementPage, createdField }) => {
+      const { name: fieldName } = createdField;
+
       await managementPage.goto();
       await managementPage.searchFields(fieldName);
       await managementPage.getFieldByName(fieldName);
@@ -165,30 +148,13 @@ test.describe('Staff & Fields Management - Delete Field', () => {
 });
 
 test.describe('Staff & Fields Management - Delete Staff', () => {
-  let staffId: number;
-  let staffName: string;
-  let staffSurname: string;
-
-  test.beforeEach(async ({ request }) => {
-    staffName = faker.person.firstName();
-    staffSurname = faker.person.lastName();
-    staffId = await createStaff(request, {
-      name: staffName,
-      surname: staffSurname,
-      age: STAFF_AGE,
-    });
-  });
-
-  test.afterEach(async ({ request }) => {
-    await deleteStaff(request, staffId).catch(() => {});
-  });
-
   test(
     'should update a staff',
     {
       tag: ['@crud', '@farm', '@resources', '@edit'],
     },
-    async ({ managementPage }) => {
+    async ({ managementPage, createdStaff }) => {
+      const { name: staffName } = createdStaff;
       const newName = faker.internet.username();
       const newSurname = faker.internet.username();
       const card = managementPage.getFieldCardByName(newName);
@@ -208,7 +174,8 @@ test.describe('Staff & Fields Management - Delete Staff', () => {
   test(
     'should delete a staff',
     { tag: ['@crud', '@farm', '@resources', '@delete'] },
-    async ({ managementPage }) => {
+    async ({ managementPage, createdStaff }) => {
+      const { name: staffName, surname: staffSurname } = createdStaff;
       await managementPage.goto();
       await managementPage.searchStaff(staffName);
       await managementPage
@@ -225,30 +192,13 @@ test.describe('Staff & Fields Management - Delete Staff', () => {
 });
 
 test.describe('Staff & Fields Management - Delete Animal', () => {
-  let animalId: number;
-  let animalAmount: number;
-  let animalType: string;
-
-  test.beforeEach(async ({ request }) => {
-    animalType = getRandomAnimalType();
-
-    animalAmount = faker.number.int({ min: 10_000, max: 99_999 });
-    animalId = await createAnimal(request, {
-      type: animalType,
-      amount: animalAmount,
-    });
-  });
-
-  test.afterEach(async ({ request }) => {
-    await deleteAnimal(request, animalId).catch(() => {});
-  });
-
   test(
     'should edit a animal',
     {
       tag: ['@crud', '@farm', '@resources', '@edit'],
     },
-    async ({ managementPage }) => {
+    async ({ managementPage, createdAnimal }) => {
+      const { type: animalType, amount: animalAmount } = createdAnimal;
       const newType = getRandomAnimalType();
 
       await managementPage.goto();
@@ -274,7 +224,8 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
   test(
     'should delete a animal',
     { tag: ['@crud', '@farm', '@resources', '@delete'] },
-    async ({ managementPage }) => {
+    async ({ managementPage, createdAnimal }) => {
+      const { type: animalType, amount: animalAmount } = createdAnimal;
       await managementPage.goto();
       await managementPage
         .getCardActionButton(
