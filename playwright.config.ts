@@ -49,5 +49,10 @@ export default defineConfig({
       name: 'api-tests',
       testMatch: ['**/api/**/*.spec.ts'],
     },
+    {
+      name: 'isolated-user-tests',
+      testMatch: ['**/*.isolated.spec.ts'],
+      use: { ...devices['Desktop Chrome'] },
+    },
   ],
 });

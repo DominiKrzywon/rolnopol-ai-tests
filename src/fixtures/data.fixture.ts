@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { expect, test as baseTest } from 'src/fixtures/test.fixture';
+import { expect, test as baseTest } from 'src/fixtures/auth.fixture';
 import {
   createAnimal,
   createField,

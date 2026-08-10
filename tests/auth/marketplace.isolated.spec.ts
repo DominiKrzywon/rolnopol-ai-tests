@@ -1,8 +1,7 @@
 import { topUpAmount } from 'src/actions/user.actions';
-import { expect, test } from 'src/fixtures/test.fixture';
+import { expect, test } from 'src/fixtures/data.fixture';
 import {
   addTransaction,
-  cancelAllMyOffers,
   getAccountBalance,
   getAnimals,
   getFields,
@@ -10,7 +9,7 @@ import {
 import { PurchasedOffer } from 'src/pages/MarketplacePage';
 
 test.describe('Marketplace e2e tests', () => {
-  test.beforeEach(async ({ request, marketplacePage }) => {
+  test.beforeEach(async ({ freshUser: _, request, marketplacePage }) => {
     await topUpAmount(request, 10000);
     await marketplacePage.goto();
   });
@@ -95,15 +94,11 @@ test.describe('Marketplace e2e tests', () => {
     {
       tag: ['@marketplace', '@offers', '@crud'],
     },
-    async ({ request, marketplacePage }) => {
+    async ({ marketplacePage, createdAnimal }) => {
       let createdOffer: {
         price: number;
         description?: string;
       };
-
-      await test.step('clear marketplace', async () => {
-        await cancelAllMyOffers(request);
-      });
 
       await test.step('create offer', async () => {
         const expectedSuccessMessage = 'Offer created successfully!';
@@ -111,7 +106,7 @@ test.describe('Marketplace e2e tests', () => {
         createdOffer = await marketplacePage.createNewOffer(
           'animal',
           250,
-          'Random text',
+          `Offer for ${createdAnimal.type}`,
         );
 
         await expect(marketplacePage.notificationMessage).toHaveText(

@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { Locator, Page } from '@playwright/test';
+import { expect, Locator, Page } from '@playwright/test';
 import { PAGE_URLS } from 'src/constants/pageUrls';
 import { ItemType } from 'src/helpers/apiHelpers';
 import { BasePage } from 'src/pages/BasePage';
@@ -196,6 +196,8 @@ export class MarketplacePage extends BasePage {
     await this.itemTypeSelect.selectOption(type);
 
     const options = await this.specificItemSelect.locator('option').all();
+
+    await expect(this.specificItemSelect.locator('option')).not.toHaveCount(1);
 
     const values = await Promise.all(
       options.map((option) => option.getAttribute('value')),

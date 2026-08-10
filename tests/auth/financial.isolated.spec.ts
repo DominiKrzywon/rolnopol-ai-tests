@@ -1,8 +1,8 @@
 import { request as playwrightRequest } from '@playwright/test';
-import { topUpAmount } from 'src/actions/user.actions';
+import { drainAccount, topUpAmount } from 'src/actions/user.actions';
 import { BASE_API_URL } from 'src/config/env.config';
-import { expect, test } from 'src/fixtures/test.fixture';
-import { addTransaction } from 'src/helpers/apiHelpers';
+import { expect, test } from 'src/fixtures/auth.fixture';
+import { getAccountBalance } from 'src/helpers/apiHelpers';
 import { getEmptyUserData } from 'src/models/User';
 
 test.describe('Financial functionality tests', () => {
@@ -14,7 +14,7 @@ test.describe('Financial functionality tests', () => {
         data: { email: user.email, password: user.password },
       });
       const body = await response.json();
-      const userId = body.data?.id;
+      const userId = body.data?.user?.id;
 
       if (typeof userId !== 'number') {
         throw new Error(
@@ -27,7 +27,7 @@ test.describe('Financial functionality tests', () => {
     }
   }
 
-  test.beforeEach(async ({ request }) => {
+  test.beforeEach(async ({ freshUser: _, request }) => {
     await topUpAmount(request, 9500);
   });
 
@@ -39,12 +39,13 @@ test.describe('Financial functionality tests', () => {
     async ({ financialPage }) => {
       const randomDescription = `Crops expense ${Date.now()}`;
       const expectedSuccessMessage = 'Transaction added successfully';
+      const amountAtStart = 9500;
       const amount = 25.5;
 
       await financialPage.goto();
 
       const balanceBefore = await financialPage.getBalance();
-      expect(balanceBefore).toBeGreaterThanOrEqual(0);
+      expect(balanceBefore).toEqual(amountAtStart);
 
       await financialPage.addTransaction({
         type: 'expense',
@@ -132,37 +133,31 @@ test.describe('Financial functionality tests', () => {
       tag: [`@financial`, `@validation`, `@edge-case`],
     },
     async ({ request, financialPage, page }) => {
-      await topUpAmount(request, 9000);
+      const leave = 50;
+      const extraMoney = 9000;
+      const amountBeforeDrain = 18450;
+      await topUpAmount(request, extraMoney);
 
       const expectedErrorMessage = 'Insufficient funds for transfer';
       const toUserId = await getEmptyUserId();
-      const leave = 50;
-      const maxTransfer = 999.99;
 
       await financialPage.goto();
-      let balanceBefore = await financialPage.getBalance();
 
-      // eslint-disable-next-line playwright/no-conditional-in-test
-      if (balanceBefore >= maxTransfer) {
-        const drain = await addTransaction(request, {
-          type: 'expense',
-          amount: balanceBefore - leave,
-          description: `Drain ${Date.now()}`,
-          category: 'general',
-        });
-        // eslint-disable-next-line playwright/no-conditional-expect
-        expect(drain.success, drain.error).toBe(true);
-        await page.reload();
-        balanceBefore = await financialPage.getBalance();
-      }
+      await drainAccount(request, amountBeforeDrain);
 
-      const amount = balanceBefore + 1;
+      await page.reload();
+      expect(await financialPage.getBalance()).toEqual(leave);
+
+      const currentBalance = await getAccountBalance(request);
+
+      const amount = leave + 1;
       const description = `Negative ${Date.now()}`;
 
       await financialPage.transferFunds({ toUserId, amount, description });
       await expect(financialPage.notificationMessage).toHaveText(
         expectedErrorMessage,
       );
+      expect(currentBalance).toEqual(leave);
     },
   );
 });
