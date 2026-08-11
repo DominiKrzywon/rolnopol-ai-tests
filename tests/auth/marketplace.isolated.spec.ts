@@ -9,9 +9,8 @@ import {
 import { PurchasedOffer } from 'src/pages/MarketplacePage';
 
 test.describe('Marketplace e2e tests', () => {
-  test.beforeEach(async ({ freshUser: _, request, marketplacePage }) => {
+  test.beforeEach(async ({ freshUser: _, request }) => {
     await topUpAmount(request, 10000);
-    await marketplacePage.goto();
   });
 
   test(
@@ -26,6 +25,7 @@ test.describe('Marketplace e2e tests', () => {
         const fieldsBefore = await getFields(request);
         const animalsBefore = await getAnimals(request);
 
+        await marketplacePage.goto();
         purchasedOffer = await marketplacePage.clickRandomBuyNow();
 
         ownedIdsBeforePurchase =
@@ -71,6 +71,7 @@ test.describe('Marketplace e2e tests', () => {
     async ({ request, marketplacePage }) => {
       const balance = await getAccountBalance(request);
 
+      await marketplacePage.goto();
       await addTransaction(request, {
         type: 'expense',
         amount: balance,
@@ -94,11 +95,13 @@ test.describe('Marketplace e2e tests', () => {
     {
       tag: ['@marketplace', '@offers', '@crud'],
     },
+
     async ({ marketplacePage, createdAnimal }) => {
       let createdOffer: {
         price: number;
         description?: string;
       };
+      await marketplacePage.goto();
 
       await test.step('create offer', async () => {
         const expectedSuccessMessage = 'Offer created successfully!';

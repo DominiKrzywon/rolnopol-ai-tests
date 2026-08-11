@@ -195,10 +195,9 @@ export class MarketplacePage extends BasePage {
 
     await this.itemTypeSelect.selectOption(type);
 
-    const options = await this.specificItemSelect.locator('option').all();
-
     await expect(this.specificItemSelect.locator('option')).not.toHaveCount(1);
 
+    const options = await this.specificItemSelect.locator('option').all();
     const values = await Promise.all(
       options.map((option) => option.getAttribute('value')),
     );

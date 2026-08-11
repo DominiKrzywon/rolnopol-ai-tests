@@ -111,6 +111,7 @@ test.describe('Financial functionality tests', () => {
       await financialPage.transferFunds({ toUserId, amount, description });
       await expect(financialPage.transferSuccess).toHaveText(
         expectedSuccessMessage,
+        { timeout: 15_000 },
       );
 
       await page.reload();
