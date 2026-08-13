@@ -1,27 +1,17 @@
 import { request as playwrightRequest } from '@playwright/test';
 import { drainAccount, topUpAmount } from 'src/actions/user.actions';
-import { BASE_API_URL } from 'src/config/env.config';
+import { loginAs } from 'src/api/auth.api';
 import { expect, test } from 'src/fixtures/auth.fixture';
 import { getAccountBalance } from 'src/helpers/apiHelpers';
 import { getEmptyUserData } from 'src/models/User';
 
 test.describe('Financial functionality tests', () => {
   async function getEmptyUserId(): Promise<number> {
-    const api = await playwrightRequest.newContext({ baseURL: BASE_API_URL });
+    const api = await playwrightRequest.newContext();
     const user = getEmptyUserData();
     try {
-      const response = await api.post(`${BASE_API_URL}/login`, {
-        data: { email: user.email, password: user.password },
-      });
-      const body = await response.json();
-      const userId = body.data?.user?.id;
-
-      if (typeof userId !== 'number') {
-        throw new Error(
-          `Failed to get USER id: ${body.error ?? JSON.stringify(body)}`,
-        );
-      }
-      return userId;
+      const session = await loginAs(api, user);
+      return session.id;
     } finally {
       await api.dispose();
     }

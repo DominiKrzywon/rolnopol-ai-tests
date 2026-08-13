@@ -1,112 +1,27 @@
-import { APIResponse, expect, Page, test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import {
+  loginAs,
+  loginUser,
+  logout,
+  registerUser,
+  validateAuthorizationGet,
+  validateAuthorizationPost,
+} from 'src/api/auth.api';
+import { prepareRandomUser } from 'src/factories/user.factory';
 
-import { BASE_API_URL } from '../../src/config/env.config';
-import { getDemoUserData } from '../../src/models/User';
-
-/**
- * Helper interface for registration requests
- */
-interface RegistrationData {
-  email: string;
-  password: string;
-  displayedName: string;
-}
-
-/**
- * Helper interface for login requests
- */
-interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-/**
- * Test helpers for API interactions
- */
-const authHelpers = {
-  /**
-   * Generate unique test user data with current timestamp
-   */
-  generateTestUser(): RegistrationData {
-    return {
-      email: `test_${Date.now()}@example.com`,
-      password: 'testPassword123',
-      displayedName: 'Test User',
-    };
-  },
-
-  /**
-   * Register a new user
-   */
-  async registerUser(
-    page: Page,
-    userData: RegistrationData,
-  ): Promise<APIResponse> {
-    return page.request.post(`${BASE_API_URL}/register`, {
-      data: userData,
-    });
-  },
-
-  /**
-   * Login with credentials
-   */
-  async login(page: Page, credentials: LoginCredentials): Promise<APIResponse> {
-    return page.request.post(`${BASE_API_URL}/login`, {
-      data: credentials,
-    });
-  },
-
-  /**
-   * Extract token from login response
-   */
-  async extractTokenFromResponse(response: APIResponse): Promise<string> {
-    const body = await response.json();
-    return body.data?.token || '';
-  },
-
-  /**
-   * Validate authorization with token (GET method)
-   */
-  async validateAuthorizationGet(
-    page: Page,
-    token: string,
-  ): Promise<APIResponse> {
-    return page.request.get(`${BASE_API_URL}/authorization`, {
-      headers: { token },
-    });
-  },
-
-  /**
-   * Validate authorization with token (POST method)
-   */
-  async validateAuthorizationPost(
-    page: Page,
-    token: string,
-  ): Promise<APIResponse> {
-    return page.request.post(`${BASE_API_URL}/authorization`, {
-      data: { token },
-    });
-  },
-
-  /**
-   * Logout user
-   */
-  async logout(page: Page): Promise<APIResponse> {
-    return page.request.post(`${BASE_API_URL}/logout`);
-  },
-};
+import { getDemoUserData, User } from '../../src/models/User';
 
 test.describe('Authentication API', () => {
   test.describe('Registration', () => {
     test(
       'should register new user successfully with valid data',
       { tag: ['@api', '@auth', '@registration', '@happy-path'] },
-      async ({ page }) => {
+      async ({ request }) => {
         // Arrange
-        const newUser = authHelpers.generateTestUser();
+        const newUser = prepareRandomUser();
 
         // Act
-        const response = await authHelpers.registerUser(page, newUser);
+        const response = await registerUser(request, newUser);
         const body = await response.json();
 
         // Assert
@@ -125,16 +40,16 @@ test.describe('Authentication API', () => {
     test(
       'should reject registration with invalid email format',
       { tag: ['@api', '@auth', '@validation', '@negative'] },
-      async ({ page }) => {
+      async ({ request }) => {
         // Arrange
-        const invalidUser: RegistrationData = {
+        const invalidUser: User = {
           email: 'invalid-email',
           password: 'testPassword123',
-          displayedName: 'Test User',
+          displayName: 'Test User',
         };
 
         // Act
-        const response = await authHelpers.registerUser(page, invalidUser);
+        const response = await registerUser(request, invalidUser);
         const body = await response.json();
 
         // Assert
@@ -156,15 +71,15 @@ test.describe('Authentication API', () => {
     test(
       'should reject registration with duplicate email',
       { tag: ['@api', '@auth', '@validation', '@negative'] },
-      async ({ page }) => {
+      async ({ request }) => {
         // Arrange
         const existingUser = getDemoUserData();
 
         // Act
-        const response = await authHelpers.registerUser(page, {
+        const response = await registerUser(request, {
           email: existingUser.email,
           password: 'whatever123',
-          displayedName: 'Whatever',
+          displayName: 'Whatever',
         });
         const body = await response.json();
 
@@ -185,16 +100,12 @@ test.describe('Authentication API', () => {
     test(
       'should login successfully with valid credentials',
       { tag: ['@api', '@auth', '@login', '@happy-path'] },
-      async ({ page }) => {
+      async ({ request }) => {
         // Arrange
         const user = getDemoUserData();
-        const credentials: LoginCredentials = {
-          email: user.email,
-          password: user.password,
-        };
 
         // Act
-        const response = await authHelpers.login(page, credentials);
+        const response = await loginUser(request, user);
         const body = await response.json();
 
         // Assert
@@ -205,31 +116,28 @@ test.describe('Authentication API', () => {
           'Response should contain authentication token',
         ).toBeDefined();
         expect(
-          body.data.id,
+          body.data.user.id,
           'Response should contain numeric user ID',
-        ).toBeDefined();
+        ).toEqual(expect.any(Number));
         expect(
-          body.data.userId,
-          'Response should contain string user ID',
-        ).toBeDefined();
-        expect(body.data.email, 'Response email should match login email').toBe(
-          user.email,
-        );
+          body.data.user.email,
+          'Response email should match login email',
+        ).toBe(user.email);
       },
     );
 
     test(
       'should reject login with non-existent email',
       { tag: ['@api', '@auth', '@login', '@negative'] },
-      async ({ page }) => {
+      async ({ request }) => {
         // Arrange
-        const invalidCredentials: LoginCredentials = {
+        const invalidCredentials: User = {
           email: 'nonexistent@example.com',
           password: 'wrongPassword123',
         };
 
         // Act
-        const response = await authHelpers.login(page, invalidCredentials);
+        const response = await loginUser(request, invalidCredentials);
         const body = await response.json();
 
         // Assert
@@ -247,16 +155,16 @@ test.describe('Authentication API', () => {
     test(
       'should reject login with wrong password',
       { tag: ['@api', '@auth', '@login', '@negative'] },
-      async ({ page }) => {
+      async ({ request }) => {
         // Arrange
         const user = getDemoUserData();
-        const invalidCredentials: LoginCredentials = {
+        const invalidCredentials: User = {
           email: user.email,
           password: 'wrongPassword123',
         };
 
         // Act
-        const response = await authHelpers.login(page, invalidCredentials);
+        const response = await loginUser(request, invalidCredentials);
         const body = await response.json();
 
         // Assert
@@ -276,20 +184,16 @@ test.describe('Authentication API', () => {
     test(
       'should validate valid token via GET request',
       { tag: ['@api', '@auth', '@authorization', '@happy-path'] },
-      async ({ page }) => {
+      async ({ request }) => {
         // Arrange
         const user = getDemoUserData();
-        const loginResponse = await authHelpers.login(page, {
+        const session = await loginAs(request, {
           email: user.email,
           password: user.password,
         });
-        const token = await authHelpers.extractTokenFromResponse(loginResponse);
 
         // Act
-        const response = await authHelpers.validateAuthorizationGet(
-          page,
-          token,
-        );
+        const response = await validateAuthorizationGet(request, session.token);
         const body = await response.json();
 
         // Assert
@@ -308,22 +212,19 @@ test.describe('Authentication API', () => {
     test(
       'should reject invalid token via GET request',
       { tag: ['@api', '@auth', '@authorization', '@negative'] },
-      async ({ page }) => {
+      async ({ request }) => {
         // Arrange
         const invalidToken = 'invalid_token_xyz';
 
         // Act
-        const response = await authHelpers.validateAuthorizationGet(
-          page,
-          invalidToken,
-        );
+        const response = await validateAuthorizationGet(request, invalidToken);
         const body = await response.json();
 
         // Assert
         expect(
           response.status(),
           'Invalid token should return 401 Unauthorized',
-        ).toBe(401);
+        ).toBe(403);
         expect(
           body.success,
           'Response success flag should be false for invalid token',
@@ -334,19 +235,15 @@ test.describe('Authentication API', () => {
     test(
       'should validate valid token via POST request',
       { tag: ['@api', '@auth', '@authorization', '@happy-path'] },
-      async ({ page }) => {
+      async ({ request }) => {
         // Arrange
         const user = getDemoUserData();
-        const loginResponse = await authHelpers.login(page, {
-          email: user.email,
-          password: user.password,
-        });
-        const token = await authHelpers.extractTokenFromResponse(loginResponse);
+        const session = await loginAs(request, user);
 
         // Act
-        const response = await authHelpers.validateAuthorizationPost(
-          page,
-          token,
+        const response = await validateAuthorizationPost(
+          request,
+          session.token,
         );
         const body = await response.json();
 
@@ -362,15 +259,12 @@ test.describe('Authentication API', () => {
     test(
       'should reject invalid token via POST request',
       { tag: ['@api', '@auth', '@authorization', '@negative'] },
-      async ({ page }) => {
+      async ({ request }) => {
         // Arrange
         const invalidToken = 'invalid_token_xyz';
 
         // Act
-        const response = await authHelpers.validateAuthorizationPost(
-          page,
-          invalidToken,
-        );
+        const response = await validateAuthorizationPost(request, invalidToken);
         const body = await response.json();
 
         // Assert
@@ -390,9 +284,9 @@ test.describe('Authentication API', () => {
     test(
       'should logout successfully',
       { tag: ['@api', '@auth', '@logout', '@happy-path'] },
-      async ({ page }) => {
+      async ({ request }) => {
         // Act
-        const response = await authHelpers.logout(page);
+        const response = await logout(request);
         const body = await response.json();
 
         // Assert

@@ -64,6 +64,22 @@ export async function loginAs(
   };
 }
 
+export async function registerVerifiedUser(
+  request: APIRequestContext,
+  user: User,
+): Promise<void> {
+  const response = await registerUser(request, user);
+
+  expect(
+    response.status(),
+    `Register failed. Status: ${response.status()}`,
+  ).toBe(201);
+
+  const body = await response.json();
+
+  expect(body.success, body.error ?? 'Register failed').toBe(true);
+}
+
 export async function applySessionCookies(
   context: BrowserContext,
   request: APIRequestContext,
@@ -84,4 +100,26 @@ export async function applySessionCookies(
       url: ENV.BASE_URL,
     },
   ]);
+}
+
+export async function validateAuthorizationGet(
+  request: APIRequestContext,
+  token: string,
+): Promise<APIResponse> {
+  return request.get(`${BASE_API_URL}/authorization`, {
+    headers: { token },
+  });
+}
+
+export async function validateAuthorizationPost(
+  request: APIRequestContext,
+  token: string,
+): Promise<APIResponse> {
+  return request.post(`${BASE_API_URL}/authorization`, {
+    data: { token },
+  });
+}
+
+export async function logout(request: APIRequestContext): Promise<APIResponse> {
+  return request.post(`${BASE_API_URL}/logout`);
 }

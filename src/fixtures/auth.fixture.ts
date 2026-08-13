@@ -1,4 +1,8 @@
-import { applySessionCookies, loginAs, registerUser } from 'src/api/auth.api';
+import {
+  applySessionCookies,
+  loginAs,
+  registerVerifiedUser,
+} from 'src/api/auth.api';
 import { prepareRandomUser } from 'src/factories/user.factory';
 import { expect, test as baseTest } from 'src/fixtures/test.fixture';
 import { User } from 'src/models/User';
@@ -11,7 +15,7 @@ export const test = baseTest.extend<AuthFixtures>({
   freshUser: async ({ request, context }, use) => {
     const user = prepareRandomUser();
 
-    await registerUser(request, user);
+    await registerVerifiedUser(request, user);
     const session = await loginAs(request, user);
     await applySessionCookies(context, request, session);
 
