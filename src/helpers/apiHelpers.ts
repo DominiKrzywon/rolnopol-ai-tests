@@ -1,4 +1,5 @@
 import { APIRequestContext } from '@playwright/test';
+import { deleteJson, getJson, postJson } from 'src/api/httpClient';
 import { BASE_API_URL } from 'src/config/env.config';
 import { ApiEnvelope } from 'src/models/ApiResponse';
 import { TransactionResponse } from 'src/models/TransactionResponse';
@@ -96,106 +97,100 @@ export async function cancelAllMyOffers(
 }
 
 export async function getFields(request: APIRequestContext): Promise<Field[]> {
-  const response = await request.get(`${BASE_API_URL}/fields`);
-  const body = (await response.json()) as ApiEnvelope<Field[]>;
-  return body.data ?? [];
+  return getJson<Field[]>(request, `${BASE_API_URL}/fields`);
 }
 
 export async function getAnimals(
   request: APIRequestContext,
 ): Promise<Animal[]> {
-  const response = await request.get(`${BASE_API_URL}/animals`);
-  const body = (await response.json()) as ApiEnvelope<Animal[]>;
-  return body.data ?? [];
+  return getJson<Animal[]>(request, `${BASE_API_URL}/animals`);
 }
 
 export async function createField(
   request: APIRequestContext,
   data: { name: string; area: number; district?: string },
 ): Promise<number> {
-  const response = await request.post(`${BASE_API_URL}/fields`, { data });
-  const body = await response.json();
-  return body.data.id;
+  const created = await postJson<{ id: number }>(
+    request,
+    `${BASE_API_URL}/fields`,
+    data,
+  );
+  return created.id;
 }
 
 export async function deleteField(
   request: APIRequestContext,
   id: number,
 ): Promise<void> {
-  const response = await request.delete(`${BASE_API_URL}/fields/${id}`);
-
-  if (!response.ok()) {
-    throw new Error(`Failed to delete field: ${response.statusText()}`);
-  }
+  await deleteJson(request, `${BASE_API_URL}/fields/${id}`);
 }
 
 export async function createStaff(
   request: APIRequestContext,
   data: { name: string; surname: string; age: number },
 ): Promise<number> {
-  const response = await request.post(`${BASE_API_URL}/staff`, { data });
-  const body = await response.json();
-  return body.data.id;
+  const created = await postJson<{ id: number }>(
+    request,
+    `${BASE_API_URL}/staff`,
+    { data },
+  );
+  return created.id;
 }
 
 export async function deleteStaff(
   request: APIRequestContext,
   id: number,
 ): Promise<void> {
-  const response = await request.delete(`${BASE_API_URL}/staff/${id}`);
-
-  if (!response.ok()) {
-    throw new Error(`Failed to delete staff: ${response.statusText()}`);
-  }
+  await deleteJson(request, `${BASE_API_URL}/staff/${id}`);
 }
 
 export async function createAnimal(
   request: APIRequestContext,
   data: { type: string; amount: number; fieldId?: number },
 ): Promise<number> {
-  const response = await request.post(`${BASE_API_URL}/animals`, { data });
-  const body = await response.json();
-  return body.data.id;
+  const created = await postJson<{ id: number }>(
+    request,
+    `${BASE_API_URL}/animals`,
+    {
+      data,
+    },
+  );
+
+  return created.id;
 }
 
 export async function deleteAnimal(
   request: APIRequestContext,
   id: number,
 ): Promise<void> {
-  const response = await request.delete(`${BASE_API_URL}/animals/${id}`);
-
-  if (!response.ok()) {
-    throw new Error(`Failed to delete animals: ${response.statusText()}`);
-  }
+  await deleteJson(request, `${BASE_API_URL}/animals/${id}`);
 }
 
 export async function createAssignment(
   request: APIRequestContext,
   data: { fieldId: number; staffId: number },
 ): Promise<number> {
-  const response = await request.post(`${BASE_API_URL}/fields/assign`, {
-    data,
-  });
-  const body = await response.json();
-  return body.data.id;
+  const created = await postJson<{ id: number }>(
+    request,
+    `${BASE_API_URL}/fields/assign`,
+    {
+      data,
+    },
+  );
+  return created.id;
 }
 
 export async function deleteAssignment(
   request: APIRequestContext,
   id: number,
 ): Promise<void> {
-  const response = await request.delete(`${BASE_API_URL}/fields/assign/${id}`);
-
-  if (!response.ok()) {
-    throw new Error(`Failed to delete assignment: ${response.statusText()}`);
-  }
+  await deleteJson(request, `${BASE_API_URL}/fields/assign/${id}`);
 }
 
 export async function getAssignments(
   request: APIRequestContext,
 ): Promise<unknown> {
-  const response = await request.get(`${BASE_API_URL}/fields/assign`);
-  return response.json();
+  return getJson(request, `${BASE_API_URL}/fields/assign`);
 }
 
 export async function transferFunds(
@@ -207,13 +202,9 @@ export async function transferFunds(
   },
 ): Promise<{
   success: boolean;
-  error?: string;
-  data?: { success: boolean; amount: number };
+  amount: number;
 }> {
-  const response = await request.post(`${BASE_API_URL}/financial/transfer`, {
-    data,
-  });
-  return response.json();
+  return postJson(request, `${BASE_API_URL}/financial/transfer`, data);
 }
 
 export async function getTransactions(
