@@ -1,12 +1,20 @@
 import { APIRequestContext } from '@playwright/test';
 import { deleteJson, getJson, postJson } from 'src/api/httpClient';
 import { BASE_API_URL } from 'src/config/env.config';
-import { ApiEnvelope } from 'src/models/ApiResponse';
-import { TransactionResponse } from 'src/models/TransactionResponse';
+import { TransactionHistory } from 'src/models/financial';
+import { TransactionResponse } from 'src/models/finanrrrcial.ts/TransactionResponse';
 
 type TransactionType = 'income' | 'expense';
 type OfferStatus = 'active' | 'cancelled';
 export type ItemType = 'field' | 'animal';
+
+export interface Assignment {
+  userId: number;
+  fieldId: number;
+  staffId: number;
+  id: number;
+  createdAt: string;
+}
 
 export interface Field {
   id: number;
@@ -38,7 +46,7 @@ interface TransactionPayload {
 export async function addTransaction(
   request: APIRequestContext,
   payload: TransactionPayload,
-): Promise<ApiEnvelope<TransactionResponse>> {
+): Promise<TransactionResponse> {
   let requestData: unknown = { ...payload };
 
   if (payload.type === 'income') {
@@ -49,50 +57,43 @@ export async function addTransaction(
     };
   }
 
-  const response = await request.post(
+  return postJson(
+    request,
     `${BASE_API_URL}/financial/transactions`,
-    {
-      data: requestData,
-    },
+    requestData,
   );
-
-  return response.json();
 }
 
 export async function getAccountBalance(
   request: APIRequestContext,
 ): Promise<number> {
-  const response = await request.get(`${BASE_API_URL}/financial/account`);
-  const body = (await response.json()) as ApiEnvelope<{
-    account: { balance: number };
-  }>;
+  const { account } = await getJson<{ account: { balance: number } }>(
+    request,
+    `${BASE_API_URL}/financial/account`,
+  );
 
-  if (!body.data) {
-    throw new Error(`Failed to read account balance ${body.error}`);
-  }
-
-  return body.data.account.balance;
+  return account.balance;
 }
 
 export async function deleteOneOffer(
   request: APIRequestContext,
-  offerId: string,
+  offerId: number,
 ): Promise<void> {
-  await request.delete(`${BASE_API_URL}/marketplace/offers/${offerId}`);
+  await deleteJson(request, `${BASE_API_URL}/marketplace/offers/${offerId}`);
 }
 
 export async function cancelAllMyOffers(
   request: APIRequestContext,
 ): Promise<void> {
-  const response = await request.get(`${BASE_API_URL}/marketplace/my-offers`);
-  const body = (await response.json()) as ApiEnvelope<{
-    offers: MarketplaceOffer[];
-  }>;
+  const { offers } = await getJson<{ offers: MarketplaceOffer[] }>(
+    request,
+    `${BASE_API_URL}/marketplace/my-offers`,
+  );
 
   await Promise.all(
-    (body.data?.offers ?? []).map((offer) =>
-      deleteOneOffer(request, String(offer.id)),
-    ),
+    offers
+      .filter((offer) => offer.status === 'active')
+      .map((offer) => deleteOneOffer(request, offer.id)),
   );
 }
 
@@ -132,7 +133,7 @@ export async function createStaff(
   const created = await postJson<{ id: number }>(
     request,
     `${BASE_API_URL}/staff`,
-    { data },
+    data,
   );
   return created.id;
 }
@@ -151,9 +152,7 @@ export async function createAnimal(
   const created = await postJson<{ id: number }>(
     request,
     `${BASE_API_URL}/animals`,
-    {
-      data,
-    },
+    data,
   );
 
   return created.id;
@@ -173,9 +172,7 @@ export async function createAssignment(
   const created = await postJson<{ id: number }>(
     request,
     `${BASE_API_URL}/fields/assign`,
-    {
-      data,
-    },
+    data,
   );
   return created.id;
 }
@@ -189,7 +186,7 @@ export async function deleteAssignment(
 
 export async function getAssignments(
   request: APIRequestContext,
-): Promise<unknown> {
+): Promise<Assignment> {
   return getJson(request, `${BASE_API_URL}/fields/assign`);
 }
 
@@ -210,20 +207,20 @@ export async function transferFunds(
 export async function getTransactions(
   request: APIRequestContext,
   params?: string,
-): Promise<unknown> {
-  const response = await request.get(
+): Promise<TransactionHistory> {
+  return await getJson<TransactionHistory>(
+    request,
     `${BASE_API_URL}/financial/transactions${params ? '?' + params : ''}`,
   );
-  return response.json();
 }
 
 export async function getMarketplaceOffers(
   request: APIRequestContext,
 ): Promise<MarketplaceOffer[]> {
-  const response = await request.get(`${BASE_API_URL}/marketplace/offers`);
-  const body = (await response.json()) as ApiEnvelope<{
-    offers: MarketplaceOffer[];
-  }>;
+  const { offers } = await getJson<{ offers: MarketplaceOffer[] }>(
+    request,
+    `${BASE_API_URL}/marketplace/offers`,
+  );
 
-  return body.data?.offers ?? [];
+  return offers;
 }

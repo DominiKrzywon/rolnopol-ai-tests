@@ -1,6 +1,6 @@
-import { APIRequestContext, expect } from '@playwright/test';
+import { APIRequestContext } from '@playwright/test';
 import { addTransaction } from 'src/helpers/apiHelpers';
-import { Transaction } from 'src/models/Transaction';
+import { Transaction } from 'src/models/finanrrrcial.ts/Transaction';
 
 export async function topUpAmount(
   request: APIRequestContext,
@@ -13,12 +13,7 @@ export async function topUpAmount(
     category: 'general',
   });
 
-  expect(
-    response.success,
-    response.error ?? 'Transaction creation failed',
-  ).toBe(true);
-
-  return response.data!.transaction;
+  return response.transaction;
 }
 
 export async function drainAccount(
@@ -32,10 +27,5 @@ export async function drainAccount(
     category: 'general',
   });
 
-  expect(
-    response.success,
-    response.error ?? 'Transaction creation failed',
-  ).toBe(true);
-
-  return response.data!.transaction;
+  return response.transaction;
 }
