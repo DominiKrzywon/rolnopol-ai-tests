@@ -1,5 +1,5 @@
 import { APIRequestContext } from '@playwright/test';
-import { addTransaction } from 'src/helpers/apiHelpers';
+import { addTransaction } from 'src/api/financial.api';
 import { Transaction } from 'src/models/financial';
 
 export async function topUpAmount(

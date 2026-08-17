@@ -1,3 +1,12 @@
+type TransactionType = 'income' | 'expense';
+
+export interface TransactionPayload {
+  type: TransactionType;
+  amount: number;
+  description: string;
+  category: string;
+}
+
 export interface Transaction {
   id: number;
   type: 'income' | 'expense';

@@ -1,8 +1,8 @@
 import { request as playwrightRequest } from '@playwright/test';
 import { drainAccount, topUpAmount } from 'src/actions/user.actions';
 import { loginAs } from 'src/api/auth.api';
+import { getAccountBalance } from 'src/api/financial.api';
 import { expect, test } from 'src/fixtures/auth.fixture';
-import { getAccountBalance } from 'src/helpers/apiHelpers';
 import { getEmptyUserData } from 'src/models/User';
 
 test.describe('Financial functionality tests', () => {

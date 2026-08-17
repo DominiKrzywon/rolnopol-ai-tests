@@ -1,11 +1,7 @@
 import { topUpAmount } from 'src/actions/user.actions';
+import { getAnimals, getFields } from 'src/api/farm.api';
+import { addTransaction, getAccountBalance } from 'src/api/financial.api';
 import { expect, test } from 'src/fixtures/data.fixture';
-import {
-  addTransaction,
-  getAccountBalance,
-  getAnimals,
-  getFields,
-} from 'src/helpers/apiHelpers';
 import { PurchasedOffer } from 'src/pages/MarketplacePage';
 
 test.describe('Marketplace e2e tests', () => {

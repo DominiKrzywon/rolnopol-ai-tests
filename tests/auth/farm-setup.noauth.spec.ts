@@ -7,14 +7,11 @@ import {
 } from 'src/actions/farm.actions';
 import { createMarketplaceOffer } from 'src/actions/marketplace.actions';
 import { topUpAmount } from 'src/actions/user.actions';
+import { getAnimals, getFields } from 'src/api/farm.api';
+import { getAccountBalance } from 'src/api/financial.api';
+import { getMarketplaceOffers } from 'src/api/marketplace.api';
 import { prepareRandomUser } from 'src/factories/user.factory';
 import { expect, test } from 'src/fixtures/test.fixture';
-import {
-  getAccountBalance,
-  getAnimals,
-  getFields,
-  getMarketplaceOffers,
-} from 'src/helpers/apiHelpers';
 import { ManagementPage } from 'src/pages/managementPages/ManagementMainPage';
 import { MarketplacePage } from 'src/pages/MarketplacePage';
 

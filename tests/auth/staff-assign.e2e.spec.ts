@@ -1,11 +1,11 @@
 import { faker } from '@faker-js/faker';
-import { expect, test } from 'src/fixtures/test.fixture';
 import {
   createField,
   createStaff,
   deleteField,
   deleteStaff,
-} from 'src/helpers/apiHelpers';
+} from 'src/api/farm.api';
+import { expect, test } from 'src/fixtures/test.fixture';
 import { FIELD_AREA, STAFF_AGE } from 'src/helpers/testDataHelpers';
 
 test.describe('Staff Assignment Management', () => {

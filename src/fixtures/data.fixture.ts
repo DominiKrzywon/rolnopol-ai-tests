@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker';
-import { expect, test as baseTest } from 'src/fixtures/auth.fixture';
 import {
   createAnimal,
   createField,
@@ -7,7 +6,8 @@ import {
   deleteAnimal,
   deleteField,
   deleteStaff,
-} from 'src/helpers/apiHelpers';
+} from 'src/api/farm.api';
+import { expect, test as baseTest } from 'src/fixtures/auth.fixture';
 import {
   FIELD_AREA,
   getRandomAnimalType,

@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { expect, Locator, Page } from '@playwright/test';
 import { PAGE_URLS } from 'src/constants/pageUrls';
-import { ItemType } from 'src/helpers/apiHelpers';
+import { ItemType } from 'src/models/marketplace';
 import { BasePage } from 'src/pages/BasePage';
 
 export interface PurchasedOffer {
