@@ -1,8 +1,7 @@
 import { APIRequestContext } from '@playwright/test';
 import { deleteJson, getJson, postJson } from 'src/api/httpClient';
 import { BASE_API_URL } from 'src/config/env.config';
-import { TransactionHistory } from 'src/models/financial';
-import { TransactionResponse } from 'src/models/finanrrrcial.ts/TransactionResponse';
+import { TransactionHistory, TransactionResponse } from 'src/models/financial';
 
 type TransactionType = 'income' | 'expense';
 type OfferStatus = 'active' | 'cancelled';
@@ -186,8 +185,8 @@ export async function deleteAssignment(
 
 export async function getAssignments(
   request: APIRequestContext,
-): Promise<Assignment> {
-  return getJson(request, `${BASE_API_URL}/fields/assign`);
+): Promise<Assignment[]> {
+  return getJson<Assignment[]>(request, `${BASE_API_URL}/fields/assign`);
 }
 
 export async function transferFunds(
@@ -208,7 +207,7 @@ export async function getTransactions(
   request: APIRequestContext,
   params?: string,
 ): Promise<TransactionHistory> {
-  return await getJson<TransactionHistory>(
+  return getJson<TransactionHistory>(
     request,
     `${BASE_API_URL}/financial/transactions${params ? '?' + params : ''}`,
   );
