@@ -7,11 +7,13 @@ import {
   STAFF_AGE,
 } from 'src/helpers/testDataHelpers';
 
+test.use({ storageState: undefined });
+
 test.describe('Staff & Fields Management', () => {
   test(
     'should create a new field in Staff & Fields view',
     { tag: ['@crud', '@farm', '@resources', '@happy-path'] },
-    async ({ managementPage }) => {
+    async ({ freshUser: _, managementPage }) => {
       const fieldName = faker.word.noun();
 
       await managementPage.goto();
@@ -39,7 +41,7 @@ test.describe('Staff & Fields Management', () => {
   test(
     'should create a new animal herd in Staff & Fields view',
     { tag: ['@crud', '@farm', '@resources', '@happy-path'] },
-    async ({ managementPage }) => {
+    async ({ freshUser: _, managementPage }) => {
       const fieldName = faker.word.noun();
       const animalAmount = faker.number.int({ min: 1, max: 99_999 });
       const expectedErrorMessage = 'Amount is required.';
@@ -81,7 +83,7 @@ test.describe('Staff & Fields Management', () => {
   test(
     'should create a new staff  in Staff & Fields view',
     { tag: ['@crud', '@farm', '@resources', '@happy-path'] },
-    async ({ managementPage }) => {
+    async ({ freshUser: _, managementPage }) => {
       const uniqueName = faker.person.firstName();
       const uniqueSurname = faker.person.lastName();
       const staffAge = faker.number.int({ min: 18, max: 65 });

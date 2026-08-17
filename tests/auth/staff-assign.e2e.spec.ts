@@ -5,8 +5,10 @@ import {
   deleteField,
   deleteStaff,
 } from 'src/api/farm.api';
-import { expect, test } from 'src/fixtures/test.fixture';
+import { expect, test } from 'src/fixtures/auth.fixture';
 import { FIELD_AREA, STAFF_AGE } from 'src/helpers/testDataHelpers';
+
+test.use({ storageState: undefined });
 
 test.describe('Staff Assignment Management', () => {
   let staffId: number;
@@ -18,7 +20,7 @@ test.describe('Staff Assignment Management', () => {
 
   const expectedMessage = 'Staff assigned successfully!';
 
-  test.beforeEach(async ({ request }) => {
+  test.beforeEach(async ({ freshUser: _, request }) => {
     fieldName = faker.word.noun();
     staffName = faker.person.firstName();
     staffSurname = faker.person.lastName();
@@ -78,17 +80,13 @@ test.describe('Staff Assignment Management', () => {
       await assignPage.goto();
       await assignPage.assignStaffToField(fieldName, fullName);
 
-      const countBefore = parseInt(
-        await assignPage.unassignedStaffCount.innerText(),
-      );
+      await expect(assignPage.unassignedStaffCount).toHaveText('0');
 
       const assignmentGrid = assignPage.getAssignmentGridByField(fieldName);
       await assignmentGrid.getByTitle('Unassign').click();
 
       await expect(page.getByText(expectedSuccessMessage)).toBeVisible();
-      await expect(assignPage.unassignedStaffCount).toHaveText(
-        String(countBefore + 1),
-      );
+      await expect(assignPage.unassignedStaffCount).toHaveText('1');
     },
   );
 
