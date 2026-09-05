@@ -1,4 +1,6 @@
 import { expect, test as base } from '@playwright/test';
+import { ApiDocsPage } from 'src/pages/ApiDocsPage';
+import { DocsPage } from 'src/pages/DocsPage';
 import { FinancialPage } from 'src/pages/FinancialPage';
 import { HomePage } from 'src/pages/HomePage';
 import { LoginPage } from 'src/pages/LoginPage';
@@ -17,6 +19,8 @@ type PageFixtures = {
   registerPage: RegisterPage;
   profilePage: ProfilePage;
   homePage: HomePage;
+  apiDocsPage: ApiDocsPage;
+  docsPage: DocsPage;
 };
 
 export const test = base.extend<PageFixtures>({
@@ -50,6 +54,14 @@ export const test = base.extend<PageFixtures>({
 
   homePage: async ({ page }, use) => {
     await use(new HomePage(page));
+  },
+
+  apiDocsPage: async ({ page }, use) => {
+    await use(new ApiDocsPage(page));
+  },
+
+  docsPage: async ({ page }, use) => {
+    await use(new DocsPage(page));
   },
 });
 

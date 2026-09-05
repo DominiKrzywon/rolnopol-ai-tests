@@ -1,19 +1,10 @@
-import { expect, test } from '@playwright/test';
 import { BASE_API_URL } from 'src/config/env.config';
-import { MarketplacePage } from 'src/pages/MarketplacePage';
-
-import { generateUniqueEmail } from '../../src/helpers/testDataHelpers';
-import { ApiDocsPage } from '../../src/pages/ApiDocsPage';
-import { DocsPage } from '../../src/pages/DocsPage';
-import { HomePage } from '../../src/pages/HomePage';
-import { LoginPage } from '../../src/pages/LoginPage';
-import { RegisterPage } from '../../src/pages/RegisterPage';
+import { expect, test } from 'src/fixtures/test.fixture';
 
 test(
   "should display the correct page title 'Rolnopol' on homepage",
   { tag: ['@smoke', '@critical'] },
-  async ({ page }) => {
-    const homePage = new HomePage(page);
+  async ({ page, homePage }) => {
     await homePage.goto();
 
     await expect(page).toHaveTitle('Rolnopol');
@@ -23,8 +14,7 @@ test(
 test(
   'should load login page successfully',
   { tag: ['@smoke', '@auth'] },
-  async ({ page }) => {
-    const loginPage = new LoginPage(page);
+  async ({ loginPage }) => {
     await loginPage.goto();
     const expectedSubtitle = 'User Login & Account Access';
 
@@ -35,8 +25,7 @@ test(
 test(
   'should load API documentation page successfully',
   { tag: ['@smoke', '@documentation'] },
-  async ({ page }) => {
-    const apiDocsPage = new ApiDocsPage(page);
+  async ({ apiDocsPage }) => {
     await apiDocsPage.goto();
     const expectedHeading =
       'API documentation for the Rolnopol service with versioning support';
@@ -48,8 +37,7 @@ test(
 test(
   'should load documentation page successfully',
   { tag: ['@smoke', '@documentation'] },
-  async ({ page }) => {
-    const docsPage = new DocsPage(page);
+  async ({ docsPage }) => {
     await docsPage.goto();
     const expectedSubtitle = 'Rolnopol System Guide & API Reference';
 
@@ -62,9 +50,8 @@ test(
   {
     tag: ['@smoke', '@critical'],
   },
-  async ({ page }) => {
-    const marketPlace = new MarketplacePage(page);
-    await marketPlace.goto();
+  async ({ page, marketplacePage }) => {
+    await marketplacePage.goto();
 
     await expect(page).toHaveURL('/login.html');
   },
@@ -73,8 +60,7 @@ test(
 test(
   'should load register page successfully',
   { tag: ['@smoke', '@auth', '@registration'] },
-  async ({ page }) => {
-    const registerPage = new RegisterPage(page);
+  async ({ registerPage }) => {
     await registerPage.goto();
     const expectedSubtitle = 'Create Your User Account';
 
@@ -83,34 +69,14 @@ test(
 );
 
 test(
-  'should register new user successfully',
-  { tag: ['@smoke', '@auth', '@registration'] },
-  async ({ page }) => {
-    const registerPage = new RegisterPage(page);
-    const uniqueEmail = generateUniqueEmail();
-    const user = {
-      email: uniqueEmail,
-      password: 'testpassword123',
-      displayName: 'Test User',
-    };
-    await registerPage.goto();
-
-    await registerPage.register(user);
-
-    await expect(registerPage.successMessage).toBeVisible();
-    await expect(page).toHaveURL('/login.html');
-  },
-);
-
-test(
   'api app health check',
   { tag: ['@smoke', '@auth', '@health'] },
-  async ({ page }) => {
-    const response = await page.request.get(`${BASE_API_URL}/healthcheck`);
+  async ({ request }) => {
+    const response = await request.get(`${BASE_API_URL}/healthcheck`);
+    const body = await response.json();
 
-    const data = await response.json();
-
-    expect(data.success).toBeTruthy();
-    expect(data.data.status).toEqual('healthy');
+    expect(response.status()).toBe(200);
+    expect(body.success).toBeTruthy();
+    expect(body.data.status).toEqual('healthy');
   },
 );

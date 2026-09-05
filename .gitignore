@@ -13,3 +13,4 @@ playwright-report-ci/
 .env.ai
 .env.*
 !.env.example
+.playwright-cli/

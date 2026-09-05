@@ -1,5 +1,4 @@
 import { Locator, Page } from '@playwright/test';
-import { LoginPage } from 'src/pages/LoginPage';
 
 import { PAGE_URLS } from '../constants/pageUrls';
 import { User } from '../models/User';
@@ -34,15 +33,12 @@ export class RegisterPage extends BasePage {
     this.notificationMessage = page.locator('.notification-message');
   }
 
-  async register(user: User): Promise<LoginPage> {
+  async register(user: User): Promise<void> {
     await this.emailInput.fill(user.email);
     if (user.displayName) {
       await this.displayNameInput.fill(user.displayName);
     }
     await this.passwordInput.fill(user.password);
     await this.registerSubmitBtn.click();
-
-    await this.page.waitForURL(/login.html/);
-    return new LoginPage(this.page);
   }
 }

@@ -1,14 +1,33 @@
-import { expect, test } from '@playwright/test';
+import { registerUser } from 'src/api/auth.api';
+import { BASE_API_URL } from 'src/config/env.config';
+import { prepareRandomUser } from 'src/factories/user.factory';
+import { expect, test } from 'src/fixtures/test.fixture';
 import { generateUniqueEmail } from 'src/helpers/testDataHelpers';
 
-import { RegisterPage } from '../../src/pages/RegisterPage';
+test(
+  'should register new user successfully',
+  { tag: ['@smoke', '@auth', '@registration'] },
+  async ({ page, registerPage }) => {
+    const uniqueEmail = generateUniqueEmail();
+    const user = {
+      email: uniqueEmail,
+      password: 'testpassword123',
+      displayName: 'Test User',
+    };
+    await registerPage.goto();
+
+    await registerPage.register(user);
+
+    await expect(registerPage.successMessage).toBeVisible();
+    await expect(page).toHaveURL('/login.html');
+  },
+);
 
 test.describe('Registration Negative Tests', () => {
   test(
     'should display validation errors for invalid email and short password',
     { tag: ['@auth', '@registration', '@validation', '@negative'] },
-    async ({ page }) => {
-      const registerPage = new RegisterPage(page);
+    async ({ page, registerPage }) => {
       const invalidEmail = 'not-a-valid-email';
       const shortPassword = 'ab';
 
@@ -26,9 +45,7 @@ test.describe('Registration Negative Tests', () => {
   test(
     'should prevent registration with empty required fields',
     { tag: ['@auth', '@registration', '@validation', '@negative'] },
-    async ({ page }) => {
-      const registerPage = new RegisterPage(page);
-
+    async ({ page, registerPage }) => {
       await registerPage.goto();
       await registerPage.registerSubmitBtn.click();
 
@@ -40,8 +57,7 @@ test.describe('Registration Negative Tests', () => {
   test(
     'should reject password with less than 3 characters',
     { tag: ['@auth', '@registration', '@validation', '@negative'] },
-    async ({ page }) => {
-      const registerPage = new RegisterPage(page);
+    async ({ page, registerPage }) => {
       const shortPasswords = ['', 'a', 'ab'];
 
       for (const shortPassword of shortPasswords) {
@@ -57,22 +73,35 @@ test.describe('Registration Negative Tests', () => {
   );
 
   test(
-    'should return error for duplicate user',
+    'should reject registration with duplicate email',
     { tag: ['@auth', '@registration', '@validation', '@negative'] },
-    async ({ page }) => {
-      const registerPage = new RegisterPage(page);
+    async ({ page, request, registerPage }) => {
+      const user = prepareRandomUser();
       const expectedErrorMessage = 'User with this email already exists';
-      const uniqueEmail = generateUniqueEmail();
-      const user = { email: uniqueEmail, password: 'Test123.' };
+
+      const setupResponse = await registerUser(request, user);
+      expect(setupResponse.status()).toBe(201);
+
       await registerPage.goto();
 
-      await registerPage.register(user);
+      const [duplicateResponse] = await Promise.all([
+        page.waitForResponse(
+          (response) =>
+            response.url() === `${BASE_API_URL}/register` &&
+            response.request().method() === 'POST',
+        ),
 
-      await registerPage.register({ ...user, password: 'Test1234.' });
+        registerPage.register({
+          ...user,
+          password: 'DifferentPassword123',
+        }),
+      ]);
 
+      expect(duplicateResponse.status()).toBe(409);
       await expect(registerPage.notificationMessage).toHaveText(
         expectedErrorMessage,
       );
+      await expect(page).toHaveURL(/register\.html$/);
     },
   );
 
@@ -87,9 +116,7 @@ test.describe('Registration Negative Tests', () => {
     test(
       `should reject invalid email: "${invalidEmail}"`,
       { tag: ['@auth', '@registration', '@validation', '@negative'] },
-      async ({ page }) => {
-        const registerPage = new RegisterPage(page);
-
+      async ({ page, registerPage }) => {
         await registerPage.goto();
         await registerPage.emailInput.fill(invalidEmail);
         await registerPage.passwordInput.fill('validPassword123');
