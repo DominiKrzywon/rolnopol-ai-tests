@@ -1,17 +1,22 @@
 import { request as playwrightRequest } from '@playwright/test';
 import { drainAccount, topUpAmount } from 'src/actions/user.actions';
-import { loginAs } from 'src/api/auth.api';
+import { registerUser } from 'src/api/auth.api';
 import { getAccountBalance } from 'src/api/financial.api';
+import { prepareRandomUser } from 'src/factories/user.factory';
 import { expect, test } from 'src/fixtures/auth.fixture';
-import { getEmptyUserData } from 'src/models/User';
 
 test.describe('Financial functionality tests', () => {
-  async function getEmptyUserId(): Promise<number> {
+  async function createRecipientId(): Promise<number> {
     const api = await playwrightRequest.newContext();
-    const user = getEmptyUserData();
+    const user = prepareRandomUser();
+
     try {
-      const session = await loginAs(api, user);
-      return session.id;
+      const response = await registerUser(api, user);
+
+      expect(response.status()).toBe(201);
+
+      const body = await response.json();
+      return body.data.user.id;
     } finally {
       await api.dispose();
     }
@@ -91,7 +96,7 @@ test.describe('Financial functionality tests', () => {
       tag: ['@financial', '@transfer', '@business-logic'],
     },
     async ({ financialPage, page }) => {
-      const toUserId = await getEmptyUserId();
+      const toUserId = await createRecipientId();
       const amount = 10;
       const description = `E2E transfer ${Date.now()}`;
       const expectedSuccessMessage = 'Transfer completed successfully!';
@@ -130,7 +135,7 @@ test.describe('Financial functionality tests', () => {
       await topUpAmount(request, extraMoney);
 
       const expectedErrorMessage = 'Insufficient funds for transfer';
-      const toUserId = await getEmptyUserId();
+      const toUserId = await createRecipientId();
 
       await financialPage.goto();
 

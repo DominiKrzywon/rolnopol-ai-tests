@@ -112,8 +112,10 @@ See [.github/workflows/playwright-e2e-tests.yml](.github/workflows/playwright-e2
 
 ## Documentation
 
-- **[TEST_PLAN.md](./TEST_PLAN.md)** - Test strategy, cases, and tags
-- **[CODING_STANDARDS.md](./CODING_STANDARDS.md)** - Code style and patterns
+- **[TEST_PLAN.md](./TEST_PLAN.md)** - the single active roadmap, test strategy,
+  priorities, environment constraints, and technical backlog
+- **[CODING_STANDARDS.md](./CODING_STANDARDS.md)** - durable code style and test
+  design rules
 
 ## Links
 

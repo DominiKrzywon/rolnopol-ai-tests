@@ -16,8 +16,16 @@ test(
     };
     await registerPage.goto();
 
-    await registerPage.register(user);
+    const [registrationResponse] = await Promise.all([
+      page.waitForResponse(
+        (response) =>
+          response.url() === `${BASE_API_URL}/register` &&
+          response.request().method() === 'POST',
+      ),
+      registerPage.register(user),
+    ]);
 
+    expect(registrationResponse.status()).toBe(201);
     await expect(registerPage.successMessage).toBeVisible();
     await expect(page).toHaveURL('/login.html');
   },
@@ -54,21 +62,39 @@ test.describe('Registration Negative Tests', () => {
     },
   );
 
-  test(
-    'should reject password with less than 3 characters',
-    { tag: ['@auth', '@registration', '@validation', '@negative'] },
-    async ({ page, registerPage }) => {
-      const shortPasswords = ['', 'a', 'ab'];
-
-      for (const shortPassword of shortPasswords) {
+  for (const password of ['a', 'ab']) {
+    test(
+      `should reject password with ${password.length} characters`,
+      { tag: ['@auth', '@registration', '@validation', '@negative'] },
+      async ({ page, registerPage }) => {
         await registerPage.goto();
         await registerPage.emailInput.fill('valid@example.com');
-        await registerPage.passwordInput.fill(shortPassword);
+        await registerPage.passwordInput.fill(password);
         await registerPage.registerSubmitBtn.click();
 
-        await expect.soft(registerPage.successMessage).toBeHidden();
-        await expect.soft(page).toHaveURL(/register\.html$/);
-      }
+        await expect.soft(registerPage.passwordValidationError).toBeVisible();
+        await expect.soft(page).toHaveURL('/register.html');
+      },
+    );
+  }
+
+  test(
+    'should reject registration for empty password',
+    {
+      tag: ['@auth', '@registration', '@validation', '@negative'],
+    },
+    async ({ page, registerPage }) => {
+      await registerPage.goto();
+      await registerPage.emailInput.fill('valid@example.com');
+      await registerPage.registerSubmitBtn.click();
+
+      const isPasswordMissing = await registerPage.passwordInput.evaluate(
+        (input: HTMLInputElement) => input.validity.valueMissing,
+      );
+
+      expect(isPasswordMissing).toBe(true);
+      await expect(registerPage.passwordInput).toBeFocused();
+      await expect(page).toHaveURL('/register.html');
     },
   );
 

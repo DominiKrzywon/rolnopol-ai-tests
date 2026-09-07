@@ -26,11 +26,13 @@ export default defineConfig({
       testMatch: ['**/auth/**/*.setup.ts'],
       use: { ...devices['Desktop Chrome'] },
     },
+
     {
       name: 'smoke-tests',
       testMatch: ['**/smoke/**.spec.ts'],
       use: { ...devices['Desktop Chrome'] },
     },
+
     {
       name: 'demo-user-tests',
       dependencies: ['setup-demo-user'],
@@ -40,18 +42,27 @@ export default defineConfig({
         storageState: DEMO_USER_AUTH_FILE,
       },
     },
+
     {
       name: 'no-auth-tests',
       testMatch: ['**/auth/**/*.noauth.spec.ts'],
       use: { ...devices['Desktop Chrome'] },
     },
+
     {
       name: 'api-tests',
       testMatch: ['**/api/**/*.spec.ts'],
     },
+
     {
       name: 'isolated-user-tests',
       testMatch: ['**/*.isolated.spec.ts'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+
+    {
+      name: 'visual-test',
+      testMatch: ['**/visual/**/*.spec.ts'],
       use: { ...devices['Desktop Chrome'] },
     },
   ],
