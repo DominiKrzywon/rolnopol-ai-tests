@@ -19,6 +19,7 @@ import {
   updateReadme,
   validateInventory,
 } from './model.mjs';
+import { loadPlaywrightLinks } from './playwright-links.mjs';
 import { sourceSnapshot } from './snapshot.mjs';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
@@ -84,7 +85,7 @@ async function expectedReadme() {
   );
 }
 
-function generate(resultPath) {
+async function generate(resultPath) {
   const plan = read('TEST_PLAN.md');
   const readme = read('README.md');
   const inventory = readJson(inventoryFile);
@@ -94,6 +95,10 @@ function generate(resultPath) {
     inventory,
     run,
     sourceSnapshot(root),
+    await loadPlaywrightLinks(
+      path.join(root, 'playwright-report/index.html'),
+      run,
+    ),
   );
   report.documents = { readme, testPlan: plan };
   writeJson(path.join(output, 'coverage.json'), report);
@@ -137,7 +142,7 @@ async function main() {
           'Use report [--no-results | --results path/to/results.json]',
         );
     }
-    generate(resultPath);
+    await generate(resultPath);
   } else if (command === 'run') {
     if (
       args.some(
@@ -173,7 +178,7 @@ async function main() {
       PLAYWRIGHT_HTML_OPEN: 'never',
     });
     // Generate even after test failure, preserving Playwright's exit code.
-    generate(existsSync(resultsFile) ? resultsFile : null);
+    await generate(existsSync(resultsFile) ? resultsFile : null);
     if (code === 0 && !existsSync(resultsFile)) {
       throw new Error(
         'Playwright exited successfully but produced no JSON results.',

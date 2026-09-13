@@ -120,6 +120,39 @@ fenced code, inline code, bold text, and safe HTTP/HTTPS or embedded-document li
 Raw HTML is displayed as text. Other repository links are shown as labels so the
 export does not depend on the repository filesystem.
 
+### Failure details and Playwright links
+
+The scenario table uses `ID | Area | Scenario | Priority | Status | Failure | Details`.
+Click a failing status or **Details** to expand project executions, retries,
+duration, failure step, expected/received values and the reported source location.
+The failure summary lists failed or interrupted scenarios from the selected run;
+stale results are labelled as a saved run. Flaky attempts remain visible under
+their scenario's details. Global errors are reported separately as a count.
+
+Failure text is deliberately restricted to the reviewed public messages and step
+names in `scripts/coverage/failures.mjs`. Unknown values and locations outside
+collected test files display as unavailable. Raw errors, stacks, source snippets,
+stdout/stderr and attachments are never copied into failure summaries. Adding a
+new public message requires reviewing that allowlist; arbitrary runtime strings
+are not made safe by HTML escaping.
+
+**Open in Playwright report** links directly to the matching test using
+`../playwright-report/index.html#?testId=...`. Keep both output folders side by
+side, including when extracting CI artifacts. The generator checks the HTML
+report's run timestamp, duration and available provenance, then resolves the ID
+by case ID and project. Missing, mismatched or unsupported reports disable links.
+The embedded HTML index reader supports the installed Playwright 1.58 format.
+The Playwright report retains its own full diagnostics and is not sanitized by
+the coverage exporter. Regenerate coverage after replacing either report.
+
+Normalized `coverage.json` uses **schemaVersion 2**. Each case has a `scenario`
+object (`title`, `area`, `priority`, `layer`) and an `execution` object (`status`,
+`durationMs`, `runs`). Each run represents one project execution/repetition, with
+its own status, duration, `playwrightTestId`, failure summary and `attempts`.
+Each attempt retains its retry number, status, duration and failure. Durations
+sum attempts; a run's failure is its last failed attempt, even if a retry passed.
+Missing failure fields are `null`, never guessed from the test declaration.
+
 ## Running and Debugging Tests
 
 ```bash

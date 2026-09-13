@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -7,6 +8,7 @@ import vm from 'node:vm';
 
 import ts from 'typescript';
 
+import { summarizeFailure } from './failures.mjs';
 import { renderMarkdown, renderReport } from './html.mjs';
 import {
   buildReport,
@@ -14,6 +16,11 @@ import {
   updateReadme,
   validateInventory,
 } from './model.mjs';
+import {
+  loadPlaywrightLinks,
+  matchPlaywrightReport,
+  playwrightTestLink,
+} from './playwright-links.mjs';
 import InventoryReporter from './reporter.mjs';
 import { sourceSnapshot } from './snapshot.mjs';
 
@@ -169,7 +176,7 @@ test('setup is outside the scenario denominator and cannot disguise scenario tes
 test('no run means implemented and planned, with no execution confirmation', () => {
   const report = buildReport(catalog, inventory(), null, snapshot);
   assert.deepEqual(
-    report.cases.map((item) => item.status),
+    report.cases.map((item) => item.execution.status),
     ['not-run', 'planned'],
   );
   assert.equal(report.metrics.confirmed, null);
@@ -207,7 +214,7 @@ test('passing only one required project gives partial confirmation', () => {
     run(),
     snapshot,
   );
-  assert.equal(report.cases[0].status, 'partial');
+  assert.equal(report.cases[0].execution.status, 'partial');
   assert.equal(report.metrics.confirmed, 0);
 });
 
@@ -215,7 +222,7 @@ test('missing repetition results cannot confirm the scenario', () => {
   const input = run();
   input.config.projects[0].repeatEach = 5;
   const report = buildReport(catalog, inventory(), input, snapshot);
-  assert.equal(report.cases[0].status, 'partial');
+  assert.equal(report.cases[0].execution.status, 'partial');
   assert.equal(report.metrics.confirmed, 0);
 });
 
@@ -230,8 +237,8 @@ test('source provenance handles Windows paths with a trailing separator', () => 
 test('untrusted numeric metadata is escaped in HTML', () => {
   const report = buildReport(catalog, inventory(), run(), snapshot);
   const payload = '<img src=x onerror=alert(1)>';
-  report.cases[0].observations[0].attempts[0].retry = payload;
-  report.cases[0].observations[0].attempts[0].durationMs = payload;
+  report.cases[0].execution.runs[0].attempts[0].retry = payload;
+  report.cases[0].execution.runs[0].attempts[0].durationMs = payload;
   report.cases[0].tests[0].line = payload;
   const html = renderReport(report, '# README', '# PLAN');
   assert.doesNotMatch(html, /<img src=x/);
@@ -246,14 +253,14 @@ test('repetitions and retries do not inflate scenario counts', () => {
     snapshot,
   );
   assert.equal(repeated.metrics.confirmed, 1);
-  assert.equal(repeated.cases[0].observations.length, 2);
+  assert.equal(repeated.cases[0].execution.runs.length, 2);
   const mixed = buildReport(
     catalog,
     inventory(),
     run([result(), result('failed')]),
     snapshot,
   );
-  assert.equal(mixed.cases[0].status, 'flaky');
+  assert.equal(mixed.cases[0].execution.status, 'flaky');
   const retry = result('passed', {
     status: 'flaky',
     results: [
@@ -270,17 +277,19 @@ test('repetitions and retries do not inflate scenario counts', () => {
 test('explicit skips, blocked tests, interruptions and expected failures stay distinct', () => {
   const skip = result('skipped', { status: 'skipped' });
   assert.equal(
-    buildReport(catalog, inventory(), run([skip]), snapshot).cases[0].status,
+    buildReport(catalog, inventory(), run([skip]), snapshot).cases[0].execution
+      .status,
     'not-run',
   );
   skip.annotations.push({ type: 'skip' });
   assert.equal(
-    buildReport(catalog, inventory(), run([skip]), snapshot).cases[0].status,
+    buildReport(catalog, inventory(), run([skip]), snapshot).cases[0].execution
+      .status,
     'skipped',
   );
   assert.equal(
     buildReport(catalog, inventory(), run([result('interrupted')]), snapshot)
-      .cases[0].status,
+      .cases[0].execution.status,
     'interrupted',
   );
   const expectedFailure = result('failed', {
@@ -289,7 +298,7 @@ test('explicit skips, blocked tests, interruptions and expected failures stay di
   });
   assert.equal(
     buildReport(catalog, inventory(), run([expectedFailure]), snapshot).cases[0]
-      .status,
+      .execution.status,
     'expected-failure',
   );
   assert.equal(
@@ -370,6 +379,290 @@ test('HTML embeds both documents, escapes scenario text and excludes raw logs', 
   assert.match(html, /&lt;script&gt;bad/);
   assert.doesNotMatch(html, /secret-log|<script>bad/);
   assert.doesNotMatch(JSON.stringify(report), /secret-log/);
+});
+
+test('coverage bars use included scenarios, group areas and handle empty priorities', () => {
+  const report = buildReport(
+    [
+      ...catalog,
+      row('TC-AUTH-003', 'excluded'),
+      { ...row('TC-FARM-001'), area: 'Farm', priority: 'P1' },
+    ],
+    inventory(),
+    run(),
+    snapshot,
+  );
+  const html = renderReport(report, '# Readme', '# Plan');
+  assert.match(
+    html,
+    /aria-label="P0 implemented coverage"[^>]*aria-valuenow="50\.0"[^>]*aria-valuetext="1 of 2 included scenarios implemented"/,
+  );
+  assert.match(
+    html,
+    /aria-label="P1 implemented coverage"[^>]*aria-valuenow="0\.0"[^>]*aria-valuetext="0 of 1 included scenarios implemented"/,
+  );
+  assert.match(html, /<strong>P2<\/strong><span>N\/A<\/span>/);
+  assert.match(
+    html,
+    /aria-label="Auth implemented coverage"[^>]*aria-valuenow="50\.0"/,
+  );
+  assert.match(
+    html,
+    /aria-label="Farm implemented coverage"[^>]*aria-valuenow="0\.0"/,
+  );
+  assert.match(html, /Implemented: 33\.3%/);
+  assert.match(html, /Confirmed: 33\.3%/);
+  assert.ok(html.indexOf('id="priorities"') < html.indexOf('id="areas"'));
+  assert.ok(html.indexOf('id="priorities"') < html.indexOf('class="filters"'));
+});
+
+test('scenario summary withholds confirmation without current valid evidence', () => {
+  const errored = run();
+  errored.errors.push({ message: 'global teardown failed' });
+  const unknown = run();
+  delete unknown.config.metadata.coverage.fingerprint;
+  for (const input of [null, run([result()], 'old'), unknown, errored]) {
+    const report = buildReport(catalog, inventory(), input, snapshot);
+    const html = renderReport(report, '# Readme', '# Plan');
+    assert.match(html, /Confirmed: N\/A<\/strong><small>No current evidence/);
+  }
+});
+
+const purchaseFailure = () => ({
+  status: 'failed',
+  retry: 0,
+  duration: 20986,
+  error: {
+    message:
+      '\u001b[31mError: expect(locator).toHaveText(expected) failed\u001b[0m\nExpected string: "Purchase completed successfully!"\nReceived string: "Insufficient funds to complete purchase (no overdraft allowed)"\nCall log:\n- private-log',
+  },
+  errorLocation: {
+    file: 'D:/private/work/tests/api/auth.api.spec.ts',
+    line: 159,
+  },
+  steps: [
+    { title: 'seller: add resource and create offer', duration: 100 },
+    {
+      title: 'buyer: add funds and buy seller offer',
+      error: { message: 'private-log' },
+    },
+  ],
+});
+const htmlIndex = (input, tests) => ({
+  startTime: Date.parse(input.stats.startTime),
+  duration: input.stats.duration,
+  metadata: input.config.metadata,
+  files: [{ tests }],
+});
+const htmlTest = (
+  project = 'api-tests',
+  testId = 'aaaaaaaaaaaaaaaaaaaa-bbbbbbbbbbbbbbbbbbbb',
+) => ({
+  projectName: project,
+  testId,
+  annotations: [{ type: 'case-id', description: 'TC-AUTH-001' }],
+});
+
+test('failure summary extracts only approved public values and actual failure location', () => {
+  const failure = summarizeFailure(purchaseFailure(), [unit()]);
+  assert.deepEqual(failure, {
+    step: 'buyer: add funds and buy seller offer',
+    expected: 'Purchase completed successfully!',
+    actual: 'Insufficient funds to complete purchase (no overdraft allowed)',
+    file: 'tests/api/auth.api.spec.ts',
+    line: 159,
+    message: 'Expected and received values differ.',
+    errorCount: 1,
+  });
+  assert.doesNotMatch(JSON.stringify(failure), /private/);
+  assert.equal(
+    summarizeFailure({ ...purchaseFailure(), status: 'passed' }, [unit()]),
+    null,
+  );
+});
+
+test('unknown values, dynamic steps, raw errors, attachments and credentials stay out of exports', () => {
+  const secret = 'synthetic-sensitive-canary';
+  const attempt = purchaseFailure();
+  attempt.error = {
+    message: `Expected: "${secret}"\nReceived: "Bearer ${secret}"`,
+    stack: secret,
+  };
+  attempt.errorLocation = { file: `D:/${secret}/unknown.ts`, line: 1 };
+  attempt.steps = [{ title: `login as ${secret}`, error: { message: secret } }];
+  attempt.stdout = [{ text: secret }];
+  attempt.stderr = [{ text: secret }];
+  attempt.attachments = [{ name: secret, body: secret, path: secret }];
+  const report = buildReport(
+    catalog,
+    inventory(),
+    run([result('failed', { results: [attempt] })]),
+    snapshot,
+  );
+  const failure = report.cases[0].execution.runs[0].failure;
+  assert.equal(failure.expected, null);
+  assert.equal(failure.actual, null);
+  assert.equal(failure.step, null);
+  assert.equal(failure.file, null);
+  assert.doesNotMatch(JSON.stringify(report), new RegExp(secret));
+  assert.doesNotMatch(
+    renderReport(report, '# README', '# PLAN'),
+    new RegExp(secret),
+  );
+});
+
+test('flaky retries retain the failing attempt without making it the final status', () => {
+  const input = run([
+    result('passed', {
+      status: 'flaky',
+      results: [
+        purchaseFailure(),
+        { status: 'passed', retry: 1, duration: 100 },
+      ],
+    }),
+  ]);
+  const report = buildReport(catalog, inventory(), input, snapshot);
+  const execution = report.cases[0].execution;
+  assert.equal(report.schemaVersion, 2);
+  assert.equal(report.cases[0].scenario.title, catalog[0].scenario);
+  assert.equal(execution.status, 'flaky');
+  assert.equal(execution.durationMs, 21086);
+  assert.equal(execution.runs[0].attempts[0].failure.line, 159);
+  assert.equal(execution.runs[0].attempts[1].failure, null);
+  assert.match(
+    renderReport(report, '# README', '# PLAN'),
+    /0 failed or interrupted scenarios/,
+  );
+});
+
+test('verified Playwright IDs remain specific to each project', () => {
+  const input = run([
+    result('failed', { results: [purchaseFailure()] }),
+    result('passed', { projectName: 'firefox' }),
+  ]);
+  const first = htmlTest();
+  const second = htmlTest(
+    'firefox',
+    'cccccccccccccccccccc-dddddddddddddddddddd',
+  );
+  const links = matchPlaywrightReport(htmlIndex(input, [first, second]), input);
+  const report = buildReport(
+    catalog,
+    inventory([unit(), unit('firefox')]),
+    input,
+    snapshot,
+    links,
+  );
+  assert.deepEqual(
+    report.cases[0].execution.runs.map((item) => item.playwrightTestId),
+    [first.testId, second.testId],
+  );
+  const html = renderReport(report, '# README', '# PLAN');
+  assert.match(html, new RegExp(`index.html#\\?testId=${first.testId}`));
+  assert.match(html, new RegExp(`index.html#\\?testId=${second.testId}`));
+  assert.equal(playwrightTestLink('javascript:alert(1)'), null);
+});
+
+test('missing or mismatched report evidence never produces a direct test link', async () => {
+  const input = run();
+  const summary = htmlIndex(input, [htmlTest()]);
+  for (const index of [
+    { ...summary, startTime: 0 },
+    { ...summary, duration: -1 },
+    { ...summary, metadata: { coverage: { fingerprint: 'other' } } },
+  ]) {
+    const links = matchPlaywrightReport(index, input);
+    assert.equal(links.status, 'mismatch');
+    const report = buildReport(catalog, inventory(), input, snapshot, links);
+    assert.equal(report.cases[0].execution.runs[0].playwrightTestId, null);
+  }
+  assert.equal(
+    (
+      await loadPlaywrightLinks(
+        'missing-report-for-unit-test/index.html',
+        input,
+      )
+    ).status,
+    'missing',
+  );
+  assert.equal(
+    (await loadPlaywrightLinks('missing-report-for-unit-test/index.html', null))
+      .status,
+    'no-run',
+  );
+});
+
+test('HTML report index is read from its embedded ZIP without exporting raw diagnostics', async () => {
+  const require = createRequire(import.meta.url);
+  const { yazl } = require(
+    path.join(
+      path.dirname(require.resolve('playwright-core/package.json')),
+      'lib/zipBundle.js',
+    ),
+  );
+  const input = run();
+  const zip = new yazl.ZipFile();
+  const chunks = [];
+  const finished = new Promise((resolve, reject) => {
+    zip.outputStream.on('data', (chunk) => chunks.push(chunk));
+    zip.outputStream.on('end', resolve);
+    zip.outputStream.on('error', reject);
+  });
+  zip.addBuffer(
+    Buffer.from(JSON.stringify(htmlIndex(input, [htmlTest()]))),
+    'report.json',
+  );
+  zip.addBuffer(Buffer.from('synthetic-private-log'), 'private.json');
+  zip.end();
+  await finished;
+  const directory = mkdtempSync(path.join(os.tmpdir(), 'rolnopol-links-'));
+  try {
+    const file = path.join(directory, 'index.html');
+    writeFileSync(
+      file,
+      `<script id="playwrightReportBase64" type="application/zip">data:application/zip;base64,${Buffer.concat(chunks).toString('base64')}</script>`,
+    );
+    const links = await loadPlaywrightLinks(file, input);
+    assert.equal(links.status, 'matched');
+    assert.equal(links.tests[0].playwrightTestId, htmlTest().testId);
+    assert.doesNotMatch(JSON.stringify(links), /synthetic-private-log/);
+    writeFileSync(file, '<html>unsupported report</html>');
+    assert.equal(
+      (await loadPlaywrightLinks(file, input)).status,
+      'unavailable',
+    );
+  } finally {
+    assert.equal(
+      path.dirname(path.resolve(directory)),
+      path.resolve(os.tmpdir()),
+    );
+    assert.ok(path.basename(directory).startsWith('rolnopol-links-'));
+    rmSync(directory, { recursive: true });
+  }
+});
+
+test('saved failures are not labelled current and details have accessible controls', () => {
+  const input = run(
+    [result('failed', { results: [purchaseFailure()] })],
+    'old',
+  );
+  const html = renderReport(
+    buildReport(catalog, inventory(), input, snapshot),
+    '# README',
+    '# PLAN',
+  );
+  assert.match(html, /Failure summary — saved run/);
+  assert.doesNotMatch(html, /Current failure summary/);
+  assert.match(
+    html,
+    /aria-expanded="false" aria-controls="details-TC-AUTH-001"/,
+  );
+  assert.match(html, /id="details-TC-AUTH-001" class="case-details" hidden/);
+  assert.match(html, /Duration: 21\.0s/);
+  assert.match(
+    html,
+    /<th>ID<\/th><th>Area<\/th><th>Scenario<\/th><th>Priority<\/th><th>Status<\/th><th>Failure<\/th><th>Details<\/th>/,
+  );
 });
 
 test('reporter captures declaration annotations and refuses failed collection', () => {

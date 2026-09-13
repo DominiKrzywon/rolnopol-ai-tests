@@ -1,3 +1,5 @@
+import { summarizeFailure } from './failures.mjs';
+
 export const START = '<!-- coverage-catalog:start -->';
 export const END = '<!-- coverage-catalog:end -->';
 export const INDEX_START = '<!-- coverage-index:start -->';
@@ -193,7 +195,13 @@ function aggregate(statuses) {
   return 'partial';
 }
 
-export function buildReport(catalog, inventory, run, snapshot) {
+export function buildReport(
+  catalog,
+  inventory,
+  run,
+  snapshot,
+  playwrightReport = { status: 'unavailable', tests: [] },
+) {
   validateInventory(catalog, inventory);
   if (inventory.snapshot?.fingerprint !== snapshot.fingerprint) {
     throw new Error('Inventory is stale. Run npm run coverage:collect.');
@@ -207,16 +215,25 @@ export function buildReport(catalog, inventory, run, snapshot) {
       .map((test) => `${test.caseIds[0]}:${test.project}`),
   );
   for (const entry of entries) {
+    const attempts = (entry.results || []).map((item) => ({
+      status: item.status || 'not-run',
+      retry: item.retry,
+      durationMs: item.duration,
+      startTime: item.startTime,
+      failure: summarizeFailure(item, inventory.tests),
+    }));
     const summary = {
       project: entry.projectName,
       status: outcome(entry),
       expectedStatus: entry.expectedStatus,
-      attempts: (entry.results || []).map((item) => ({
-        status: item.status || 'not-run',
-        retry: item.retry,
-        durationMs: item.duration,
-        startTime: item.startTime,
-      })),
+      durationMs: attempts.reduce(
+        (total, item) =>
+          total + (Number.isFinite(item.durationMs) ? item.durationMs : 0),
+        0,
+      ),
+      failure: attempts.findLast((item) => item.failure)?.failure || null,
+      playwrightTestId: null,
+      attempts,
     };
     if (entry.projectName === 'setup-demo-user') {
       infrastructure.push(summary);
@@ -230,6 +247,16 @@ export function buildReport(catalog, inventory, run, snapshot) {
     const key = `${ids[0].description}:${entry.projectName}`;
     if (!knownUnits.has(key))
       throw new Error(`Result has no inventory mapping: ${key}`);
+    const links =
+      playwrightReport.status === 'matched'
+        ? playwrightReport.tests.filter(
+            (test) =>
+              test.caseId === ids[0].description &&
+              test.project === entry.projectName,
+          )
+        : [];
+    if (new Set(links.map((test) => test.playwrightTestId)).size === 1)
+      summary.playwrightTestId = links[0].playwrightTestId;
     if (!units.has(key)) units.set(key, []);
     units.get(key).push(summary);
   }
@@ -257,35 +284,51 @@ export function buildReport(catalog, inventory, run, snapshot) {
       while (states.length < expectedRepeats) states.push('not-run');
       return states;
     });
+    const status =
+      item.scope === 'excluded'
+        ? 'excluded'
+        : !tests.length
+          ? 'planned'
+          : aggregate(statuses);
     return {
-      ...item,
+      id: item.id,
+      scenario: {
+        title: item.scenario,
+        area: item.area,
+        priority: item.priority,
+        layer: item.layer,
+      },
+      scope: item.scope,
+      notes: item.notes,
       implemented: tests.length > 0,
-      status:
-        item.scope === 'excluded'
-          ? 'excluded'
-          : !tests.length
-            ? 'planned'
-            : aggregate(statuses),
       tests,
-      observations,
+      execution: {
+        status,
+        durationMs: observations.reduce(
+          (total, item) => total + item.durationMs,
+          0,
+        ),
+        runs: observations,
+      },
     };
   });
   const included = cases.filter((item) => item.scope === 'included');
   const implemented = included.filter((item) => item.implemented).length;
   const confirmed =
     freshness === 'current' && run.errors.length === 0
-      ? included.filter((item) => item.status === 'passed').length
+      ? included.filter((item) => item.execution.status === 'passed').length
       : null;
   const counts = {};
   for (const item of cases)
-    counts[item.status] = (counts[item.status] || 0) + 1;
+    counts[item.execution.status] = (counts[item.execution.status] || 0) + 1;
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     generatedAt: new Date().toISOString(),
     snapshot,
     scope:
       'Explicit TEST_PLAN scenario catalog; not application code coverage.',
     freshness,
+    playwrightReport: { status: playwrightReport.status },
     counts,
     metrics: {
       denominator: included.length,
