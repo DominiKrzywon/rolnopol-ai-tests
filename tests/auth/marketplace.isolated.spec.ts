@@ -11,7 +11,10 @@ test.describe('Marketplace e2e tests', () => {
 
   test(
     'should buy random offer and verify transaction history',
-    { tag: ['@marketplace', '@purchase', '@happy-path'] },
+    {
+      annotation: { type: 'case-id', description: 'TC-MARKET-001' },
+      tag: ['@marketplace', '@purchase', '@happy-path'],
+    },
     async ({ request, marketplacePage }) => {
       let purchasedOffer: PurchasedOffer;
       let ownedIdsBeforePurchase: number[];
@@ -63,7 +66,10 @@ test.describe('Marketplace e2e tests', () => {
 
   test(
     'should return error when offer is to expensive',
-    { tag: ['@marketplace', '@offers', '@crud'] },
+    {
+      annotation: { type: 'case-id', description: 'TC-MARKET-002' },
+      tag: ['@marketplace', '@offers', '@crud'],
+    },
     async ({ request, marketplacePage }) => {
       const balance = await getAccountBalance(request);
 
@@ -89,6 +95,7 @@ test.describe('Marketplace e2e tests', () => {
   test(
     'create offer and verify in My Offers page',
     {
+      annotation: { type: 'case-id', description: 'TC-MARKET-003' },
       tag: ['@marketplace', '@offers', '@crud'],
     },
 

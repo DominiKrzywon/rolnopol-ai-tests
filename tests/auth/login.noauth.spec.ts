@@ -3,7 +3,10 @@ import { expect, test } from 'src/fixtures/auth.fixture';
 test.describe('Login E2E', () => {
   test(
     'should display correct user data after login',
-    { tag: ['@auth', '@login', '@session', '@happy-path'] },
+    {
+      annotation: { type: 'case-id', description: 'TC-LOGIN-001' },
+      tag: ['@auth', '@login', '@session', '@happy-path'],
+    },
     async ({ loginPage, profilePage, page, registeredUser }) => {
       await loginPage.goto();
       await loginPage.login(registeredUser);
@@ -18,7 +21,10 @@ test.describe('Login E2E', () => {
 
   test(
     'session management should work correctly',
-    { tag: ['@auth', '@session', '@logout'] },
+    {
+      annotation: { type: 'case-id', description: 'TC-LOGIN-002' },
+      tag: ['@auth', '@session', '@logout'],
+    },
     async ({ loginPage, profilePage, page, homePage, registeredUser }) => {
       const expectedLoginHeaderText = 'Rolnopol';
 

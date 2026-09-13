@@ -2,12 +2,12 @@ FROM mcr.microsoft.com/playwright:v1.58.2-jammy
 
 WORKDIR /app
 
-# Kopiujemy i instalujemy zależności
+# Copy and install dependencies
 COPY package*.json ./
 RUN npm install
 
-# Kopiujemy pliki testów
+# Copy test files
 COPY . .
 
-# Komenda, która odpali testy wewnątrz kontenera
+# Run tests inside the container
 CMD ["npx", "playwright", "test"]

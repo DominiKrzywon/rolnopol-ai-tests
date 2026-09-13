@@ -46,6 +46,7 @@ test.describe('Staff Assignment Management', () => {
   test(
     'should assignment for new staff and field',
     {
+      annotation: { type: 'case-id', description: 'TC-ASSIGN-001' },
       tag: ['@crud', '@farm', '@assignment'],
     },
     async ({ assignPage }) => {
@@ -59,6 +60,7 @@ test.describe('Staff Assignment Management', () => {
   test(
     'should not show assigned staff in select dropdown',
     {
+      annotation: { type: 'case-id', description: 'TC-ASSIGN-002' },
       tag: ['@crud', '@farm', '@assignment'],
     },
     async ({ assignPage }) => {
@@ -73,7 +75,10 @@ test.describe('Staff Assignment Management', () => {
 
   test(
     'should unassigned works correctly',
-    { tag: ['@crud', '@farm', '@assignment'] },
+    {
+      annotation: { type: 'case-id', description: 'TC-ASSIGN-003' },
+      tag: ['@crud', '@farm', '@assignment'],
+    },
     async ({ assignPage, page }) => {
       const expectedSuccessMessage = 'Staff unassigned successfully!';
 
@@ -112,6 +117,7 @@ test.describe('Staff Assignment Management', () => {
     test(
       'should show 2 staff assigned to field in tree view',
       {
+        annotation: { type: 'case-id', description: 'TC-ASSIGN-004' },
         tag: ['@crud', '@farm', '@assignment'],
       },
       async ({ assignPage }) => {

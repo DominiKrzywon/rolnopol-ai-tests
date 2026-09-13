@@ -2,8 +2,7 @@ import 'dotenv/config';
 
 /**
  * Centralized environment variable configuration.
- * Validates that all required variables are set and non-empty at import time,
- * preventing silent failures during test execution.
+ * Validate values when used, so collecting tests needs no account credentials.
  */
 
 const REQUIRED_ENV_VARS = [
@@ -18,24 +17,23 @@ const REQUIRED_ENV_VARS = [
 
 type EnvVarName = (typeof REQUIRED_ENV_VARS)[number];
 
-function validateEnvVars(): Record<EnvVarName, string> {
-  const missing = REQUIRED_ENV_VARS.filter(
-    (name) => !process.env[name]?.trim(),
-  );
-
-  if (missing.length > 0) {
-    throw new Error(
-      `Missing or empty environment variable(s): ${missing.join(', ')}. ` +
-        `Ensure these are defined in your .env file or CI environment.`,
-    );
-  }
-
-  return Object.fromEntries(
-    REQUIRED_ENV_VARS.map((name) => [name, process.env[name]!.trim()]),
-  ) as Record<EnvVarName, string>;
-}
-
-export const ENV = validateEnvVars();
+export const ENV = Object.defineProperties(
+  {},
+  Object.fromEntries(
+    REQUIRED_ENV_VARS.map((name) => [
+      name,
+      {
+        get(): string {
+          const value = process.env[name]?.trim();
+          if (!value) {
+            throw new Error(`Missing or empty environment variable: ${name}`);
+          }
+          return value;
+        },
+      },
+    ]),
+  ),
+) as Record<EnvVarName, string>;
 
 /**
  * API base URL for REST API endpoints (v1)

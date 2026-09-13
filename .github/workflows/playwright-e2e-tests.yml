@@ -33,6 +33,12 @@ jobs:
       - name: Type check
         run: npm run tsc:check
 
+      - name: Test coverage tooling
+        run: npm run coverage:test
+
+      - name: Validate scenario IDs and README index
+        run: npm run coverage:validate
+
   test:
     needs: quality
     runs-on: ubuntu-latest
@@ -101,12 +107,22 @@ jobs:
           exit 1
 
       - name: Run Playwright tests
-        run: npm test
+        run: npm run coverage:run
+
+      - name: Preserve available coverage evidence
+        if: ${{ success() || failure() }}
+        run: |
+          if [ ! -f coverage-report/index.html ]; then
+            npm run coverage:collect
+            npm run coverage:report
+          fi
 
       - name: Upload Playwright HTML Report
         if: ${{ success() || failure() }}
         uses: actions/upload-artifact@v4
         with:
           name: rolnopol-${{ github.run_id }}-${{ github.run_attempt }}
-          path: playwright-report/
+          path: |
+            playwright-report/
+            coverage-report/
           retention-days: 30

@@ -3,7 +3,10 @@ import { expect, test } from 'src/fixtures/test.fixture';
 
 test(
   "should display the correct page title 'Rolnopol' on homepage",
-  { tag: ['@smoke', '@critical'] },
+  {
+    annotation: { type: 'case-id', description: 'TC-SMOKE-001' },
+    tag: ['@smoke', '@critical'],
+  },
   async ({ page, homePage }) => {
     await homePage.goto();
 
@@ -13,7 +16,10 @@ test(
 
 test(
   'should load login page successfully',
-  { tag: ['@smoke', '@auth'] },
+  {
+    annotation: { type: 'case-id', description: 'TC-SMOKE-002' },
+    tag: ['@smoke', '@auth'],
+  },
   async ({ loginPage }) => {
     await loginPage.goto();
     const expectedSubtitle = 'User Login & Account Access';
@@ -24,7 +30,10 @@ test(
 
 test(
   'should load API documentation page successfully',
-  { tag: ['@smoke', '@documentation'] },
+  {
+    annotation: { type: 'case-id', description: 'TC-SMOKE-003' },
+    tag: ['@smoke', '@documentation'],
+  },
   async ({ apiDocsPage }) => {
     await apiDocsPage.goto();
     const expectedHeading =
@@ -36,7 +45,10 @@ test(
 
 test(
   'should load documentation page successfully',
-  { tag: ['@smoke', '@documentation'] },
+  {
+    annotation: { type: 'case-id', description: 'TC-SMOKE-004' },
+    tag: ['@smoke', '@documentation'],
+  },
   async ({ docsPage }) => {
     await docsPage.goto();
     const expectedSubtitle = 'Rolnopol System Guide & API Reference';
@@ -48,6 +60,7 @@ test(
 test(
   'should not display marketplace for non-logged user',
   {
+    annotation: { type: 'case-id', description: 'TC-SMOKE-005' },
     tag: ['@smoke', '@critical'],
   },
   async ({ page, marketplacePage }) => {
@@ -59,7 +72,10 @@ test(
 
 test(
   'should load register page successfully',
-  { tag: ['@smoke', '@auth', '@registration'] },
+  {
+    annotation: { type: 'case-id', description: 'TC-SMOKE-006' },
+    tag: ['@smoke', '@auth', '@registration'],
+  },
   async ({ registerPage }) => {
     await registerPage.goto();
     const expectedSubtitle = 'Create Your User Account';
@@ -70,7 +86,10 @@ test(
 
 test(
   'api app health check',
-  { tag: ['@smoke', '@auth', '@health'] },
+  {
+    annotation: { type: 'case-id', description: 'TC-SMOKE-007' },
+    tag: ['@smoke', '@auth', '@health'],
+  },
   async ({ request }) => {
     const response = await request.get(`${BASE_API_URL}/healthcheck`);
     const body = await response.json();

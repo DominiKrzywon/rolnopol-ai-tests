@@ -6,7 +6,10 @@ import { generateUniqueEmail } from 'src/helpers/testDataHelpers';
 
 test(
   'should register new user successfully',
-  { tag: ['@smoke', '@auth', '@registration'] },
+  {
+    annotation: { type: 'case-id', description: 'TC-REG-001' },
+    tag: ['@smoke', '@auth', '@registration'],
+  },
   async ({ page, registerPage }) => {
     const uniqueEmail = generateUniqueEmail();
     const user = {
@@ -34,7 +37,10 @@ test(
 test.describe('Registration Negative Tests', () => {
   test(
     'should display validation errors for invalid email and short password',
-    { tag: ['@auth', '@registration', '@validation', '@negative'] },
+    {
+      annotation: { type: 'case-id', description: 'TC-REG-002' },
+      tag: ['@auth', '@registration', '@validation', '@negative'],
+    },
     async ({ page, registerPage }) => {
       const invalidEmail = 'not-a-valid-email';
       const shortPassword = 'ab';
@@ -52,7 +58,10 @@ test.describe('Registration Negative Tests', () => {
 
   test(
     'should prevent registration with empty required fields',
-    { tag: ['@auth', '@registration', '@validation', '@negative'] },
+    {
+      annotation: { type: 'case-id', description: 'TC-REG-003' },
+      tag: ['@auth', '@registration', '@validation', '@negative'],
+    },
     async ({ page, registerPage }) => {
       await registerPage.goto();
       await registerPage.registerSubmitBtn.click();
@@ -62,10 +71,16 @@ test.describe('Registration Negative Tests', () => {
     },
   );
 
-  for (const password of ['a', 'ab']) {
+  for (const { password, caseId } of [
+    { password: 'a', caseId: 'TC-REG-004' },
+    { password: 'ab', caseId: 'TC-REG-005' },
+  ]) {
     test(
       `should reject password with ${password.length} characters`,
-      { tag: ['@auth', '@registration', '@validation', '@negative'] },
+      {
+        annotation: { type: 'case-id', description: caseId },
+        tag: ['@auth', '@registration', '@validation', '@negative'],
+      },
       async ({ page, registerPage }) => {
         await registerPage.goto();
         await registerPage.emailInput.fill('valid@example.com');
@@ -81,6 +96,7 @@ test.describe('Registration Negative Tests', () => {
   test(
     'should reject registration for empty password',
     {
+      annotation: { type: 'case-id', description: 'TC-REG-006' },
       tag: ['@auth', '@registration', '@validation', '@negative'],
     },
     async ({ page, registerPage }) => {
@@ -100,7 +116,10 @@ test.describe('Registration Negative Tests', () => {
 
   test(
     'should reject registration with duplicate email',
-    { tag: ['@auth', '@registration', '@validation', '@negative'] },
+    {
+      annotation: { type: 'case-id', description: 'TC-REG-007' },
+      tag: ['@auth', '@registration', '@validation', '@negative'],
+    },
     async ({ page, request, registerPage }) => {
       const user = prepareRandomUser();
       const expectedErrorMessage = 'User with this email already exists';
@@ -132,16 +151,19 @@ test.describe('Registration Negative Tests', () => {
   );
 
   const invalidEmails = [
-    'plaintext',
-    '@example.com',
-    'user@',
-    'user @example.com',
+    { invalidEmail: 'plaintext', caseId: 'TC-REG-008' },
+    { invalidEmail: '@example.com', caseId: 'TC-REG-009' },
+    { invalidEmail: 'user@', caseId: 'TC-REG-010' },
+    { invalidEmail: 'user @example.com', caseId: 'TC-REG-011' },
   ];
 
-  for (const invalidEmail of invalidEmails) {
+  for (const { invalidEmail, caseId } of invalidEmails) {
     test(
       `should reject invalid email: "${invalidEmail}"`,
-      { tag: ['@auth', '@registration', '@validation', '@negative'] },
+      {
+        annotation: { type: 'case-id', description: caseId },
+        tag: ['@auth', '@registration', '@validation', '@negative'],
+      },
       async ({ page, registerPage }) => {
         await registerPage.goto();
         await registerPage.emailInput.fill(invalidEmail);

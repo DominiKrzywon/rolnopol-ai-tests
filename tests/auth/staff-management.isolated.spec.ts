@@ -12,7 +12,10 @@ test.use({ storageState: undefined });
 test.describe('Staff & Fields Management', () => {
   test(
     'should create a new field in Staff & Fields view',
-    { tag: ['@crud', '@farm', '@resources', '@happy-path'] },
+    {
+      annotation: { type: 'case-id', description: 'TC-FARM-001' },
+      tag: ['@crud', '@farm', '@resources', '@happy-path'],
+    },
     async ({ freshUser: _, managementPage }) => {
       const fieldName = faker.word.noun();
 
@@ -40,7 +43,10 @@ test.describe('Staff & Fields Management', () => {
 
   test(
     'should create a new animal herd in Staff & Fields view',
-    { tag: ['@crud', '@farm', '@resources', '@happy-path'] },
+    {
+      annotation: { type: 'case-id', description: 'TC-FARM-002' },
+      tag: ['@crud', '@farm', '@resources', '@happy-path'],
+    },
     async ({ freshUser: _, managementPage }) => {
       const fieldName = faker.word.noun();
       const animalAmount = faker.number.int({ min: 1, max: 99_999 });
@@ -82,7 +88,10 @@ test.describe('Staff & Fields Management', () => {
 
   test(
     'should create a new staff  in Staff & Fields view',
-    { tag: ['@crud', '@farm', '@resources', '@happy-path'] },
+    {
+      annotation: { type: 'case-id', description: 'TC-FARM-003' },
+      tag: ['@crud', '@farm', '@resources', '@happy-path'],
+    },
     async ({ freshUser: _, managementPage }) => {
       const uniqueName = faker.person.firstName();
       const uniqueSurname = faker.person.lastName();
@@ -110,7 +119,10 @@ test.describe('Staff & Fields Management', () => {
 test.describe('Staff & Fields Management - Delete Field', () => {
   test(
     'should edit a field name',
-    { tag: ['@crud', '@farm', '@resources', '@edit'] },
+    {
+      annotation: { type: 'case-id', description: 'TC-FARM-004' },
+      tag: ['@crud', '@farm', '@resources', '@edit'],
+    },
     async ({ managementPage, createdField }) => {
       const { name: fieldName } = createdField;
       const newFieldName = faker.word.noun();
@@ -132,7 +144,10 @@ test.describe('Staff & Fields Management - Delete Field', () => {
 
   test(
     'should delete a field',
-    { tag: ['@crud', '@farm', '@resources', '@delete'] },
+    {
+      annotation: { type: 'case-id', description: 'TC-FARM-005' },
+      tag: ['@crud', '@farm', '@resources', '@delete'],
+    },
     async ({ managementPage, createdField }) => {
       const { name: fieldName } = createdField;
 
@@ -153,6 +168,7 @@ test.describe('Staff & Fields Management - Delete Staff', () => {
   test(
     'should update a staff',
     {
+      annotation: { type: 'case-id', description: 'TC-FARM-006' },
       tag: ['@crud', '@farm', '@resources', '@edit'],
     },
     async ({ managementPage, createdStaff }) => {
@@ -175,7 +191,10 @@ test.describe('Staff & Fields Management - Delete Staff', () => {
 
   test(
     'should delete a staff',
-    { tag: ['@crud', '@farm', '@resources', '@delete'] },
+    {
+      annotation: { type: 'case-id', description: 'TC-FARM-007' },
+      tag: ['@crud', '@farm', '@resources', '@delete'],
+    },
     async ({ managementPage, createdStaff }) => {
       const { name: staffName, surname: staffSurname } = createdStaff;
       await managementPage.goto();
@@ -197,6 +216,7 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
   test(
     'should edit a animal',
     {
+      annotation: { type: 'case-id', description: 'TC-FARM-008' },
       tag: ['@crud', '@farm', '@resources', '@edit'],
     },
     async ({ managementPage, createdAnimal }) => {
@@ -225,7 +245,10 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
 
   test(
     'should delete a animal',
-    { tag: ['@crud', '@farm', '@resources', '@delete'] },
+    {
+      annotation: { type: 'case-id', description: 'TC-FARM-009' },
+      tag: ['@crud', '@farm', '@resources', '@delete'],
+    },
     async ({ managementPage, createdAnimal }) => {
       const { type: animalType, amount: animalAmount } = createdAnimal;
       await managementPage.goto();

@@ -1,475 +1,572 @@
-# Plan rozwoju testów Rolnopol
+# Rolnopol test development plan
 
-> Inwentaryzacja aplikacji: 5 września 2026, Rolnopol v1.79.0.
-> Aktualizacja 7 września 2026: przegląd kodu, kolekcja testów, `check:ci`
-> oraz kontrola anonimowego dostępu na `http://localhost:3000`.
-> Nie uruchamiano ponownie pełnej regresji ani całej inwentaryzacji API.
+> Application inventory: September 5, 2026, Rolnopol v1.79.0.
+> September 7, 2026 update: code review, test collection, `check:ci`,
+> and anonymous access checks at `http://localhost:3000`.
+> Neither the full regression suite nor the complete API inventory was rerun.
 
-## 1. Cel repozytorium
+## 1. Repository purpose
 
-To repozytorium służy przede wszystkim do nauki TypeScriptu, Playwrighta,
-projektowania testów i pracy z API. Celem nie jest pokrycie każdego przycisku,
-lecz zbudowanie małego, wiarygodnego i łatwego do debugowania frameworka.
+This repository is primarily for learning TypeScript, Playwright, test design,
+and API testing. The goal is to build a small, trustworthy framework that is
+easy to debug, rather than cover every button.
 
-Sama aplikacja Rolnopol została stworzona do nauki testów automatycznych i ma
-specyficzną konstrukcję edukacyjną. Zakres ćwiczeń dobieram świadomie; nie każde
-zaobserwowane odstępstwo będę zgłaszać jako błąd. Konkretne wyłączenia zapisuję
-w planie wraz z obserwacją i uzasadnieniem. Edukacyjny charakter aplikacji nie
-oznacza, że każde odstępstwo jest celowo zaprojektowane przez jej autora.
+The Rolnopol application itself was created for learning automated testing and
+has an educational design. I choose the exercise scope deliberately; I will
+not report every observed deviation as a defect. I record specific exclusions
+in the plan together with the observation and rationale. The application's
+educational purpose does not imply that every deviation was intentionally
+designed by its author.
 
-Kod testów i konfigurację zmieniam samodzielnie, aby ćwiczyć. Rola mentora to
-analiza, wskazówki, przegląd moich zmian i pomoc w interpretacji wyników.
+I change test code and configuration myself to practice. The mentor's role is
+analysis, guidance, reviewing my changes, and helping interpret results.
 
-Najważniejsze zasady rozwoju:
+Core development principles:
 
-1. Najpierw naprawiamy wiarygodność istniejących testów.
-2. Logikę biznesową sprawdzamy głównie szybkimi testami API.
-3. Testy UI zostawiamy dla zachowania widocznego dla użytkownika.
-4. Pełny E2E łączy UI z API tylko dla kilku najważniejszych podróży.
-5. Jeden test ma jeden czytelny powód do niepowodzenia.
-6. Jedna mała zmiana powinna trafiać do jednego commita.
+1. Restore confidence in existing tests first.
+2. Check business logic mainly through fast API tests.
+3. Reserve UI tests for user-visible behavior.
+4. Combine UI and API in full E2E only for a few critical journeys.
+5. Each test should have one clear reason to fail.
+6. Each small change should belong in one commit.
 
-## 2. Zweryfikowany stan repozytorium
+## 2. Repository evidence and environment
 
-### Repozytorium
+### Current code and collection evidence: September 13, 2026
 
-- Playwright zbiera **61 testów w 14 plikach** i 7 projektach.
-- `tests/auth/access-control.noauth.spec.ts` zawiera 6 przypadków przekierowań.
-  Po samodzielnym usunięciu trzech tras Staff & Fields powinny pozostać
-  3 przypadki, czyli 58 testów łącznie, jeśli inne testy się nie zmienią.
-- Obecne warstwy to Page Objects, actions, fixtures, fabryki danych i klient API.
-- `npm run check:ci` przechodzi: formatowanie, ESLint i TypeScript
-  zweryfikowano 7 września 2026. Tablica `protectedRoutes` jest już używana.
-- CI uruchamia się tylko ręcznie przez `workflow_dispatch`; nie jest bramką dla
-  pull requestów.
-- `trace: 'on'` zapisuje trace dla każdego testu i niepotrzebnie powiększa
-  `test-results`.
+Playwright collection before adding IDs returned **59 entries in 13 files**:
+58 scenario tests and one demo-session setup, across seven projects. Collection
+is not evidence that those tests pass. Generated inventory is the current source
+for counts; do not maintain a second live test counter here.
 
-### Historyczne wyniki kontrolne z 5 września 2026
+- Anonymous redirects now cover Profile, Marketplace, and Financial only.
+- Short-password and invalid-email inputs are separate collected test cases.
+- Staff management and assignment suites already use the isolated-user project.
+- Login tests use a registered user and reopen the profile after logout.
+- Financial transfer recipients are created independently without shared login.
+- The positive registration test still asserts a transient success message.
+- The overdraft test still hardcodes its drain amount and checks a balance read
+  before the rejected action; its ID does not establish assertion quality.
+- CI remains manually triggered through `workflow_dispatch`.
+- `trace: 'on'` remains an existing debugging setting.
 
-- `setup-demo-user`: **1/1 przeszedł**.
-- `tests/api/auth.api.spec.ts`: **11/11 przeszło** przy `--workers=1`.
-- przed ówczesnym porządkowaniem projekt `smoke-tests` miał wynik **14/18**
-  przy `--workers=1`; po przeniesieniu testów zbiera 7 przypadków i wymaga
-  ponownego zapisania baseline'u.
-- Pełny zestaw nie jest jeszcze wiarygodnym baseline'em. Najpierw trzeba usunąć
-  znane błędy testów i konflikt współdzielonych sesji.
+### Full-run observation: September 13, 2026
 
-### Przyczyny czterech historycznych błędów smoke
+The first `npm run coverage:run` verification (one worker, zero retries)
+recorded **57 passed and 2 failed out of 59 entries**, including one passed setup.
+The scenario-only result was 56 passed and 2 failed out of 58 implemented cases.
+The visual failure reported a missing baseline in the visual project's current
+snapshot path. The demo profile test navigated to login; shared-session
+invalidation is a hypothesis consistent with the known environment constraint,
+not a separately reproduced diagnosis. Neither failure was fixed in this task.
+The reporting runner now disables automatic snapshot creation so a missing
+baseline cannot change the source fingerprint during measurement.
 
-1. Snapshot strony głównej pochodzi z aplikacji v1.0.120, a badana aplikacja ma
-   v1.79.0. Różnią się nagłówek, ikony i stopka. Ikony zależą też od zewnętrznego
-   CDN Font Awesome, więc wynik zależy od dostępu do sieci.
-2. Dwa testy poprawnej rejestracji wykonują tę samą podróż. Metoda
-   `RegisterPage.register()` czeka na przejście do `/login.html`, po czym test
-   próbuje znaleźć komunikat sukcesu ze starej strony rejestracji.
-3. Test duplikatu wywołuje drugi raz ten sam `RegisterPage` już po przejściu na
-   stronę logowania. Test nie odtwarza więc poprawnie scenariusza duplikatu.
+### Historical quality evidence
 
-Aktualizacja z przeglądu kodu 7 września: został jeden pozytywny test
-rejestracji, `RegisterPage.register()` jedynie wypełnia i wysyła formularz,
-a duplikat przygotowuje konto przez API. Powyższe punkty opisują historyczne
-przyczyny. Nadal pozostaje asercja znikającego komunikatu sukcesu w pozytywnym
-teście i pętla krótkich haseł wewnątrz jednego przypadku. Nie potwierdzono
-ponownym uruchomieniem aktualnego wyniku testów rejestracji.
+`npm run check:ci` passed on September 7, 2026. This is a dated observation,
+not a claim about subsequent changes. Current command results belong in the
+run report or the implementation report.
 
-### Aplikacja zbadana na localhost
+### Historical check results from September 5, 2026
 
-Publiczne ekrany: Home, Login, Register, Documentation, API Explorer, Alerts i
-Contact.
+- `setup-demo-user`: **1/1 passed**.
+- `tests/api/auth.api.spec.ts`: **11/11 passed** with `--workers=1`.
+- Before the project reorganization at that time, `smoke-tests` achieved
+  **14/18** with `--workers=1`; after moving tests, it collects 7 cases
+  and needs a newly recorded baseline.
+- The full suite is not yet a trustworthy baseline. Known test defects
+  and shared-session conflicts need to be resolved first.
 
-Po zalogowaniu dostępne są również:
+### Causes of the four historical smoke failures
 
-- profil z edycją danych i usunięciem konta;
-- pola, personel i zwierzęta wraz z wyszukiwaniem oraz paginacją;
-- przypisania w widokach Grid, List, Cards, Table, Timeline, Tree i Chart;
-- wykresy Bar, Pie i Doughnut;
-- marketplace z filtrowaniem, paginacją, własnymi ofertami i historią;
-- finanse z przychodami, wydatkami, przelewami i filtrami dat.
+1. The homepage snapshot comes from application v1.0.120, while the inspected
+   application is v1.79.0. The header, icons, and footer differ. Icons also
+   depend on the external Font Awesome CDN, making the result network-dependent.
+2. Two successful-registration tests exercise the same journey.
+   `RegisterPage.register()` waits for navigation to `/login.html`, after which
+   the test tries to find a success message from the old registration page.
+3. The duplicate-registration test calls the same `RegisterPage` again after
+   navigation to the login page. It therefore does not correctly reproduce
+   the duplicate-registration scenario.
 
-Specyfikacja OpenAPI v1.79.0 opisuje **71 operacji na 57 ścieżkach**. Obecne
-testy API pokrywają prawie wyłącznie uwierzytelnianie.
+September 7 code review update: one positive registration test remains,
+`RegisterPage.register()` only fills and submits the form, and the duplicate
+case prepares the account through API. The points above describe historical
+causes. The disappearing success-message assertion in the positive test and
+the short-password loop within a single case still remain. Current registration
+test results have not been confirmed by rerunning them.
 
-### Decyzja o zakresie: anonimowy dostęp do Staff & Fields
+### Application explored on localhost
 
-Kontrola przez Playwright uruchomiony z terminala 7 września 2026, w osobnym
-czystym kontekście przeglądarki dla każdej trasy, potwierdziła:
+Public screens: Home, Login, Register, Documentation, API Explorer, Alerts,
+and Contact.
 
-- `/profile.html`, `/marketplace.html` i `/financial.html` przekierowują
-  anonimowego użytkownika na `/login.html`;
-- `/staff-fields-main.html`, `/staff-fields-assign.html` oraz
-  `/staff-fields-charts.html` pozostają otwarte; w ciągu 5 sekund oczekiwania
-  asercja przekierowania nie została spełniona;
-- obserwowane żądania tych stron do `/api/v1/fields`, `/api/v1/staff`,
-  `/api/v1/fields/assign` i `/api/v1/animals` otrzymały `401`;
-- dokument HTML każdej z sześciu stron początkowo zwrócił `200`.
+After login, the application also provides:
 
-Ze względu na edukacyjny cel projektu **nie będę zgłaszać braku przekierowania
-tych trzech stron jako błędu**. Usunę samodzielnie wyłącznie trzy wpisy
-`/staff-fields-*.html` z tablicy `protectedRoutes` w
-`tests/auth/access-control.noauth.spec.ts`. Pozostawię testy przekierowania
-profilu, marketplace i finansów. Ta zmiana kodu nie została jeszcze wykonana.
+- profile editing and account deletion;
+- fields, staff, and animals with search and pagination;
+- assignments in Grid, List, Cards, Table, Timeline, Tree, and Chart views;
+- Bar, Pie, and Doughnut charts;
+- a marketplace with filtering, pagination, owned offers, and history;
+- finances with income, expenses, transfers, and date filters.
 
-Jest to świadome ograniczenie zakresu testów przekierowań UI. Nie usuwam
-endpointów z aplikacji, testów gospodarstwa po zalogowaniu ani planowanych
-testów autoryzacji API. Trasy stron HTML i endpointy `/api/v1/staff` czy
-`/api/v1/fields` to różne elementy. Otwarcie strony nie dowodzi dostępu do
-chronionych danych; zaobserwowane `401` nie są też pełnym audytem autoryzacji.
-Nie zakładam, że brak przekierowania jest zamierzonym wymaganiem aplikacji.
+OpenAPI v1.79.0 describes **71 operations across 57 paths**. Current API tests
+cover almost exclusively authentication.
 
-### Znane ograniczenia środowiska
+### Scope decision: anonymous access to Staff & Fields
 
-- Serwer utrzymuje jedną aktywną sesję na użytkownika. Drugie logowanie na to
-  samo konto unieważnia poprzedni token, dlatego testy modyfikujące dane nie mogą
-  współdzielić kont.
-- `page` i `request` mają osobne magazyny cookies. `applySessionCookies` kopiuje
-  sesję tylko z `request` do kontekstu przeglądarki; późniejsza zmiana sesji w UI
-  nie aktualizuje automatycznie `request`.
-- Rate limiter działa per IP. Rejestracja i logowanie świeżego konta zwiększają
-  liczbę żądań, więc liczbę workerów należy dobierać pomiarem, a nie maskować 429
-  przez retry.
-- Swagger jest wskazówką, ale nie pełnym kontraktem. Nie opisuje m.in.
-  `GET /fields/assign`, a odpowiedź `/financial/transactions` zawiera pole
-  `hasMore`, którego brakuje w schemacie.
+A Playwright check run from the terminal on September 7, 2026, using a separate
+clean browser context for each route, confirmed:
 
-## 3. Priorytety
+- `/profile.html`, `/marketplace.html`, and `/financial.html` redirect
+  anonymous users to `/login.html`;
+- `/staff-fields-main.html`, `/staff-fields-assign.html`, and
+  `/staff-fields-charts.html` remain open; the redirect assertion did not
+  pass within the 5-second wait;
+- observed requests from those pages to `/api/v1/fields`, `/api/v1/staff`,
+  `/api/v1/fields/assign`, and `/api/v1/animals` received `401`;
+- the HTML document for each of the six pages initially returned `200`.
 
-- **P0**: zielony baseline, healthcheck, logowanie/sesja, ochrona tras, jeden
-  podstawowy przepływ gospodarstwa.
-- **P1**: kontrakty API dla farmy, finansów i marketplace oraz najważniejsze
-  reguły biznesowe.
-- **P2**: alerty, kontakt, wykresy, mapa, dostępność, responsywność i stabilne
-  testy wizualne.
-- **Poza zwykłym CI**: `/shutdown`, przywracanie bazy, zmiana feature flags oraz
-  inne destrukcyjne endpointy administracyjne. Wolno je testować tylko w
-  jednorazowym środowisku.
+Because this is an educational project, **I will not report the missing
+redirects on those three pages as defects**. The agreed change was to remove only
+the three `/staff-fields-*.html` entries from `protectedRoutes` in
+`tests/auth/access-control.noauth.spec.ts`. The remaining cases cover the profile,
+marketplace, and financial redirect tests. The three entries have now been removed (code inspection: September 13, 2026).
 
-## 4. Roadmapa
+This is a deliberate limit on UI redirect testing. It does not remove application
+endpoints, authenticated farm tests, or planned API authorization tests.
+HTML page routes and endpoints such as `/api/v1/staff` or `/api/v1/fields`
+are different elements. Opening a page does not prove access to protected data;
+the observed `401` responses are not a complete authorization audit either.
+I do not assume that the missing redirect is an intended application requirement.
 
-### Etap 0 — odzyskaj zaufanie do obecnych testów
+### Known environment constraints
 
-- [x] Dodać `.playwright-cli/` do `.gitignore` i `.prettierignore`.
-- [ ] Przestać śledzić cztery stare pliki `.playwright-cli/*.yml`, które trafiły
-      do repozytorium przed dodaniem reguł ignorowania.
-- [x] Usunąć `tests/api/probe.spec.ts` po zapisaniu wniosków albo zamienić sondę
-      w nazwany test kontraktu bez `console.log`.
-- [x] Zostawić jeden UI test poprawnej rejestracji. Drugi duplikat nie zwiększa
-      wartości edukacyjnej.
-- [ ] Test poprawnej rejestracji powinien sprawdzić status odpowiedzi `201` i
-      końcowy URL `/login.html`. Nie powinien szukać znikającego komunikatu na
-      poprzedniej stronie.
-- [x] Test duplikatu przygotować przez API, następnie otworzyć świeżą stronę
-      rejestracji i sprawdzić `409` oraz komunikat widoczny w UI.
-- [ ] Każde krótkie hasło wykonywać jako osobny przypadek testowy, aby raport
-      wskazywał dokładną wartość wejściową.
-- [x] Każdy błędny email wykonywać jako osobny przypadek testowy.
-- [ ] Snapshot wizualny zawęzić do stabilnego komponentu strony głównej.
-      Zamaskować wersję i dane dynamiczne, ustalić viewport oraz uniezależnić ikony
-      od CDN. Baseline aktualizować dopiero po ręcznym obejrzeniu diffu.
-- [ ] Ustawić `trace: 'retain-on-failure'` po zakończeniu bieżącego debugowania.
-- [ ] Doprowadzić kolejno do zielonego `check:ci`, `api-tests` i `smoke-tests`.
+- The server maintains one active session per user. Logging into the same account
+  again invalidates the previous token, so state-changing tests cannot share accounts.
+- `page` and `request` have separate cookie stores. `applySessionCookies` copies
+  the session only from `request` to the browser context; later UI session changes
+  do not automatically update `request`.
+- Rate limiting is per IP. Registering and logging in a fresh account adds requests,
+  so worker count should be selected through measurement rather than hiding 429
+  responses with retries.
+- Swagger is a guide, not a complete contract. For example, it omits
+  `GET /fields/assign`, while the `/financial/transactions` response includes
+  `hasMore`, which is missing from the schema.
 
-Warunek zakończenia: trzy powyższe komendy są zielone bez retry.
+## 3. Priorities
 
-### Etap 1 — uporządkuj projekty i dane testowe
+- **P0**: a passing baseline, healthcheck, login/session, route protection,
+  and one basic farm flow.
+- **P1**: farm, financial, and marketplace API contracts and key business rules.
+- **P2**: alerts, contact, charts, map, accessibility, responsiveness,
+  and stable visual tests.
+- **Outside ordinary CI**: `/shutdown`, database restoration, feature flag changes,
+  and other destructive administrative endpoints. Test these only in a disposable environment.
 
-- [ ] Przenieść `staff-management.e2e.spec.ts` i `staff-assign.e2e.spec.ts` do
-      projektu użytkowników izolowanych (`*.isolated.spec.ts`). Dziś uruchamiają
-      zależność logowania demo, a zaraz potem zerują `storageState`.
-- [ ] Uporządkować podział: anonimowe przekierowania pozostawić w
-      `no-auth-tests`, a podróże rejestrujące i logujące użytkownika wydzielić
-      osobno. Przy wprowadzeniu `*.journey.spec.ts` dodać odpowiadający
-      `testMatch`; obecna konfiguracja nie zbiera tego wzorca.
-- [ ] Używać konta demo wyłącznie w odczytowych testach profilu.
-- [ ] Każdy test modyfikujący dane ma tworzyć własnego użytkownika i zasoby.
-- [ ] Id odbiorcy przelewu uzyskiwać z rejestracji świeżego konta, bez logowania
-      na współdzielone `EMPTY_USER`.
-- [ ] Nie hardkodować salda `18450`; wyliczać stan początkowy przez API.
-- [ ] Zacząć od `workers: 1`, następnie zmierzyć `2` i `3`. Nie dodawać retry
-      jako lekarstwa na rate limiter 429.
-- [ ] Walidować tylko `BASE_URL` dla publicznych smoke. Dane demo/empty powinny
-      być wymagane dopiero przez test, który naprawdę ich używa.
+## 4. Roadmap
 
-Warunek zakończenia: pełny przebieg ma zapisany wynik bazowy i żadne dwa testy
-nie unieważniają sobie sesji.
+### Stage 0 — restore confidence in existing tests
 
-### Etap 1b — domknij dług techniczny warstwy API
+- [x] Add `.playwright-cli/` to `.gitignore` and `.prettierignore`.
+- [ ] Stop tracking the four old `.playwright-cli/*.yml` files committed
+      before ignore rules were added.
+- [x] Remove `tests/api/probe.spec.ts` after recording findings, or turn the
+      probe into a named contract test without `console.log`.
+- [x] Keep one successful-registration UI test. The duplicate adds no learning value.
+- [ ] The successful-registration test should check response status `201`
+      and the final `/login.html` URL. It should not look for a disappearing
+      message on the previous page.
+- [x] Prepare the duplicate case through API, then open a fresh registration
+      page and check `409` and the visible UI message.
+- [x] Run each short password as a separate test case so the report identifies
+      the exact input.
+- [x] Run each invalid email as a separate test case.
+- [ ] Limit the visual snapshot to a stable homepage component.
+      Mask version and dynamic data, set the viewport, and remove icon dependence
+      on the CDN. Update the baseline only after manually inspecting the diff.
+- [ ] Set `trace: 'retain-on-failure'` after the current debugging work is complete.
+- [ ] Make `check:ci`, `api-tests`, and `smoke-tests` pass in that order.
 
-Ten backlog został zachowany ze starszego planu refaktoru. Realizować go małymi
-commitami, równolegle z dodawaniem testów kontraktowych:
+Completion criterion: the three commands above pass without retries.
 
-- [ ] W `httpClient` użyć wspólnego `ApiEnvelope<T>`, pokazywać `error` zwrócony
-      przez API i poprawić komunikat dla `success: false` przy statusie 2xx.
-- [ ] Nie dodawać obsługi 204 ani `putJson`, dopóki prawdziwy test kontraktu nie
-      pokaże takiej potrzeby.
-- [ ] Przenieść happy-path `loginAs` i `registerVerifiedUser` na `postJson`, ale
-      zostawić surowe `APIResponse` w funkcjach używanych do asercji 4xx.
-- [ ] Dla nieużywanych `transferFunds`, `getTransactions`, `getAssignments`,
-      `createAssignment`, `deleteAssignment`, `cancelAllMyOffers` i
-      `deleteOneOffer` podjąć decyzję: pokryć kontraktem albo usunąć.
-- [ ] Modele odpowiedzi finansów, farmy i marketplace uzupełniać dopiero na
-      podstawie rzeczywistych odpowiedzi zapisanych w testach API.
-- [ ] Usunąć `expect()` z `MarketplacePage`, rozdzielić helpery na stałe i
-      fabryki oraz doprecyzować nazwy dublujących się akcji UI/API.
+### Stage 1 — organize projects and test data
 
-### Etap 2 — mały i szybki zestaw P0
+- [x] Move the staff management and assignment suites to `*.isolated.spec.ts`.
+      Current collection assigns both suites to the isolated-user project.
+- [ ] Clarify the split: keep anonymous redirects in `no-auth-tests` and
+      separate journeys that register and log in users.
+      When introducing `*.journey.spec.ts`, add a matching `testMatch`;
+      the current configuration does not collect that pattern.
+- [ ] Use the demo account only for read-only profile tests.
+- [ ] Every state-changing test must create its own user and resources.
+- [x] Obtain the transfer recipient ID by registering a fresh account,
+      without logging into the shared `EMPTY_USER`.
+- [ ] Do not hardcode the `18450` balance; obtain the initial state through API.
+- [ ] Start with `workers: 1`, then measure `2` and `3`.
+      Do not add retries as a remedy for rate limiter 429 responses.
+- [x] Validate environment values when accessed. Coverage collection supplies
+      a local base URL, bypasses dotenv loading, and needs no account credentials.
 
-- [ ] Sparametryzowany smoke publicznych stron: Home, Login, Register, Docs,
-      Swagger iframe, Alerts i Contact.
-- [ ] Macierz ochrony tras dla użytkownika anonimowego i zalogowanego:
-      Profile, Marketplace, Financial. Trzy strony Staff & Fields wyłączyć
-      z wymogu anonimowego przekierowania zgodnie z decyzją w sekcji 2;
-      ich funkcje po zalogowaniu pozostają w zakresie testów gospodarstwa.
-- [ ] Dla chronionej trasy sprawdzać końcowy URL i brak nieoczekiwanych błędów
-      konsoli, nie tylko status dokumentu HTML równy 200.
-- [ ] Po logowaniu sprawdzić utrzymanie sesji po reloadzie i jej usunięcie po
-      logout. Reload jest już sprawdzany w `login.noauth.spec.ts`; uzupełnić
-      scenariusz o ponowne wejście na profil po wylogowaniu i przekierowanie
-      na login. Najpierw zastąpić współdzielone `EMPTY_USER` świeżym kontem.
-- [ ] Zostawić jeden krótki happy path: świeży użytkownik tworzy pole, pracownika
-      i przypisanie; stan końcowy potwierdza API.
-- [ ] Oznaczyć testy spójnymi tagami `@p0`, `@smoke`, `@api`, `@ui`, `@e2e`.
+Completion criterion: a full run has a recorded baseline, and no two tests
+invalidate each other's sessions.
 
-Warunek zakończenia: `@p0` przechodzi pięć razy przez `--repeat-each=5` i nie ma
-losowych niepowodzeń.
+### Stage 1b — address API layer technical debt
 
-### Etap 3 — kontrakty API przed kolejnymi testami UI
+This backlog was retained from an older refactoring plan. Implement it in small
+commits alongside contract tests:
 
-Kolejność implementacji:
+- [ ] Use the shared `ApiEnvelope<T>` in `httpClient`, expose the API's
+      `error`, and improve the message for `success: false` with a 2xx status.
+- [ ] Do not add 204 handling or `putJson` until a real contract test shows the need.
+- [ ] Move happy-path `loginAs` and `registerVerifiedUser` to `postJson`,
+      but retain raw `APIResponse` in functions used for 4xx assertions.
+- [ ] For unused `transferFunds`, `getTransactions`, `getAssignments`,
+      `createAssignment`, `deleteAssignment`, `cancelAllMyOffers`, and
+      `deleteOneOffer`, decide whether to cover them with contracts or remove them.
+- [ ] Extend financial, farm, and marketplace response models only from real
+      responses captured in API tests.
+- [ ] Remove `expect()` from `MarketplacePage`, separate helpers into constants
+      and factories, and clarify names of overlapping UI/API actions.
+
+### Stage 2 — a small, fast P0 suite
+
+- [ ] Parameterized public-page smoke: Home, Login, Register, Docs,
+      Swagger iframe, Alerts, and Contact.
+- [ ] Route-protection matrix for anonymous and authenticated users:
+      Profile, Marketplace, Financial. Exclude the three Staff & Fields pages
+      from anonymous redirect requirements according to section 2;
+      their authenticated features remain in farm-test scope.
+- [ ] For a protected route, assert the final URL and absence of unexpected
+      console errors, not just an HTML document status of 200.
+- [x] Verify session persistence after reload and removal after logout.
+      Login tests now use registered users and reopen the profile after logout
+      to verify the login redirect and visible login control.
+- [ ] Keep one short happy path: a fresh user creates a field, staff member,
+      and assignment; confirm the final state through API.
+- [ ] Tag tests consistently with `@p0`, `@smoke`, `@api`, `@ui`, and `@e2e`.
+
+Completion criterion: `@p0` passes five times using `--repeat-each=5`
+without intermittent failures.
+
+### Stage 3 — API contracts before more UI tests
+
+Implementation order:
 
 1. **Financial API**
-   - [ ] konto i saldo;
-   - [ ] historia z `total`, `limit`, `offset` i `hasMore`;
-   - [ ] income oraz expense i wpływ na saldo;
-   - [ ] przelew: minimum `0.01`, maksimum `999.99`, saldo równe kwocie,
-         przekroczenie salda i nieistniejący odbiorca.
+   - [ ] account and balance;
+   - [ ] history with `total`, `limit`, `offset`, and `hasMore`;
+   - [ ] income and expense and their effect on the balance;
+   - [ ] transfer: minimum `0.01`, maximum `999.99`, balance equal to the
+         amount, exceeding the balance, and a nonexistent recipient.
 2. **Farm API**
-   - [ ] CRUD pola, personelu i zwierząt;
-   - [ ] przypisanie i usunięcie przypisania;
-   - [ ] blokada usunięcia przypisanego zasobu;
-   - [ ] granice wieku, powierzchni, liczby zwierząt i wymaganych pól;
-   - [ ] district oraz dozwolone typy zwierząt.
+   - [ ] field, staff, and animal CRUD;
+   - [ ] assignment and unassignment;
+   - [ ] preventing deletion of an assigned resource;
+   - [ ] boundaries for age, area, animal count, and required fields;
+   - [ ] district and allowed animal types.
 3. **Marketplace API**
-   - [ ] lista ofert i `my-offers`;
-   - [ ] utworzenie i anulowanie własnej oferty;
-   - [ ] brak możliwości kupienia własnej oferty;
-   - [ ] zakup, zmiana właściciela i dwa wpisy finansowe;
-   - [ ] niewystarczające środki i próba podwójnego zakupu.
-4. **Users i Profile API**
-   - [ ] odczyt oraz aktualizacja świeżego konta;
-   - [ ] usunięcie wyłącznie świeżego konta testowego;
-   - [ ] brak dostępu do danych innego użytkownika.
-5. **Alerts, Contact i System API**
-   - [ ] alerts, history, upcoming i filtry;
-   - [ ] poprawny oraz błędny formularz kontaktowy;
-   - [ ] healthcheck, ping, about i statistics.
+   - [ ] offer listing and `my-offers`;
+   - [ ] creating and cancelling an owned offer;
+   - [ ] preventing purchase of one's own offer;
+   - [ ] purchase, ownership transfer, and two financial entries;
+   - [ ] insufficient funds and a double-purchase attempt.
+4. **Users and Profile API**
+   - [ ] reading and updating a fresh account;
+   - [ ] deleting only a fresh test account;
+   - [ ] preventing access to another user's data.
+5. **Alerts, Contact, and System API**
+   - [ ] alerts, history, upcoming, and filters;
+   - [ ] valid and invalid contact forms;
+   - [ ] healthcheck, ping, about, and statistics.
 
-Na początku asertować tylko stabilne pola ważne biznesowo. Dopiero po poznaniu
-rzeczywistych odpowiedzi warto dodać walidację schematów, np.
-`@playwright/test` + `zod` albo `ajv`. Swagger i rzeczywiste odpowiedzi pomagają
-poznać API, ale zaobserwowane zachowanie nie staje się automatycznie wymaganiem.
-Rozbieżności z oczekiwanym kontraktem opisać i świadomie ustalić zakres testu.
+Initially assert only stable, business-relevant fields. Once real responses are
+understood, consider schema validation, for example `@playwright/test` with
+`zod` or `ajv`. Swagger and real responses help discover the API, but observed
+behavior does not automatically become a requirement. Describe discrepancies
+with the expected contract and deliberately define test scope.
 
-Warunek zakończenia: każda główna domena ma co najmniej happy path, granicę i
-błąd autoryzacji, bez kopiowania tych samych przypadków do UI.
+Completion criterion: every main domain has at least a happy path, a boundary
+case, and an authorization failure, without copying the same cases into UI.
 
-### Etap 4 — rozszerzaj UI domenami
+### Stage 4 — expand UI coverage by domain
 
-#### Profil i uwierzytelnianie
+#### Profile and authentication
 
-- [ ] edycja display name na świeżym koncie;
-- [ ] walidacja hasła i potwierdzenia hasła;
-- [ ] upload niepoprawnego typu pliku;
-- [ ] usunięcie świeżego konta z potwierdzeniem `DELETE`;
-- [ ] 2FA tylko wtedy, gdy funkcja jest aktywna i da się kontrolować dane.
+- [ ] editing the display name on a fresh account;
+- [ ] password and password-confirmation validation;
+- [ ] uploading an invalid file type;
+- [ ] deleting a fresh account with `DELETE` confirmation;
+- [ ] 2FA only when the feature is active and its data can be controlled.
 
-#### Gospodarstwo
+#### Farm
 
-- [ ] wyszukiwanie i paginacja pól, personelu i zwierząt;
-- [ ] edycja wszystkich istotnych pól, nie tylko nazwy;
-- [ ] relacja zwierzę–pole oraz district;
-- [ ] jeden reprezentatywny test widoku przypisań, zamiast kopiowania tej samej
-      asercji dla siedmiu prezentacji;
-- [ ] wykresy: renderowanie danych i przełączanie typu wykresu bez błędów JS.
+- [ ] search and pagination for fields, staff, and animals;
+- [ ] editing all important fields, not just the name;
+- [ ] animal–field relationships and district;
+- [ ] one representative assignment-view test instead of repeating the same
+      assertion across seven presentations;
+- [ ] charts: rendering data and switching chart type without JS errors.
 
-#### Marketplace i finanse
+#### Marketplace and finances
 
-- [ ] filtrowanie i paginacja ofert;
-- [ ] anulowanie własnej oferty w UI;
-- [ ] osobne scenariusze zakupu pola i zwierząt, bez warunku w środku testu;
-- [ ] filtry historii finansowej po typie, kategorii i zakresie dat;
-- [ ] walidacja karty/CVV oraz limitów formularza przelewu.
+- [ ] offer filtering and pagination;
+- [ ] cancelling an owned offer through UI;
+- [ ] separate field and animal purchase scenarios without a conditional inside the test;
+- [ ] transaction-history filters by type, category, and date range;
+- [ ] card/CVV validation and transfer-form limits.
 
-#### Nowe publiczne funkcje
+#### New public features
 
-- [ ] Alerts: wyszukiwanie, severity, region i pusty wynik;
-- [ ] Contact: wymagane pola, błędny email, Clear i poprawna wysyłka;
-- [ ] Docs: wyszukiwanie oraz pokazywanie/ukrywanie opisów feature-flagged;
-- [ ] Map: test dopiero po świadomym włączeniu feature flag.
+- [ ] Alerts: search, severity, region, and empty results;
+- [ ] Contact: required fields, invalid email, Clear, and successful submission;
+- [ ] Docs: search and showing/hiding feature-flagged descriptions;
+- [ ] Map: test only after deliberately enabling the feature flag.
 
-### Etap 5 — jakość niefunkcjonalna i CI
+### Stage 5 — nonfunctional quality and CI
 
-- [ ] Dodać `pull_request` do workflow.
-- [ ] Rozdzielić CI na `quality`, szybkie `api`, `smoke` i pełne `regression`.
-- [ ] Pełną regresję uruchamiać ręcznie lub cyklicznie, dopóki rate limiter i
-      dane testowe nie są w pełni izolowane.
-- [ ] Dodać `@axe-core/playwright` dopiero po ustabilizowaniu P0; zacząć od
-      Home, Login, Register i jednego ekranu po zalogowaniu.
-- [ ] Po Chromium dodać Firefox dla P0. WebKit i widoki mobilne dopiero wtedy,
-      gdy nie potrajają czasu debugowania podstaw.
-- [ ] Testy wizualne ograniczyć do kilku stabilnych komponentów. Nie maskować
-      większości strony tylko po to, aby snapshot był zielony.
-- [ ] Raport przechowywać po każdym CI, trace i screenshot tylko przy błędzie.
+- [ ] Add `pull_request` to the workflow.
+- [ ] Split CI into `quality`, fast `api`, `smoke`, and full `regression`.
+- [ ] Run full regression manually or on a schedule until rate limiting
+      and test data are fully isolated.
+- [ ] Add `@axe-core/playwright` only after P0 is stable; start with
+      Home, Login, Register, and one authenticated screen.
+- [ ] After Chromium, add Firefox for P0. Add WebKit and mobile views only
+      when they do not triple the time spent debugging fundamentals.
+- [ ] Limit visual tests to a few stable components. Do not mask most of
+      the page simply to make the snapshot pass.
+- [ ] Retain the report after every CI run, and traces/screenshots only on failure.
 
-## 5. Docelowa mapa pokrycia
+## 5. Scenario catalog and coverage contract
 
-| Obszar           | Jest teraz                             | Najbliższy wartościowy krok             | Później                    |
-| ---------------- | -------------------------------------- | --------------------------------------- | -------------------------- |
-| Publiczne strony | częściowy smoke                        | Alerts, Contact, macierz tras           | Docs search, feature flags |
-| Auth API         | 11 działających testów                 | poprawić nazwy/statusy i izolację sesji | 2FA, role                  |
-| Auth UI          | login/logout, błędne testy rejestracji | naprawić rejestrację i guardy           | zmiana hasła               |
-| Profil           | odczyt demo                            | aktualizacja świeżego konta             | bezpieczne usunięcie       |
-| Farma            | CRUD UI i przypisania                  | kontrakty API i blokady                 | district, paginacja, mapa  |
-| Marketplace      | zakup, oferta, brak środków            | API anulowania i własności              | wyścig dwóch kupujących    |
-| Finanse          | saldo, historia, przelew, overdraft    | API paginacji i granic                  | statystyki i raport        |
-| Alerts/Contact   | brak                                   | podstawowy UI + API                     | kombinacje filtrów         |
-| Wykresy          | brak                                   | render i zmiana typu                    | zgodność danych z API      |
-| Visual/a11y      | jeden kruchy snapshot                  | stabilny komponent Home                 | krytyczne ekrany           |
+This is the only manually maintained scenario registry. The initial catalog
+maps all existing scenario tests and selected next exercises from the roadmap.
+Broader roadmap topics have not all been decomposed into cases: percentages
+apply only to included rows below, never to the entire application.
 
-## 6. Konwencje dla nowych testów
+One row describes one concrete case at one test layer. UI and API checks of
+related behavior may have different IDs. Existing overlapping tests remain
+visible and are not evidence of additional business requirements. Technical
+maintenance tasks are not scenario rows. Setup entries have no case ID.
 
-### Nazwy i pliki
+- Add one static `case-id` annotation to each test declaration. Use
+  `TC-AREA-001` identifiers, never recycle IDs, and keep them after renaming files.
+- Parameterized data carries explicit IDs per case; array positions are not IDs.
+- Included rows with no collected test are planned gaps, not validation errors.
+- Excluded rows require a rationale. Do not silently remove gaps to improve a score.
+- README contains a generated index of this catalog. Edit rows here and run
+  `npm run coverage:readme`; the report parses both complete Markdown documents.
+- Supported table cells are single-line text with `\|` for a literal pipe.
+  The column names and start/end markers are part of the parser contract.
 
-- `*.api.spec.ts` — kontrakty HTTP bez przeglądarki.
-- `*.isolated.spec.ts` — UI na użytkowniku tworzonym dla testu.
-- `*.journey.spec.ts` — nieliczne scenariusze łączące kilka domen.
-- Nazwa testu opisuje zachowanie i wynik, np.
+<!-- coverage-catalog:start -->
+
+| ID             | Area        | Scenario                                                              | Layer  | Priority | Scope    | Notes                                                                                           |
+| -------------- | ----------- | --------------------------------------------------------------------- | ------ | -------- | -------- | ----------------------------------------------------------------------------------------------- |
+| TC-ASSIGN-001  | Farm        | should assignment for new staff and field                             | UI     | P1       | included | -                                                                                               |
+| TC-ASSIGN-002  | Farm        | should not show assigned staff in select dropdown                     | UI     | P1       | included | -                                                                                               |
+| TC-ASSIGN-003  | Farm        | should unassigned works correctly                                     | UI     | P1       | included | -                                                                                               |
+| TC-ASSIGN-004  | Farm        | should show 2 staff assigned to field in tree view                    | UI     | P1       | included | -                                                                                               |
+| TC-AUTH-001    | Auth        | should register new user successfully with valid data                 | API    | P0       | included | -                                                                                               |
+| TC-AUTH-002    | Auth        | should reject registration with invalid email format                  | API    | P0       | included | -                                                                                               |
+| TC-AUTH-003    | Auth        | should reject registration with duplicate email                       | API    | P0       | included | -                                                                                               |
+| TC-AUTH-004    | Auth        | should login successfully with valid credentials                      | API    | P0       | included | -                                                                                               |
+| TC-AUTH-005    | Auth        | should reject login with non-existent email                           | API    | P0       | included | -                                                                                               |
+| TC-AUTH-006    | Auth        | should reject login with wrong password                               | API    | P0       | included | -                                                                                               |
+| TC-AUTH-007    | Auth        | should validate valid token via GET request                           | API    | P0       | included | -                                                                                               |
+| TC-AUTH-008    | Auth        | should reject invalid token via GET request                           | API    | P0       | included | -                                                                                               |
+| TC-AUTH-009    | Auth        | should validate valid token via POST request                          | API    | P0       | included | -                                                                                               |
+| TC-AUTH-010    | Auth        | should reject invalid token via POST request                          | API    | P0       | included | -                                                                                               |
+| TC-AUTH-011    | Auth        | should logout successfully                                            | API    | P0       | included | -                                                                                               |
+| TC-AUTH-012    | Auth        | Anonymous fields request returns 401 without field data               | API    | P0       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-CHART-001   | Charts      | Chart type switches without JavaScript errors                         | UI     | P2       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-FARM-001    | Farm        | should create a new field in Staff & Fields view                      | UI     | P1       | included | -                                                                                               |
+| TC-FARM-002    | Farm        | should create a new animal herd in Staff & Fields view                | UI     | P1       | included | -                                                                                               |
+| TC-FARM-003    | Farm        | should create a new staff in Staff & Fields view                      | UI     | P1       | included | -                                                                                               |
+| TC-FARM-004    | Farm        | should edit a field name                                              | UI     | P1       | included | -                                                                                               |
+| TC-FARM-005    | Farm        | should delete a field                                                 | UI     | P1       | included | -                                                                                               |
+| TC-FARM-006    | Farm        | should update a staff                                                 | UI     | P1       | included | -                                                                                               |
+| TC-FARM-007    | Farm        | should delete a staff                                                 | UI     | P1       | included | -                                                                                               |
+| TC-FARM-008    | Farm        | should edit a animal                                                  | UI     | P1       | included | -                                                                                               |
+| TC-FARM-009    | Farm        | should delete a animal                                                | UI     | P1       | included | -                                                                                               |
+| TC-FARM-010    | Farm        | A newly created field can be retrieved with its name and area         | API    | P0       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-FARM-011    | Farm        | Invalid field area is rejected without creating a field               | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-FARM-012    | Farm        | Deleting an assigned field follows the agreed deletion contract       | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-FARM-013    | Farm        | Fields search and pagination show the requested subset                | UI     | P1       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-FIN-001     | Finance     | verify account balance and transaction history                        | UI     | P1       | included | -                                                                                               |
+| TC-FIN-002     | Finance     | verify funds transfer between users                                   | UI     | P1       | included | -                                                                                               |
+| TC-FIN-003     | Finance     | verify prevent overdraft                                              | UI     | P1       | included | Review needed: final balance is currently read before the rejected transfer.                    |
+| TC-FIN-004     | Finance     | Transaction history respects limit and offset and exposes hasMore     | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-FIN-005     | Finance     | Income and expense update the API account balance                     | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-FIN-006     | Finance     | Transfer accepts the minimum amount 0.01                              | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-FIN-007     | Finance     | Transfer accepts the maximum amount 999.99                            | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-FIN-008     | Finance     | Transfer of the full available balance leaves zero                    | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-FIN-009     | Finance     | Transfer above available balance leaves both accounts unchanged       | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-FIN-010     | Finance     | Transfer to a nonexistent recipient is rejected                       | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-GUARD-001   | Auth        | should redirect anonymous user from /profile.html to login            | UI     | P0       | included | -                                                                                               |
+| TC-GUARD-002   | Auth        | should redirect anonymous user from /marketplace.html to login        | UI     | P0       | included | -                                                                                               |
+| TC-GUARD-003   | Auth        | should redirect anonymous user from /financial.html to login          | UI     | P0       | included | -                                                                                               |
+| TC-GUARD-004   | Auth        | Anonymous Staff and Fields main page redirects to login               | UI     | P0       | excluded | Deliberate UI redirect exclusion recorded in section 2; API authorization remains in scope.     |
+| TC-GUARD-005   | Auth        | Anonymous assignments page redirects to login                         | UI     | P0       | excluded | Deliberate UI redirect exclusion recorded in section 2; authenticated features remain in scope. |
+| TC-GUARD-006   | Auth        | Anonymous charts page redirects to login                              | UI     | P0       | excluded | Deliberate UI redirect exclusion recorded in section 2; chart behavior remains in scope.        |
+| TC-JOURNEY-001 | Journeys    | should create assignment for new farmer                               | E2E    | P0       | included | -                                                                                               |
+| TC-JOURNEY-002 | Journeys    | marketplace e2e test                                                  | E2E    | P0       | included | -                                                                                               |
+| TC-JOURNEY-003 | Journeys    | verify blocked transaction                                            | E2E    | P0       | included | -                                                                                               |
+| TC-LOGIN-001   | Auth        | should display correct user data after login                          | UI     | P0       | included | -                                                                                               |
+| TC-LOGIN-002   | Auth        | session management should work correctly                              | UI     | P0       | included | -                                                                                               |
+| TC-MARKET-001  | Marketplace | should buy random offer and verify transaction history                | UI     | P1       | included | -                                                                                               |
+| TC-MARKET-002  | Marketplace | should return error when offer is to expensive                        | UI     | P1       | included | -                                                                                               |
+| TC-MARKET-003  | Marketplace | create offer and verify in My Offers page                             | UI     | P1       | included | -                                                                                               |
+| TC-MARKET-004  | Marketplace | An owner can cancel an offer through API                              | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-MARKET-005  | Marketplace | A different user cannot cancel another owner offer                    | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-MARKET-006  | Marketplace | An owner can cancel an offer through UI                               | UI     | P1       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-PROFILE-001 | Profile     | should display correct user information in profile sections           | UI     | P1       | included | Full-run observation: redirected to login; investigate shared-session invalidation.             |
+| TC-PROFILE-002 | Profile     | A fresh user can update the display name                              | UI     | P1       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-PROFILE-003 | Profile     | A fresh user can delete their own account after confirmation          | UI     | P1       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-PUBLIC-001  | Public      | Alerts page opens and displays its main controls                      | UI     | P2       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-PUBLIC-002  | Public      | Contact rejects missing required fields                               | UI     | P2       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-PUBLIC-003  | Public      | Contact accepts a valid submission                                    | UI     | P2       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-REG-001     | Auth        | should register new user successfully                                 | UI     | P0       | included | Review needed: assertion still depends on a transient success message.                          |
+| TC-REG-002     | Auth        | should display validation errors for invalid email and short password | UI     | P0       | included | -                                                                                               |
+| TC-REG-003     | Auth        | should prevent registration with empty required fields                | UI     | P0       | included | Review needed: hidden success alone does not prove required-field validation.                   |
+| TC-REG-004     | Auth        | should reject password with 1 characters                              | UI     | P0       | included | -                                                                                               |
+| TC-REG-005     | Auth        | should reject password with 2 characters                              | UI     | P0       | included | -                                                                                               |
+| TC-REG-006     | Auth        | should reject registration for empty password                         | UI     | P0       | included | -                                                                                               |
+| TC-REG-007     | Auth        | should reject registration with duplicate email                       | UI     | P0       | included | -                                                                                               |
+| TC-REG-008     | Auth        | should reject invalid email: "plaintext"                              | UI     | P0       | included | -                                                                                               |
+| TC-REG-009     | Auth        | should reject invalid email: "@example.com"                           | UI     | P0       | included | -                                                                                               |
+| TC-REG-010     | Auth        | should reject invalid email: "user@"                                  | UI     | P0       | included | -                                                                                               |
+| TC-REG-011     | Auth        | should reject invalid email: "user @example.com"                      | UI     | P0       | included | -                                                                                               |
+| TC-SMOKE-001   | Public      | should display the correct page title 'Rolnopol' on homepage          | UI     | P0       | included | -                                                                                               |
+| TC-SMOKE-002   | Public      | should load login page successfully                                   | UI     | P0       | included | -                                                                                               |
+| TC-SMOKE-003   | Public      | should load API documentation page successfully                       | UI     | P0       | included | -                                                                                               |
+| TC-SMOKE-004   | Public      | should load documentation page successfully                           | UI     | P0       | included | -                                                                                               |
+| TC-SMOKE-005   | Public      | should not display marketplace for non-logged user                    | UI     | P0       | included | Overlaps TC-GUARD-002; both existing cases are counted separately.                              |
+| TC-SMOKE-006   | Public      | should load register page successfully                                | UI     | P0       | included | -                                                                                               |
+| TC-SMOKE-007   | Public      | api app health check                                                  | API    | P0       | included | -                                                                                               |
+| TC-VIS-001     | Visual      | should match homepage visual snapshot                                 | Visual | P2       | included | Missing baseline in current visual-project path; review the image before creating a baseline.   |
+
+<!-- coverage-catalog:end -->
+
+### Metric definitions
+
+Automation coverage = included IDs with a collected test / all included IDs.
+Execution confirmation = included IDs passing in every collected project /
+all included IDs, only for matching source fingerprints and no global run errors.
+No denominator means no percentage. Missing or stale results mean no current
+confirmation, not zero failures. Setup and excluded cases are shown separately.
+
+Retries and repetitions are attempts, not new scenarios. Results retain passed,
+failed, flaky, skipped, not-run, interrupted, partial, and expected-failure states.
+A passing subset of required projects is partial. A mixture of pass and fail
+observations is shown as flaky; this describes that run, not its root cause.
+Expected failures do not confirm correct application behavior. Skips explicitly
+annotated by Playwright are separated from cases not executed after setup failure.
+
+An ID only proves a declared mapping. Review assertions before interpreting a
+passing test as evidence; known weaknesses remain visible in the Notes column.
+
+## 6. Conventions for new tests
+
+### Names and files
+
+- `*.api.spec.ts` — HTTP contracts without a browser.
+- `*.isolated.spec.ts` — UI with a user created for the test.
+- `*.journey.spec.ts` — a few scenarios spanning multiple domains.
+- Test names describe behavior and outcome, for example
   `should reject transfer above available balance`.
 
 ### Arrange–Act–Assert
 
-- Przygotowanie danych najlepiej przez API.
-- Jedna główna akcja użytkownika przez UI.
-- Asercja UI sprawdza komunikat/zachowanie, a asercja API stan biznesowy.
-- Page Object nie zawiera `expect()` i nie wymusza happy path, jeśli metoda jest
-  używana także w testach negatywnych.
+- Prefer preparing data through API.
+- Perform one main user action through UI.
+- UI assertions check messages/behavior; API assertions check business state.
+- Page Objects contain no `expect()` and do not force the happy path
+  when a method is also used in negative tests.
 
-### Stabilność
+### Stability
 
-- Preferować `getByRole`, `getByLabel` i `getByTestId`.
-- Nie używać `waitForTimeout()` w testach właściwych.
-- Nie łapać błędów pustym `.catch(() => {})` bez zapisania, dlaczego cleanup
-  może bezpiecznie się nie udać.
-- Nie współdzielić kont modyfikowanych przez testy równoległe.
-- Retry pozostaje `0`, dopóki przyczyna flaków nie jest znana.
-- Dla każdej naprawy flaka najpierw odtworzyć problem, potem uruchomić test
-  minimum pięć razy.
+- Prefer `getByRole`, `getByLabel`, and `getByTestId`.
+- Do not use `waitForTimeout()` in actual tests.
+- Do not swallow errors with an empty `.catch(() => {})` without documenting
+  why cleanup can safely fail.
+- Do not share accounts modified by parallel tests.
+- Retries remain `0` until the cause of flakiness is known.
+- For each flakiness fix, reproduce the issue first, then run the test
+  at least five times.
 
-## 7. Przydatne komendy kontrolne
+## 7. Useful verification commands
 
 ```bash
-# Co Playwright naprawdę zbiera
+# What Playwright actually collects
 npx playwright test --list
 
-# Jakość kodu
+# Code quality
 npm run check:ci
 
-# Szybkie warstwy
+# Fast layers
 npx playwright test --project=api-tests --workers=1
 npx playwright test --project=smoke-tests --workers=1
 
-# Priorytet P0 po dodaniu tagów
+# P0 priority after adding tags
 npx playwright test --grep @p0 --workers=1
 
-# Kontrola flaków
+# Flakiness checks
 npx playwright test --grep @p0 --repeat-each=5 --workers=1
 
-# Pełny baseline bez równoległości
+# Full baseline without parallelism
 npx playwright test --workers=1 --reporter=list
 ```
 
-## 8. Kolejność małych commitów
+## 8. Coverage implementation workflow
 
-1. [x] `chore: ignore Playwright CLI artifacts`
-2. [x] `test: remove temporary API probe`
-3. [ ] `test: limit anonymous redirect matrix to agreed routes`
-4. [x] Oddzielenie wysłania rejestracji od oczekiwania na nawigację jest już
-       widoczne w kodzie; nie powtarzać refaktoru ani tworzyć pustego commita.
-5. [ ] `test: finish registration response and password cases`
-6. [ ] `test: stabilize homepage visual contract`
-7. [ ] `refactor: move staff suites to isolated-user project`
-8. [ ] `ci: run quality and smoke checks on pull requests`
-9. [ ] `test: add financial API contract coverage`
-10. [ ] `test: add farm API CRUD and assignment contracts`
+The standalone tooling lives in `scripts/coverage/` and runs with Node.js.
+`coverage:collect` uses Playwright discovery with no browser or credentials.
+`coverage:validate` checks mappings and the generated README index.
+`coverage:run` collects the full inventory, executes the selected scope with
+one worker and zero retries by default, generates the report even after failure,
+and preserves a failing exit code. Pass Playwright filters after `--`.
+`coverage:report` only reads saved inputs and does not contact the application.
 
-## 9. Definition of Done dla pojedynczego zadania
+Generated outputs live in ignored `coverage-report/`: inventory, raw Playwright
+results, normalized coverage JSON, and a standalone HTML document. The HTML
+renders README and this plan alongside the metrics and filtered scenario table.
+CI retains both Playwright HTML and coverage artifacts, including failed runs.
 
-- Test czerwienieje z oczekiwanego powodu przed poprawką aplikacji/testu.
-- Dane są unikalne i nie zależą od kolejności uruchomienia.
-- Cleanup nie usuwa danych demo ani danych innego testu.
-- Test przechodzi pojedynczo i w swoim projekcie.
-- `npm run check:ci` przechodzi.
-- Krytyczny test przechodzi pięć razy bez retry.
-- Nazwa, tagi i warstwa testu odpowiadają sprawdzanemu zachowaniu.
-- Plan jest aktualizowany na podstawie faktycznego wyniku, nie samej obecności
-  pliku testowego.
+The source fingerprint includes test and helper code, report tooling, config,
+package files and the two documents. A Git revision alone cannot identify local
+uncommitted edits. Application version is optional run metadata supplied with
+`COVERAGE_APP_VERSION`; unknown is reported honestly. No historical trend or
+release threshold is inferred from one run.
 
-## 10. Najbliższe ćwiczenia z mentorem
+## 9. Definition of Done for a single task
 
-To kolejność na najbliższe sesje nauki. Dalsza roadmapa pozostaje backlogiem;
-każdy krok kończy się małą, samodzielną zmianą i przeglądem jej wyniku.
+- The test fails for the expected reason before the application/test fix.
+- Data is unique and independent of execution order.
+- Cleanup does not delete demo data or another test's data.
+- The test passes individually and within its project.
+- `npm run check:ci` passes.
+- A critical test passes five times without retries.
+- The name, tags, and test layer match the behavior under test.
+- The plan is updated from actual results, not merely the presence of a test file.
 
-1. **Domknij zakres testu przekierowań.** Usuń trzy wpisy Staff & Fields
-   z `protectedRoutes`. Pozostaw asercję końcowego URL. Opcjonalnie sprawdź
-   widoczność formularza logowania, aby potwierdzić docelowy ekran.
-   Uruchom sam plik z `--project=no-auth-tests --workers=1 --retries=0`,
-   następnie `--repeat-each=5`. Gotowe: 3/3 oraz 15/15 bez retry.
-   Wyjaśnij własnymi słowami, dlaczego `200` dokumentu HTML i `401` API mogą
-   wystąpić razem. Marketplace jest też sprawdzany w smoke; zdecyduj świadomie,
-   czy zachować ten szybki duplikat.
-2. **Dokończ rejestrację.** W pozytywnym teście rozpocznij oczekiwanie na
-   odpowiedź `POST /api/v1/register` przed wysłaniem formularza, sprawdź `201`
-   i końcowy `/login.html`. Usuń zależność od przemijającego komunikatu sukcesu.
-   Krótkie hasła rozdziel na przypadki przez pętlę deklarującą `test()`;
-   pustą wartość i zbyt krótkie hasło sprawdzaj zgodnie z ich walidacją UI.
-   Sam brak sukcesu nie wystarcza jako dowód poprawnej walidacji.
-   Gotowe: raport rozróżnia dane wejściowe, a cały plik rejestracji przechodzi.
-3. **Uporządkuj izolację i sesję.** Przenieś dwie suite Staff & Fields do
-   wzorca `*.isolated.spec.ts` i potwierdź przez `--list`, że nie uruchamiają
-   setupu demo. W testach logowania użyj świeżego konta; po logout ponownie
-   wejdź na profil i oczekuj loginu. Odbiorcę przelewu również twórz osobno,
-   bez logowania na `EMPTY_USER`. Gotowe: scenariusze nie zależą od wspólnej
-   sesji ani kolejności. Każdą z tych zmian wykonaj w osobnym małym commicie.
-4. **Zapisz aktualny wynik bazowy.** Uruchom `check:ci`, `api-tests`,
-   `smoke-tests` i poprawione pliki auth kolejno, z jednym workerem i bez retry.
-   Zapisz datę, wersję aplikacji, komendę i wynik. Dla porażki ustal, czy
-   przyczyną jest test, dane, środowisko czy zachowanie aplikacji.
-   `check:ci` jest już zielone; wyniki uruchomień testów wymagają odświeżenia.
-   Pełną regresję dodaj po tym kroku; snapshot wizualny diagnozuj osobno.
-5. **Dodaj mały kontrakt API gospodarstwa.** Zacznij od anonimowego
-   `GET /api/v1/fields`: oczekuj `401` i odpowiedzi błędu bez danych pól.
-   Do negatywnego przypadku użyj surowej odpowiedzi HTTP, aby móc sprawdzić
-   status. Następnie na świeżym koncie utwórz pole i potwierdź odczyt jego ID,
-   nazwy i powierzchni. Dodaj jeden przypadek walidacji na podstawie poznanego
-   kontraktu. Gotowe: mały zestaw API uruchamia się samodzielnie i sprząta
-   wyłącznie własne dane. To krótkie ćwiczenie przed szerszą kolejnością
-   domen z etapu 3.
-6. **Przejdź do finansów.** Najpierw popraw istniejący overdraft: oblicz kwotę
-   opróżnienia z rzeczywistego salda, zamiast wpisywać `18450`. Po odrzuconym
-   przelewie ponownie pobierz saldo przez API. Obecny `currentBalance` jest
-   odczytany przed akcją, więc jego końcowa asercja nie dowodzi braku zmiany.
-   Następnie dodaj kontrakt przychodu/wydatku i granic przelewu.
-   Gotowe: sprawdzasz stan po akcji oraz brak skutków odrzuconej operacji.
+## 10. Upcoming exercises with the mentor
 
-### Narzędzia do kolejnych ćwiczeń
+Use the existing stages as the single backlog. Completed code changes above
+should not be repeated merely because an old result is missing.
 
-Na obecnym etapie wystarczy zainstalowany Playwright i terminal. Do własnej
-obserwacji używaj `--headed` albo `--debug`, a `--list` traktuj jako kontrolę
-przypisania testów do projektów. Badanie z 7 września wykonano przez istniejącą
-bibliotekę Playwright z terminala, bez dodawania pliku sondy i konfiguracji MCP.
+1. Review the known registration and overdraft assertion gaps in catalog Notes.
+   Make each correction separately and verify the affected file and project.
+2. Record an API and smoke baseline with `npm run coverage:run -- --project=api-tests`
+   and then the smoke project. Each run replaces the current result; archive the
+   output directory separately when a comparison is needed.
+3. Implement `TC-AUTH-012` and `TC-FARM-010` as the first farm API exercise,
+   using raw HTTP responses for expected 401 errors and independent test data.
+4. Continue the financial API boundaries in stage 3. Preserve stable IDs and
+   regenerate README when catalog descriptions or scope change.
+5. Diagnose the visual baseline separately, then measure the full suite and
+   repeat P0 checks under comparable conditions as described in the roadmap.
 
-MCP jest opcjonalnym narzędziem do eksploracji przeglądarki przez asystenta;
-nie jest warunkiem pisania ani uruchamiania testów. Można wrócić do jego
-konfiguracji jako osobnego ćwiczenia, gdy pojawi się potrzeba takiej pracy.
-Dokumentacja projektu opisuje również CLI jako opcję dla agentów:
-[Playwright MCP](https://github.com/microsoft/playwright-mcp).
+CLI/MCP browser exploration is optional when clarifying expected behavior.
+Neither exploration tools nor an agent are dependencies of the coverage report.

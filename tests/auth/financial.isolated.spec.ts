@@ -29,6 +29,7 @@ test.describe('Financial functionality tests', () => {
   test(
     'verify account balance and transaction history',
     {
+      annotation: { type: 'case-id', description: 'TC-FIN-001' },
       tag: ['@financial', '@balance', '@history'],
     },
     async ({ financialPage }) => {
@@ -93,6 +94,7 @@ test.describe('Financial functionality tests', () => {
   test(
     'verify funds transfer between users',
     {
+      annotation: { type: 'case-id', description: 'TC-FIN-002' },
       tag: ['@financial', '@transfer', '@business-logic'],
     },
     async ({ financialPage, page }) => {
@@ -126,6 +128,7 @@ test.describe('Financial functionality tests', () => {
   test(
     'verify prevent overdraft',
     {
+      annotation: { type: 'case-id', description: 'TC-FIN-003' },
       tag: [`@financial`, `@validation`, `@edge-case`],
     },
     async ({ request, financialPage, page }) => {

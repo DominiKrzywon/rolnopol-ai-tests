@@ -11,9 +11,23 @@ export default defineConfig({
   testDir: './tests',
   timeout: 30 * 1000,
   fullyParallel: true,
+  metadata: {
+    environment: new URL(ENV.BASE_URL).origin,
+    coverage: process.env.COVERAGE_CONTEXT
+      ? JSON.parse(process.env.COVERAGE_CONTEXT)
+      : undefined,
+  },
   reporter: process.env.CI
-    ? [['github'], ['html']]
-    : [['html', { open: 'never' }]],
+    ? [
+        ['github'],
+        ['html', { open: 'never' }],
+        ['json', { outputFile: 'coverage-report/playwright-results.json' }],
+      ]
+    : [
+        ['list'],
+        ['html', { open: 'never' }],
+        ['json', { outputFile: 'coverage-report/playwright-results.json' }],
+      ],
   use: {
     baseURL: ENV.BASE_URL || 'http://localhost:3000',
     // baseURL: 'http://web:3000',

@@ -5,14 +5,18 @@ import { getDemoUserData } from '../../src/models/User';
 import { LoginPage } from '../../src/pages/LoginPage';
 import { ProfilePage } from '../../src/pages/ProfilePage';
 
-setup('authenticate as DEMO_USER', async ({ page }) => {
-  const user = getDemoUserData();
-  const loginPage = new LoginPage(page);
-  const profilePage = new ProfilePage(page);
+setup(
+  'authenticate as DEMO_USER',
+  { annotation: { type: 'coverage-role', description: 'setup' } },
+  async ({ page }) => {
+    const user = getDemoUserData();
+    const loginPage = new LoginPage(page);
+    const profilePage = new ProfilePage(page);
 
-  await loginPage.goto();
-  await loginPage.login(user);
-  await expect(page).toHaveURL(profilePage.PAGE_URL);
+    await loginPage.goto();
+    await loginPage.login(user);
+    await expect(page).toHaveURL(profilePage.PAGE_URL);
 
-  await page.context().storageState({ path: DEMO_USER_AUTH_FILE });
-});
+    await page.context().storageState({ path: DEMO_USER_AUTH_FILE });
+  },
+);

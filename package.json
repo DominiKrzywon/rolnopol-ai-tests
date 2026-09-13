@@ -18,7 +18,13 @@
     "lint": "npx eslint .",
     "lint-staged": "npx lint-staged",
     "tsc:check": "npx tsc --noEmit --pretty",
-    "prepare": "husky"
+    "prepare": "husky",
+    "coverage:validate": "node scripts/coverage/cli.mjs validate",
+    "coverage:collect": "node scripts/coverage/cli.mjs collect",
+    "coverage:run": "node scripts/coverage/cli.mjs run",
+    "coverage:report": "node scripts/coverage/cli.mjs report",
+    "coverage:readme": "node scripts/coverage/cli.mjs readme",
+    "coverage:test": "node --test scripts/coverage/coverage.test.mjs"
   },
   "engines": {
     "node": "^18.0.0 || ^20.0.0 || >=22.0.0"

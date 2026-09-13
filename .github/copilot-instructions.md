@@ -42,38 +42,14 @@ chore: update playwright to v1.40.0
 3. Keep under 50 characters
 4. Use imperative mood ("add" not "added")
 
-## Test Framework
+## Shared learning and test workflow
 
-This project uses **Playwright Test** framework for end-to-end testing. Always review `playwright.config.ts` when creating tests to understand:
+Read [the shared context](../.agents/skills/CONTEXT.md) for learning mode,
+repository sources, environment handling and validation scope.
+Use the [skill catalog](../README.md#agent-skills) to choose a procedure.
+All skill packages live in .agents/skills; maintain workflows there instead
+of duplicating them in agent or prompt files.
 
-- Base URL configuration
-- Timeout settings
-- Browser configurations
-- Test directory structure
-- Reporter settings
-
-## Test Creation Guidelines
-
-When creating or updating tests, always use appropriate tags from the Test Plan and Tagging System (see TEST_PLAN.md):
-
-### Examples
-
-```typescript
-test('should display title "Rolnopol" on homepage', {
-  tag: ['@smoke', '@critical'],
-});
-test('user registration with valid data', {
-  tag: ['@auth', '@registration', '@happy-path'],
-});
-test('prevent purchase with insufficient funds', {
-  tag: ['@marketplace', '@validation', '@edge-case'],
-});
-```
-
-Keep tags aligned with TEST_PLAN.md test cases for consistency.
-
-## Security: Environment Files
-
-**NEVER read or access the `.env` file.** It contains sensitive credentials that must not be exposed in conversations or code suggestions.
-
-When you need access to credentials or environment variables for AI purposes, use `#file:.env.ai` instead.
+Use [playwright-test-automation](../.agents/skills/playwright-test-automation/SKILL.md)
+for test design and implementation. Review-only requests use the small or
+advanced review skill according to dependency scope.

@@ -12,6 +12,7 @@ export default [
       'playwright-report/**',
       'test-results/**',
       'node_modules/**',
+      'coverage-report/**',
     ],
   },
   { files: ['**/*.ts'] },
@@ -62,4 +63,16 @@ export default [
     },
   },
   eslintPluginPrettierRecommended,
+  {
+    files: ['scripts/coverage/**/*.mjs'],
+    rules: {
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      ...Object.fromEntries(
+        Object.keys(eslintPluginPlaywright.rules).map((rule) => [
+          `playwright/${rule}`,
+          'off',
+        ]),
+      ),
+    },
+  },
 ];

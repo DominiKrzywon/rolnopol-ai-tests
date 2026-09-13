@@ -21,6 +21,7 @@ test.describe('E2E user journeys', () => {
   test(
     'should create assignment for new farmer',
     {
+      annotation: { type: 'case-id', description: 'TC-JOURNEY-001' },
       tag: ['@e2e', '@farm-setup', '@user-journey'],
     },
     async ({ page, managementPage, assignPage }) => {
@@ -90,7 +91,10 @@ test.describe('E2E user journeys', () => {
 
   test(
     'marketplace e2e test',
-    { tag: [`@e2e`, `@marketplace-flow`, `@user-journey`] },
+    {
+      annotation: { type: 'case-id', description: 'TC-JOURNEY-002' },
+      tag: [`@e2e`, `@marketplace-flow`, `@user-journey`],
+    },
     async ({ browser }) => {
       test.setTimeout(90_000);
 
@@ -179,7 +183,10 @@ test.describe('E2E user journeys', () => {
 
   test(
     'verify blocked transaction',
-    { tag: [`@e2e`, `@edge-case`, `@validation`] },
+    {
+      annotation: { type: 'case-id', description: 'TC-JOURNEY-003' },
+      tag: [`@e2e`, `@edge-case`, `@validation`],
+    },
     async ({ page, marketplacePage }) => {
       const expectedErrorMessage =
         'Insufficient funds to complete purchase (no overdraft allowed)';

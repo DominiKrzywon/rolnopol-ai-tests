@@ -4,7 +4,10 @@ import { HomePage } from '../../src/pages/HomePage';
 
 test(
   'should match homepage visual snapshot',
-  { tag: ['@smoke', '@critical', '@visual'] },
+  {
+    annotation: { type: 'case-id', description: 'TC-VIS-001' },
+    tag: ['@smoke', '@critical', '@visual'],
+  },
   async ({ page }) => {
     const homePage = new HomePage(page);
 

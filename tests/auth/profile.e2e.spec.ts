@@ -5,7 +5,10 @@ import { getDemoUserData } from '../../src/models/User';
 test.describe('Profile Page E2E', () => {
   test(
     'should display correct user information in profile sections',
-    { tag: ['@auth', '@profile', '@happy-path'] },
+    {
+      annotation: { type: 'case-id', description: 'TC-PROFILE-001' },
+      tag: ['@auth', '@profile', '@happy-path'],
+    },
     async ({ profilePage }) => {
       const user = getDemoUserData();
 

@@ -15,7 +15,10 @@ test.describe('Authentication API', () => {
   test.describe('Registration', () => {
     test(
       'should register new user successfully with valid data',
-      { tag: ['@api', '@auth', '@registration', '@happy-path'] },
+      {
+        annotation: { type: 'case-id', description: 'TC-AUTH-001' },
+        tag: ['@api', '@auth', '@registration', '@happy-path'],
+      },
       async ({ request }) => {
         // Arrange
         const newUser = prepareRandomUser();
@@ -39,7 +42,10 @@ test.describe('Authentication API', () => {
 
     test(
       'should reject registration with invalid email format',
-      { tag: ['@api', '@auth', '@validation', '@negative'] },
+      {
+        annotation: { type: 'case-id', description: 'TC-AUTH-002' },
+        tag: ['@api', '@auth', '@validation', '@negative'],
+      },
       async ({ request }) => {
         // Arrange
         const invalidUser: User = {
@@ -70,7 +76,10 @@ test.describe('Authentication API', () => {
 
     test(
       'should reject registration with duplicate email',
-      { tag: ['@api', '@auth', '@validation', '@negative'] },
+      {
+        annotation: { type: 'case-id', description: 'TC-AUTH-003' },
+        tag: ['@api', '@auth', '@validation', '@negative'],
+      },
       async ({ request }) => {
         // Arrange
         const existingUser = getDemoUserData();
@@ -99,7 +108,10 @@ test.describe('Authentication API', () => {
   test.describe('Login', () => {
     test(
       'should login successfully with valid credentials',
-      { tag: ['@api', '@auth', '@login', '@happy-path'] },
+      {
+        annotation: { type: 'case-id', description: 'TC-AUTH-004' },
+        tag: ['@api', '@auth', '@login', '@happy-path'],
+      },
       async ({ request }) => {
         // Arrange
         const user = getDemoUserData();
@@ -128,7 +140,10 @@ test.describe('Authentication API', () => {
 
     test(
       'should reject login with non-existent email',
-      { tag: ['@api', '@auth', '@login', '@negative'] },
+      {
+        annotation: { type: 'case-id', description: 'TC-AUTH-005' },
+        tag: ['@api', '@auth', '@login', '@negative'],
+      },
       async ({ request }) => {
         // Arrange
         const invalidCredentials: User = {
@@ -154,7 +169,10 @@ test.describe('Authentication API', () => {
 
     test(
       'should reject login with wrong password',
-      { tag: ['@api', '@auth', '@login', '@negative'] },
+      {
+        annotation: { type: 'case-id', description: 'TC-AUTH-006' },
+        tag: ['@api', '@auth', '@login', '@negative'],
+      },
       async ({ request }) => {
         // Arrange
         const user = getDemoUserData();
@@ -183,7 +201,10 @@ test.describe('Authentication API', () => {
   test.describe('Token Authorization', () => {
     test(
       'should validate valid token via GET request',
-      { tag: ['@api', '@auth', '@authorization', '@happy-path'] },
+      {
+        annotation: { type: 'case-id', description: 'TC-AUTH-007' },
+        tag: ['@api', '@auth', '@authorization', '@happy-path'],
+      },
       async ({ request }) => {
         // Arrange
         const user = getDemoUserData();
@@ -211,7 +232,10 @@ test.describe('Authentication API', () => {
 
     test(
       'should reject invalid token via GET request',
-      { tag: ['@api', '@auth', '@authorization', '@negative'] },
+      {
+        annotation: { type: 'case-id', description: 'TC-AUTH-008' },
+        tag: ['@api', '@auth', '@authorization', '@negative'],
+      },
       async ({ request }) => {
         // Arrange
         const invalidToken = 'invalid_token_xyz';
@@ -234,7 +258,10 @@ test.describe('Authentication API', () => {
 
     test(
       'should validate valid token via POST request',
-      { tag: ['@api', '@auth', '@authorization', '@happy-path'] },
+      {
+        annotation: { type: 'case-id', description: 'TC-AUTH-009' },
+        tag: ['@api', '@auth', '@authorization', '@happy-path'],
+      },
       async ({ request }) => {
         // Arrange
         const user = getDemoUserData();
@@ -258,7 +285,10 @@ test.describe('Authentication API', () => {
 
     test(
       'should reject invalid token via POST request',
-      { tag: ['@api', '@auth', '@authorization', '@negative'] },
+      {
+        annotation: { type: 'case-id', description: 'TC-AUTH-010' },
+        tag: ['@api', '@auth', '@authorization', '@negative'],
+      },
       async ({ request }) => {
         // Arrange
         const invalidToken = 'invalid_token_xyz';
@@ -283,7 +313,10 @@ test.describe('Authentication API', () => {
   test.describe('Logout', () => {
     test(
       'should logout successfully',
-      { tag: ['@api', '@auth', '@logout', '@happy-path'] },
+      {
+        annotation: { type: 'case-id', description: 'TC-AUTH-011' },
+        tag: ['@api', '@auth', '@logout', '@happy-path'],
+      },
       async ({ request }) => {
         // Act
         const response = await logout(request);
