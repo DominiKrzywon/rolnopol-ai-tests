@@ -131,32 +131,29 @@ test.describe('Financial functionality tests', () => {
       annotation: { type: 'case-id', description: 'TC-FIN-003' },
       tag: [`@financial`, `@validation`, `@edge-case`],
     },
-    async ({ request, financialPage, page }) => {
+    async ({ request, financialPage }) => {
       const leave = 50;
-      const extraMoney = 9000;
-      const amountBeforeDrain = 18450;
-      await topUpAmount(request, extraMoney);
-
       const expectedErrorMessage = 'Insufficient funds for transfer';
       const toUserId = await createRecipientId();
 
-      await financialPage.goto();
+      const balanceBeforeDrain = await getAccountBalance(request);
+      await drainAccount(request, balanceBeforeDrain - leave);
 
-      await drainAccount(request, amountBeforeDrain);
+      const balanceBeforeTransfer = await getAccountBalance(request);
+      expect(balanceBeforeTransfer).toBe(leave);
 
-      await page.reload();
-      expect(await financialPage.getBalance()).toEqual(leave);
-
-      const currentBalance = await getAccountBalance(request);
-
-      const amount = leave + 1;
+      const amount = balanceBeforeTransfer + 1;
       const description = `Negative ${Date.now()}`;
+
+      await financialPage.goto();
 
       await financialPage.transferFunds({ toUserId, amount, description });
       await expect(financialPage.notificationMessage).toHaveText(
         expectedErrorMessage,
       );
-      expect(currentBalance).toEqual(leave);
+
+      const balanceAfterTransfer = await getAccountBalance(request);
+      expect(balanceAfterTransfer).toBe(balanceBeforeTransfer);
     },
   );
 });

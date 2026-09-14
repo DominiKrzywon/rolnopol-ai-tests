@@ -10,7 +10,7 @@ test(
     annotation: { type: 'case-id', description: 'TC-REG-001' },
     tag: ['@smoke', '@auth', '@registration'],
   },
-  async ({ page, registerPage }) => {
+  async ({ page, registerPage, loginPage }) => {
     const uniqueEmail = generateUniqueEmail();
     const user = {
       email: uniqueEmail,
@@ -30,6 +30,7 @@ test(
 
     expect(registrationResponse.status()).toBe(201);
     await expect(registerPage.successMessage).toBeVisible();
+    await expect(loginPage.header).toBeVisible();
     await expect(page).toHaveURL('/login.html');
   },
 );
