@@ -1,4 +1,3 @@
-import { expect, test } from '@playwright/test';
 import {
   loginAs,
   loginUser,
@@ -8,6 +7,7 @@ import {
   validateAuthorizationPost,
 } from 'src/api/auth.api';
 import { prepareRandomUser } from 'src/factories/user.factory';
+import { expect, test } from 'src/fixtures/auth.fixture';
 
 import { getDemoUserData, User } from '../../src/models/User';
 
@@ -112,12 +112,9 @@ test.describe('Authentication API', () => {
         annotation: { type: 'case-id', description: 'TC-AUTH-004' },
         tag: ['@api', '@auth', '@login', '@happy-path'],
       },
-      async ({ request }) => {
-        // Arrange
-        const user = getDemoUserData();
-
+      async ({ request, registeredUser }) => {
         // Act
-        const response = await loginUser(request, user);
+        const response = await loginUser(request, registeredUser);
         const body = await response.json();
 
         // Assert
@@ -134,7 +131,7 @@ test.describe('Authentication API', () => {
         expect(
           body.data.user.email,
           'Response email should match login email',
-        ).toBe(user.email);
+        ).toBe(registeredUser.email);
       },
     );
 
@@ -205,13 +202,9 @@ test.describe('Authentication API', () => {
         annotation: { type: 'case-id', description: 'TC-AUTH-007' },
         tag: ['@api', '@auth', '@authorization', '@happy-path'],
       },
-      async ({ request }) => {
+      async ({ request, registeredUser }) => {
         // Arrange
-        const user = getDemoUserData();
-        const session = await loginAs(request, {
-          email: user.email,
-          password: user.password,
-        });
+        const session = await loginAs(request, registeredUser);
 
         // Act
         const response = await validateAuthorizationGet(request, session.token);
@@ -262,10 +255,9 @@ test.describe('Authentication API', () => {
         annotation: { type: 'case-id', description: 'TC-AUTH-009' },
         tag: ['@api', '@auth', '@authorization', '@happy-path'],
       },
-      async ({ request }) => {
+      async ({ request, registeredUser }) => {
         // Arrange
-        const user = getDemoUserData();
-        const session = await loginAs(request, user);
+        const session = await loginAs(request, registeredUser);
 
         // Act
         const response = await validateAuthorizationPost(

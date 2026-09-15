@@ -9,10 +9,11 @@ test.describe('Profile Page E2E', () => {
       annotation: { type: 'case-id', description: 'TC-PROFILE-001' },
       tag: ['@auth', '@profile', '@happy-path'],
     },
-    async ({ profilePage }) => {
+    async ({ profilePage, page }) => {
       const user = getDemoUserData();
 
       await profilePage.goto();
+      await expect(page).toHaveURL(profilePage.PAGE_URL);
 
       await expect
         .soft(profilePage.welcomeMessage)
