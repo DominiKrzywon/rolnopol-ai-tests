@@ -1,9 +1,15 @@
 {
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.enable": true,
+  "eslint.validate": ["typescript"],
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "cSpell.userWords": ["Rolnopol"],
   "playwright.reuseBrowser": false,
