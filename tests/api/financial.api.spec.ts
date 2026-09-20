@@ -249,4 +249,152 @@ test.describe('Financial API', () => {
       }
     },
   );
+
+  test(
+    'should not allowed to transfer more than current balance',
+    {
+      annotation: {
+        type: 'case-id',
+        description: 'TC-FIN-009',
+      },
+      tag: ['@api', '@financial', '@transfer', '@negative'],
+    },
+    async ({ freshUser: _, request }) => {
+      const expectedErrorMessage = 'Insufficient funds for transfer';
+      const recipientApi = await playwrightRequest.newContext();
+
+      try {
+        const amount = 50;
+        const recipientId = await createLoggedInRecipient(recipientApi);
+
+        await topUpAmount(request, amount);
+        const senderBalanceBefore = await getAccountBalance(request);
+        const recipientBalanceBefore = await getAccountBalance(recipientApi);
+
+        expect(senderBalanceBefore).toEqual(amount);
+        expect(recipientBalanceBefore).toEqual(0);
+
+        const response = await request.post(
+          `${BASE_API_URL}/financial/transfer`,
+          {
+            data: {
+              toUserId: recipientId,
+              amount: senderBalanceBefore + 0.01,
+              description: 'Wrong balance',
+            },
+          },
+        );
+        const body = await response.json();
+
+        expect(response.status()).toBe(400);
+        expect(body.success).toBe(false);
+        expect(body.error).toBe(expectedErrorMessage);
+
+        const senderBalanceAfter = await getAccountBalance(request);
+        const recipientBalanceAfter = await getAccountBalance(recipientApi);
+
+        expect(senderBalanceAfter).toEqual(senderBalanceBefore);
+        expect(recipientBalanceAfter).toEqual(recipientBalanceBefore);
+      } finally {
+        await recipientApi.dispose();
+      }
+    },
+  );
+
+  test(
+    'should not allowed to transfer to non existing ID',
+    {
+      annotation: {
+        type: 'case-id',
+        description: 'TC-FIN-010',
+      },
+      tag: ['@api', '@financial', '@transfer', '@negative'],
+    },
+    async ({ freshUser: _, request }) => {
+      const expectedErrorMessage = 'Recipient user does not exist';
+
+      await topUpAmount(request, 10);
+      const senderBalanceBefore = await getAccountBalance(request);
+
+      const response = await request.post(
+        `${BASE_API_URL}/financial/transfer`,
+        {
+          data: {
+            toUserId: Number.MAX_SAFE_INTEGER,
+            amount: 1,
+            description: 'Transfer to nonexistent recipient',
+          },
+        },
+      );
+      const body = await response.json();
+      const senderBalanceAfter = await getAccountBalance(request);
+
+      expect(response.status()).toBe(400);
+      expect(senderBalanceBefore).toEqual(senderBalanceAfter);
+      expect(body.success).toBe(false);
+      expect(body.error).toBe(expectedErrorMessage);
+    },
+  );
+
+  test(
+    'should be able to check transaction history and pagination',
+    {
+      annotation: {
+        type: 'case-id',
+        description: 'TC-FIN-004',
+      },
+      tag: ['@api', '@financial', '@history'],
+    },
+    async ({ freshUser: _, request }) => {
+      const amount1 = 50;
+      const amount2 = 100;
+      const amount3 = 150;
+
+      const transaction1 = await topUpAmount(request, amount1);
+      const transaction2 = await topUpAmount(request, amount2);
+      const transaction3 = await topUpAmount(request, amount3);
+
+      const firstPage = await request.get(
+        `${BASE_API_URL}/financial/transactions?limit=2&offset=0`,
+      );
+
+      const bodyFirstPage = await firstPage.json();
+      expect(firstPage.status()).toBe(200);
+      expect(bodyFirstPage.success).toBe(true);
+      expect(bodyFirstPage.data.total).toBe(3);
+      expect(bodyFirstPage.data.limit).toBe(2);
+      expect(bodyFirstPage.data.offset).toBe(0);
+      expect(bodyFirstPage.data.hasMore).toBe(true);
+
+      const secondPage = await request.get(
+        `${BASE_API_URL}/financial/transactions?limit=2&offset=2`,
+      );
+      const bodySecondPage = await secondPage.json();
+
+      expect(bodySecondPage.success).toBe(true);
+      expect(secondPage.status()).toBe(200);
+      expect(bodySecondPage.data.total).toBe(3);
+      expect(bodySecondPage.data.limit).toBe(2);
+      expect(bodySecondPage.data.offset).toBe(2);
+      expect(bodySecondPage.data.hasMore).toBe(false);
+
+      expect(bodyFirstPage.data.transactions).toHaveLength(2);
+      expect(bodySecondPage.data.transactions).toHaveLength(1);
+
+      const expectedIds = [
+        transaction1.id,
+        transaction2.id,
+        transaction3.id,
+      ].sort((a, b) => a - b);
+
+      const actualIds = [
+        ...bodyFirstPage.data.transactions,
+        ...bodySecondPage.data.transactions,
+      ]
+        .map((transaction: { id: number }) => transaction.id)
+        .sort((a, b) => a - b);
+
+      expect(actualIds).toEqual(expectedIds);
+    },
+  );
 });
