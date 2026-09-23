@@ -153,6 +153,29 @@ Each attempt retains its retry number, status, duration and failure. Durations
 sum attempts; a run's failure is its last failed attempt, even if a retry passed.
 Missing failure fields are `null`, never guessed from the test declaration.
 
+## Application Code Coverage
+
+The scenario report above measures test cases. A separate backend pilot measures
+the Rolnopol application code executed by the farm and financial API specs. It
+uses Node’s V8 coverage and runs the application on a temporary copy, so the
+application checkout’s JSON databases are not modified. Node.js 22 or newer and
+an adjacent `../rolnopol` checkout with installed dependencies are required.
+
+```bash
+npm run coverage:app-code
+# Or point to another application checkout:
+npm run coverage:app-code -- --app path/to/rolnopol
+```
+
+Open `coverage-report/app-code/index.html` for line, function, and branch
+coverage of the 14 explicitly listed backend files. The report also writes
+`summary.json` and `lcov.info`. The same run refreshes the scenario report with
+the selected Playwright result. It needs no demo credentials because the selected
+specs create their own users. The application’s frontend JavaScript, other
+backend modules, and its own Vitest suite are outside this pilot denominator.
+A loaded route file can have high line coverage from registration at startup;
+use the scenario assertions to judge behavior.
+
 ## Running and Debugging Tests
 
 ```bash

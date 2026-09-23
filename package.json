@@ -24,7 +24,8 @@
     "coverage:run": "node scripts/coverage/cli.mjs run",
     "coverage:report": "node scripts/coverage/cli.mjs report",
     "coverage:readme": "node scripts/coverage/cli.mjs readme",
-    "coverage:test": "node --test scripts/coverage/coverage.test.mjs"
+    "coverage:test": "node --test scripts/coverage/coverage.test.mjs",
+    "coverage:app-code": "node scripts/coverage/app-code.mjs"
   },
   "engines": {
     "node": "^18.0.0 || ^20.0.0 || >=22.0.0"

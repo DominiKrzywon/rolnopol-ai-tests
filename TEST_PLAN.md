@@ -32,7 +32,7 @@ Core development principles:
 
 ## 2. Repository evidence and environment
 
-### Current code and collection evidence: September 13, 2026
+### Historical code and collection evidence: September 13, 2026
 
 Playwright collection before adding IDs returned **59 entries in 13 files**:
 58 scenario tests and one demo-session setup, across seven projects. Collection
@@ -49,6 +49,15 @@ for counts; do not maintain a second live test counter here.
   before the rejected action; its ID does not establish assertion quality.
 - CI remains manually triggered through `workflow_dispatch`.
 - `trace: 'on'` remains an existing debugging setting.
+
+### API source review: September 22, 2026
+
+The API project now collects `TC-AUTH-012`, `TC-FARM-010`, and
+`TC-FIN-004` through `TC-FIN-011`. Their assertions cover the specific
+contracts named in the catalog; implementation alone does not confirm a pass.
+The previous September 18 HTML report predates most of these tests. The
+regenerated catalog report reflects current implementations without assigning
+old execution results to them; run the API project for current confirmation.
 
 ### Full-run observation: September 13, 2026
 
@@ -255,10 +264,10 @@ without intermittent failures.
 Implementation order:
 
 1. **Financial API**
-   - [ ] account and balance;
-   - [ ] history with `total`, `limit`, `offset`, and `hasMore`;
-   - [ ] income and expense and their effect on the balance;
-   - [ ] transfer: minimum `0.01`, maximum `999.99`, balance equal to the
+   - [x] account and opening balance;
+   - [x] history with `total`, `limit`, `offset`, and `hasMore`;
+   - [x] income and expense and their effect on the balance;
+   - [x] transfer: minimum `0.01`, maximum `999.99`, balance equal to the
          amount, exceeding the balance, and a nonexistent recipient.
 2. **Farm API**
    - [ ] field, staff, and animal CRUD;
@@ -266,6 +275,9 @@ Implementation order:
    - [ ] preventing deletion of an assigned resource;
    - [ ] boundaries for age, area, animal count, and required fields;
    - [ ] district and allowed animal types.
+   - The implemented field API case creates a field, retrieves it from the
+     listing, checks its name and area, and cleans it up. It does not complete
+     field CRUD or cover staff and animal CRUD.
 3. **Marketplace API**
    - [ ] offer listing and `my-offers`;
    - [ ] creating and cancelling an owned offer;
@@ -281,6 +293,7 @@ Implementation order:
    - [ ] valid and invalid contact forms;
    - [ ] healthcheck, ping, about, and statistics.
 
+These checkboxes track implemented assertions, not successful execution.
 Initially assert only stable, business-relevant fields. Once real responses are
 understood, consider schema validation, for example `@playwright/test` with
 `zod` or `ajv`. Swagger and real responses help discover the API, but observed
@@ -379,7 +392,7 @@ maintenance tasks are not scenario rows. Setup entries have no case ID.
 | TC-AUTH-009    | Auth        | should validate valid token via POST request                          | API    | P0       | included | -                                                                                               |
 | TC-AUTH-010    | Auth        | should reject invalid token via POST request                          | API    | P0       | included | -                                                                                               |
 | TC-AUTH-011    | Auth        | should logout successfully                                            | API    | P0       | included | -                                                                                               |
-| TC-AUTH-012    | Auth        | Anonymous fields request returns 401 without field data               | API    | P0       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-AUTH-012    | Auth        | Anonymous fields request returns 401 without field data               | API    | P0       | included | -                                                                                               |
 | TC-CHART-001   | Charts      | Chart type switches without JavaScript errors                         | UI     | P2       | included | Planned contract; review expected behavior before implementation.                               |
 | TC-FARM-001    | Farm        | should create a new field in Staff & Fields view                      | UI     | P1       | included | -                                                                                               |
 | TC-FARM-002    | Farm        | should create a new animal herd in Staff & Fields view                | UI     | P1       | included | -                                                                                               |
@@ -390,21 +403,21 @@ maintenance tasks are not scenario rows. Setup entries have no case ID.
 | TC-FARM-007    | Farm        | should delete a staff                                                 | UI     | P1       | included | -                                                                                               |
 | TC-FARM-008    | Farm        | should edit a animal                                                  | UI     | P1       | included | -                                                                                               |
 | TC-FARM-009    | Farm        | should delete a animal                                                | UI     | P1       | included | -                                                                                               |
-| TC-FARM-010    | Farm        | A newly created field can be retrieved with its name and area         | API    | P0       | included | Planned contract; review expected behavior before implementation.                               |
+| TC-FARM-010    | Farm        | A newly created field can be retrieved with its name and area         | API    | P0       | included | -                                                                                               |
 | TC-FARM-011    | Farm        | Invalid field area is rejected without creating a field               | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
 | TC-FARM-012    | Farm        | Deleting an assigned field follows the agreed deletion contract       | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
 | TC-FARM-013    | Farm        | Fields search and pagination show the requested subset                | UI     | P1       | included | Planned contract; review expected behavior before implementation.                               |
 | TC-FIN-001     | Finance     | verify account balance and transaction history                        | UI     | P1       | included | -                                                                                               |
 | TC-FIN-002     | Finance     | verify funds transfer between users                                   | UI     | P1       | included | -                                                                                               |
 | TC-FIN-003     | Finance     | verify prevent overdraft                                              | UI     | P1       | included | Review needed: final balance is currently read before the rejected transfer.                    |
-| TC-FIN-004     | Finance     | Transaction history respects limit and offset and exposes hasMore     | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
-| TC-FIN-005     | Finance     | Income and expense update the API account balance                     | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
-| TC-FIN-006     | Finance     | Transfer accepts the minimum amount 0.01                              | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
-| TC-FIN-007     | Finance     | Transfer accepts the maximum amount 999.99                            | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
-| TC-FIN-008     | Finance     | Transfer of the full available balance leaves zero                    | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
-| TC-FIN-009     | Finance     | Transfer above available balance leaves both accounts unchanged       | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
-| TC-FIN-010     | Finance     | Transfer to a nonexistent recipient is rejected                       | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
-| TC-FIN-011     | Finance     | A fresh user can read their financial account and balance             | API    | P1       | included | Planned contract; confirm the expected opening balance before implementation.                   |
+| TC-FIN-004     | Finance     | Transaction history respects limit and offset and exposes hasMore     | API    | P1       | included | -                                                                                               |
+| TC-FIN-005     | Finance     | Income and expense update the API account balance                     | API    | P1       | included | -                                                                                               |
+| TC-FIN-006     | Finance     | Transfer accepts the minimum amount 0.01                              | API    | P1       | included | -                                                                                               |
+| TC-FIN-007     | Finance     | Transfer accepts the maximum amount 999.99                            | API    | P1       | included | -                                                                                               |
+| TC-FIN-008     | Finance     | Transfer of the full available balance leaves zero                    | API    | P1       | included | -                                                                                               |
+| TC-FIN-009     | Finance     | Transfer above available balance leaves both accounts unchanged       | API    | P1       | included | -                                                                                               |
+| TC-FIN-010     | Finance     | Transfer to a nonexistent recipient is rejected                       | API    | P1       | included | -                                                                                               |
+| TC-FIN-011     | Finance     | A fresh user can read their financial account and balance             | API    | P1       | included | Checks the opening balance and account shape; does not compare `userId` with the test user ID.  |
 | TC-GUARD-001   | Auth        | should redirect anonymous user from /profile.html to login            | UI     | P0       | included | -                                                                                               |
 | TC-GUARD-002   | Auth        | should redirect anonymous user from /marketplace.html to login        | UI     | P0       | included | -                                                                                               |
 | TC-GUARD-003   | Auth        | should redirect anonymous user from /financial.html to login          | UI     | P0       | included | -                                                                                               |
@@ -562,10 +575,13 @@ should not be repeated merely because an old result is missing.
 2. Record an API and smoke baseline with `npm run coverage:run -- --project=api-tests`
    and then the smoke project. Each run replaces the current result; archive the
    output directory separately when a comparison is needed.
-3. Implement `TC-AUTH-012` and `TC-FARM-010` as the first farm API exercise,
-   using raw HTTP responses for expected 401 errors and independent test data.
-4. Continue the financial API boundaries in stage 3. Preserve stable IDs and
-   regenerate README when catalog descriptions or scope change.
+3. Continue farm API contracts with invalid area, assigned-resource deletion,
+   and the remaining field, staff, and animal operations. Keep independent
+   users and resources for state-changing cases.
+4. Run the implemented financial API cases as a project baseline. Review the
+   account-owner assertion in `TC-FIN-011`, then continue the missing domains
+   in stage 3. Preserve stable IDs and regenerate README when catalog
+   descriptions or scope change.
 5. Diagnose the visual baseline separately, then measure the full suite and
    repeat P0 checks under comparable conditions as described in the roadmap.
 
