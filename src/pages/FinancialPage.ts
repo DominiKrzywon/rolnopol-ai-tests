@@ -44,6 +44,8 @@ export class FinancialPage extends BasePage {
   readonly transferSuccess: Locator;
   readonly transferAmountError: Locator;
   readonly transferFormError: Locator;
+  readonly startDateInput: Locator;
+  readonly endDateInput: Locator;
 
   readonly transactionFormHeader: Locator;
   readonly transactionContent: Locator;
@@ -84,6 +86,8 @@ export class FinancialPage extends BasePage {
     this.transferSuccess = page.locator('#transfer-form-success');
     this.transferAmountError = page.locator('#transfer-amount-error');
     this.transferFormError = page.locator('#transfer-form-errors');
+    this.startDateInput = page.getByLabel('Start Date');
+    this.endDateInput = page.getByLabel('End Date');
 
     this.transactionFormHeader = page.locator('#transaction-form-header');
     this.transactionContent = page.locator('#transaction-form-content');
@@ -163,5 +167,10 @@ export class FinancialPage extends BasePage {
   async filterBy({ type, category }: FilterOptions): Promise<void> {
     await this.filterType.selectOption(type ?? '');
     await this.filterCategory.selectOption(category ?? '');
+  }
+
+  async setDateRange(startDate: string, endDate: string): Promise<void> {
+    await this.startDateInput.fill(startDate);
+    await this.endDateInput.fill(endDate);
   }
 }

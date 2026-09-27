@@ -4,10 +4,11 @@ import {
 } from '@playwright/test';
 import { topUpAmount } from 'src/actions/user.actions';
 import { loginAs, registerVerifiedUser } from 'src/api/auth.api';
-import { getAccountBalance } from 'src/api/financial.api';
+import { addTransaction, getAccountBalance } from 'src/api/financial.api';
 import { BASE_API_URL } from 'src/config/env.config';
 import { prepareRandomUser } from 'src/factories/user.factory';
 import { expect, test } from 'src/fixtures/auth.fixture';
+import { getTransactionsByDateRange } from 'src/helpers/financialHelpers';
 
 async function createLoggedInRecipient(
   recipientApi: APIRequestContext,
@@ -26,7 +27,8 @@ test.describe('Financial API', () => {
       annotation: { type: 'case-id', description: 'TC-FIN-011' },
       tag: ['@api', '@financial', '@balance'],
     },
-    async ({ freshUser: _, request }) => {
+    async ({ freshUser, request }) => {
+      const session = await loginAs(request, freshUser);
       const response = await request.get(`${BASE_API_URL}/financial/account`);
       const body = await response.json();
 
@@ -35,7 +37,7 @@ test.describe('Financial API', () => {
       expect(body.data.account).toMatchObject({
         id: expect.any(Number),
         balance: 0,
-        userId: expect.any(Number),
+        userId: session.id,
         currency: 'ROL',
       });
     },
@@ -395,6 +397,120 @@ test.describe('Financial API', () => {
         .sort((a, b) => a - b);
 
       expect(actualIds).toEqual(expectedIds);
+    },
+  );
+
+  test(
+    'should be able to check history filter by type',
+    {
+      annotation: { type: 'case-id', description: 'TC-FIN-012' },
+      tag: ['@api', '@financial', '@history'],
+    },
+    async ({ freshUser: _, request }) => {
+      const amountIncome = 100;
+      const amountExpense = 50;
+      const income = await topUpAmount(request, amountIncome);
+      const { transaction: expense } = await addTransaction(request, {
+        type: 'expense',
+        amount: amountExpense,
+        description: 'Test api',
+        category: 'General',
+      });
+      const response = await request.get(
+        `${BASE_API_URL}/financial/transactions?type=income`,
+      );
+      const body = await response.json();
+
+      expect(response.status()).toBe(200);
+      expect(body.success).toBe(true);
+      expect(body.data.total).toBe(1);
+      expect(body.data.transactions).toHaveLength(1);
+      expect(body.data.transactions[0]).toMatchObject({
+        id: income.id,
+        type: 'income',
+      });
+      expect(body.data.transactions[0].id).not.toBe(expense.id);
+    },
+  );
+
+  test(
+    'should be able to check history filter by category',
+    {
+      annotation: { type: 'case-id', description: 'TC-FIN-013' },
+      tag: ['@api', '@financial', '@history'],
+    },
+    async ({ freshUser: _, request }) => {
+      const incomeAmount = 50;
+
+      await topUpAmount(request, incomeAmount);
+      const { transaction: secondIncome } = await addTransaction(request, {
+        type: 'income',
+        amount: incomeAmount,
+        description: 'Test',
+        category: 'salary',
+      });
+
+      const response = await request.get(
+        `${BASE_API_URL}/financial/transactions?category=salary`,
+      );
+      const body = await response.json();
+
+      expect(response.status()).toBe(200);
+      expect(body.success).toBe(true);
+      expect(body.data.total).toBe(1);
+      expect(body.data.transactions).toHaveLength(1);
+      expect(body.data.transactions[0]).toMatchObject({
+        id: secondIncome.id,
+        type: 'income',
+        category: 'salary',
+      });
+    },
+  );
+
+  test(
+    'should be able to check date rage',
+    {
+      annotation: { type: 'case-id', description: 'TC-FIN-014' },
+      tag: ['@api', '@financial', '@history'],
+    },
+    async ({ freshUser: _, request }) => {
+      const transactionAmount = 100;
+      const transaction = await topUpAmount(request, transactionAmount);
+      const transactionTime = new Date(transaction.timestamp).getTime();
+      const day = 24 * 60 * 60 * 1000;
+      const date = (time: number): string =>
+        new Date(time).toISOString().slice(0, 10);
+
+      const startDate = date(transactionTime - day);
+      const endDate = date(transactionTime + day);
+
+      const matchingRange = await getTransactionsByDateRange(
+        request,
+        startDate,
+        endDate,
+      );
+
+      expect(matchingRange.total).toBe(1);
+      expect(matchingRange.transactions).toHaveLength(1);
+      expect(matchingRange.transactions[0].id).toBe(transaction.id);
+
+      const beforeRange = await getTransactionsByDateRange(
+        request,
+        date(transactionTime - 3 * day),
+        date(transactionTime - 2 * day),
+      );
+
+      expect(beforeRange.total).toBe(0);
+      expect(beforeRange.transactions).toEqual([]);
+
+      const afterRange = await getTransactionsByDateRange(
+        request,
+        date(transactionTime + 2 * day),
+        date(transactionTime + 3 * day),
+      );
+
+      expect(afterRange.total).toBe(0);
+      expect(afterRange.transactions).toEqual([]);
     },
   );
 });
