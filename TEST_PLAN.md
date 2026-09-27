@@ -50,14 +50,18 @@ for counts; do not maintain a second live test counter here.
 - CI remains manually triggered through `workflow_dispatch`.
 - `trace: 'on'` remains an existing debugging setting.
 
-### API source review: September 22, 2026
+### API source review: September 27, 2026
 
-The API project now collects `TC-AUTH-012`, `TC-FARM-010`, and
-`TC-FIN-004` through `TC-FIN-011`. Their assertions cover the specific
-contracts named in the catalog; implementation alone does not confirm a pass.
-The previous September 18 HTML report predates most of these tests. The
-regenerated catalog report reflects current implementations without assigning
-old execution results to them; run the API project for current confirmation.
+`tests/api/farm.api.spec.ts` now declares `TC-AUTH-012`, `TC-FARM-010`,
+`TC-FARM-012`, and `TC-FARM-013`. The first three have source assertions for
+the catalogued authorization, create-and-read, and assigned-field-deletion
+contracts. `TC-FARM-013` needs correction before it supports its catalog row:
+it does not search, and six fields with the application's page size of five
+should initially display `1/2`, not `1/1`.
+
+Implementation alone does not confirm a pass. The previous September 18 HTML
+report predates these farm cases. Run the API project after correcting
+`TC-FARM-013` to record current execution evidence.
 
 ### Full-run observation: September 13, 2026
 
@@ -270,14 +274,18 @@ Implementation order:
    - [x] transfer: minimum `0.01`, maximum `999.99`, balance equal to the
          amount, exceeding the balance, and a nonexistent recipient.
 2. **Farm API**
-   - [ ] field, staff, and animal CRUD;
+   - [x] create a field and retrieve it by ID with its name and area;
+   - [x] delete an assigned field and confirm that its assignment is also gone;
+   - [ ] update a field and cover its invalid and boundary values;
+   - [ ] staff and animal CRUD;
    - [ ] assignment and unassignment;
-   - [ ] preventing deletion of an assigned resource;
+   - [ ] establish and cover the product contract for deleting an assigned
+         resource in each supported direction;
    - [ ] boundaries for age, area, animal count, and required fields;
    - [ ] district and allowed animal types.
-   - The implemented field API case creates a field, retrieves it from the
-     listing, checks its name and area, and cleans it up. It does not complete
-     field CRUD or cover staff and animal CRUD.
+   - [ ] correct the UI pagination scenario currently declared as `TC-FARM-013`:
+         place it in an isolated UI spec, use unique field names, search for the
+         requested subset, and assert `1/2` then `2/2` for six fields.
 3. **Marketplace API**
    - [ ] offer listing and `my-offers`;
    - [ ] creating and cancelling an owned offer;
@@ -375,91 +383,90 @@ maintenance tasks are not scenario rows. Setup entries have no case ID.
 
 <!-- coverage-catalog:start -->
 
-| ID             | Area        | Scenario                                                              | Layer  | Priority | Scope    | Notes                                                                                           |
-| -------------- | ----------- | --------------------------------------------------------------------- | ------ | -------- | -------- | ----------------------------------------------------------------------------------------------- |
-| TC-ASSIGN-001  | Farm        | should assignment for new staff and field                             | UI     | P1       | included | -                                                                                               |
-| TC-ASSIGN-002  | Farm        | should not show assigned staff in select dropdown                     | UI     | P1       | included | -                                                                                               |
-| TC-ASSIGN-003  | Farm        | should unassigned works correctly                                     | UI     | P1       | included | -                                                                                               |
-| TC-ASSIGN-004  | Farm        | should show 2 staff assigned to field in tree view                    | UI     | P1       | included | -                                                                                               |
-| TC-AUTH-001    | Auth        | should register new user successfully with valid data                 | API    | P0       | included | -                                                                                               |
-| TC-AUTH-002    | Auth        | should reject registration with invalid email format                  | API    | P0       | included | -                                                                                               |
-| TC-AUTH-003    | Auth        | should reject registration with duplicate email                       | API    | P0       | included | -                                                                                               |
-| TC-AUTH-004    | Auth        | should login successfully with valid credentials                      | API    | P0       | included | -                                                                                               |
-| TC-AUTH-005    | Auth        | should reject login with non-existent email                           | API    | P0       | included | -                                                                                               |
-| TC-AUTH-006    | Auth        | should reject login with wrong password                               | API    | P0       | included | -                                                                                               |
-| TC-AUTH-007    | Auth        | should validate valid token via GET request                           | API    | P0       | included | -                                                                                               |
-| TC-AUTH-008    | Auth        | should reject invalid token via GET request                           | API    | P0       | included | -                                                                                               |
-| TC-AUTH-009    | Auth        | should validate valid token via POST request                          | API    | P0       | included | -                                                                                               |
-| TC-AUTH-010    | Auth        | should reject invalid token via POST request                          | API    | P0       | included | -                                                                                               |
-| TC-AUTH-011    | Auth        | should logout successfully                                            | API    | P0       | included | -                                                                                               |
-| TC-AUTH-012    | Auth        | Anonymous fields request returns 401 without field data               | API    | P0       | included | -                                                                                               |
-| TC-CHART-001   | Charts      | Chart type switches without JavaScript errors                         | UI     | P2       | included | Planned contract; review expected behavior before implementation.                               |
-| TC-FARM-001    | Farm        | should create a new field in Staff & Fields view                      | UI     | P1       | included | -                                                                                               |
-| TC-FARM-002    | Farm        | should create a new animal herd in Staff & Fields view                | UI     | P1       | included | -                                                                                               |
-| TC-FARM-003    | Farm        | should create a new staff in Staff & Fields view                      | UI     | P1       | included | -                                                                                               |
-| TC-FARM-004    | Farm        | should edit a field name                                              | UI     | P1       | included | -                                                                                               |
-| TC-FARM-005    | Farm        | should delete a field                                                 | UI     | P1       | included | -                                                                                               |
-| TC-FARM-006    | Farm        | should update a staff                                                 | UI     | P1       | included | -                                                                                               |
-| TC-FARM-007    | Farm        | should delete a staff                                                 | UI     | P1       | included | -                                                                                               |
-| TC-FARM-008    | Farm        | should edit a animal                                                  | UI     | P1       | included | -                                                                                               |
-| TC-FARM-009    | Farm        | should delete a animal                                                | UI     | P1       | included | -                                                                                               |
-| TC-FARM-010    | Farm        | A newly created field can be retrieved with its name and area         | API    | P0       | included | -                                                                                               |
-| TC-FARM-011    | Farm        | Invalid field area is rejected without creating a field               | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
-| TC-FARM-012    | Farm        | Deleting an assigned field follows the agreed deletion contract       | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
-| TC-FARM-013    | Farm        | Fields search and pagination show the requested subset                | UI     | P1       | included | Planned contract; review expected behavior before implementation.                               |
-| TC-FIN-001     | Finance     | verify account balance and transaction history                        | UI     | P1       | included | -                                                                                               |
-| TC-FIN-002     | Finance     | verify funds transfer between users                                   | UI     | P1       | included | -                                                                                               |
-| TC-FIN-003     | Finance     | verify prevent overdraft                                              | UI     | P1       | included | Review needed: final balance is currently read before the rejected transfer.                    |
-| TC-FIN-004     | Finance     | Transaction history respects limit and offset and exposes hasMore     | API    | P1       | included | -                                                                                               |
-| TC-FIN-005     | Finance     | Income and expense update the API account balance                     | API    | P1       | included | -                                                                                               |
-| TC-FIN-006     | Finance     | Transfer accepts the minimum amount 0.01                              | API    | P1       | included | -                                                                                               |
-| TC-FIN-007     | Finance     | Transfer accepts the maximum amount 999.99                            | API    | P1       | included | -                                                                                               |
-| TC-FIN-008     | Finance     | Transfer of the full available balance leaves zero                    | API    | P1       | included | -                                                                                               |
-| TC-FIN-009     | Finance     | Transfer above available balance leaves both accounts unchanged       | API    | P1       | included | -                                                                                               |
-| TC-FIN-010     | Finance     | Transfer to a nonexistent recipient is rejected                       | API    | P1       | included | -                                                                                               |
-| TC-FIN-011     | Finance     | A fresh user can read their financial account and balance             | API    | P1       | included | Checks the opening balance and account shape; does not compare `userId` with the test user ID.  |
-| TC-GUARD-001   | Auth        | should redirect anonymous user from /profile.html to login            | UI     | P0       | included | -                                                                                               |
-| TC-GUARD-002   | Auth        | should redirect anonymous user from /marketplace.html to login        | UI     | P0       | included | -                                                                                               |
-| TC-GUARD-003   | Auth        | should redirect anonymous user from /financial.html to login          | UI     | P0       | included | -                                                                                               |
-| TC-GUARD-004   | Auth        | Anonymous Staff and Fields main page redirects to login               | UI     | P0       | excluded | Deliberate UI redirect exclusion recorded in section 2; API authorization remains in scope.     |
-| TC-GUARD-005   | Auth        | Anonymous assignments page redirects to login                         | UI     | P0       | excluded | Deliberate UI redirect exclusion recorded in section 2; authenticated features remain in scope. |
-| TC-GUARD-006   | Auth        | Anonymous charts page redirects to login                              | UI     | P0       | excluded | Deliberate UI redirect exclusion recorded in section 2; chart behavior remains in scope.        |
-| TC-JOURNEY-001 | Journeys    | should create assignment for new farmer                               | E2E    | P0       | included | -                                                                                               |
-| TC-JOURNEY-002 | Journeys    | marketplace e2e test                                                  | E2E    | P0       | included | -                                                                                               |
-| TC-JOURNEY-003 | Journeys    | verify blocked transaction                                            | E2E    | P0       | included | -                                                                                               |
-| TC-LOGIN-001   | Auth        | should display correct user data after login                          | UI     | P0       | included | -                                                                                               |
-| TC-LOGIN-002   | Auth        | session management should work correctly                              | UI     | P0       | included | -                                                                                               |
-| TC-MARKET-001  | Marketplace | should buy random offer and verify transaction history                | UI     | P1       | included | -                                                                                               |
-| TC-MARKET-002  | Marketplace | should return error when offer is to expensive                        | UI     | P1       | included | -                                                                                               |
-| TC-MARKET-003  | Marketplace | create offer and verify in My Offers page                             | UI     | P1       | included | -                                                                                               |
-| TC-MARKET-004  | Marketplace | An owner can cancel an offer through API                              | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
-| TC-MARKET-005  | Marketplace | A different user cannot cancel another owner offer                    | API    | P1       | included | Planned contract; review expected behavior before implementation.                               |
-| TC-MARKET-006  | Marketplace | An owner can cancel an offer through UI                               | UI     | P1       | included | Planned contract; review expected behavior before implementation.                               |
-| TC-PROFILE-001 | Profile     | should display correct user information in profile sections           | UI     | P1       | included | Full-run observation: redirected to login; investigate shared-session invalidation.             |
-| TC-PROFILE-002 | Profile     | A fresh user can update the display name                              | UI     | P1       | included | Planned contract; review expected behavior before implementation.                               |
-| TC-PROFILE-003 | Profile     | A fresh user can delete their own account after confirmation          | UI     | P1       | included | Planned contract; review expected behavior before implementation.                               |
-| TC-PUBLIC-001  | Public      | Alerts page opens and displays its main controls                      | UI     | P2       | included | Planned contract; review expected behavior before implementation.                               |
-| TC-PUBLIC-002  | Public      | Contact rejects missing required fields                               | UI     | P2       | included | Planned contract; review expected behavior before implementation.                               |
-| TC-PUBLIC-003  | Public      | Contact accepts a valid submission                                    | UI     | P2       | included | Planned contract; review expected behavior before implementation.                               |
-| TC-REG-001     | Auth        | should register new user successfully                                 | UI     | P0       | included | Review needed: assertion still depends on a transient success message.                          |
-| TC-REG-002     | Auth        | should display validation errors for invalid email and short password | UI     | P0       | included | -                                                                                               |
-| TC-REG-003     | Auth        | should prevent registration with empty required fields                | UI     | P0       | included | Review needed: hidden success alone does not prove required-field validation.                   |
-| TC-REG-004     | Auth        | should reject password with 1 characters                              | UI     | P0       | included | -                                                                                               |
-| TC-REG-005     | Auth        | should reject password with 2 characters                              | UI     | P0       | included | -                                                                                               |
-| TC-REG-006     | Auth        | should reject registration for empty password                         | UI     | P0       | included | -                                                                                               |
-| TC-REG-007     | Auth        | should reject registration with duplicate email                       | UI     | P0       | included | -                                                                                               |
-| TC-REG-008     | Auth        | should reject invalid email: "plaintext"                              | UI     | P0       | included | -                                                                                               |
-| TC-REG-009     | Auth        | should reject invalid email: "@example.com"                           | UI     | P0       | included | -                                                                                               |
-| TC-REG-010     | Auth        | should reject invalid email: "user@"                                  | UI     | P0       | included | -                                                                                               |
-| TC-REG-011     | Auth        | should reject invalid email: "user @example.com"                      | UI     | P0       | included | -                                                                                               |
-| TC-SMOKE-001   | Public      | should display the correct page title 'Rolnopol' on homepage          | UI     | P0       | included | -                                                                                               |
-| TC-SMOKE-002   | Public      | should load login page successfully                                   | UI     | P0       | included | -                                                                                               |
-| TC-SMOKE-003   | Public      | should load API documentation page successfully                       | UI     | P0       | included | -                                                                                               |
-| TC-SMOKE-004   | Public      | should load documentation page successfully                           | UI     | P0       | included | -                                                                                               |
-| TC-SMOKE-005   | Public      | should not display marketplace for non-logged user                    | UI     | P0       | included | Overlaps TC-GUARD-002; both existing cases are counted separately.                              |
-| TC-SMOKE-006   | Public      | should load register page successfully                                | UI     | P0       | included | -                                                                                               |
-| TC-SMOKE-007   | Public      | api app health check                                                  | API    | P0       | included | -                                                                                               |
-| TC-VIS-001     | Visual      | should match homepage visual snapshot                                 | Visual | P2       | included | Missing baseline in current visual-project path; review the image before creating a baseline.   |
+| ID             | Area        | Scenario                                                              | Layer  | Priority | Scope    | Notes                                                                                                                          |
+| -------------- | ----------- | --------------------------------------------------------------------- | ------ | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| TC-ASSIGN-001  | Farm        | should assignment for new staff and field                             | UI     | P1       | included | -                                                                                                                              |
+| TC-ASSIGN-002  | Farm        | should not show assigned staff in select dropdown                     | UI     | P1       | included | -                                                                                                                              |
+| TC-ASSIGN-003  | Farm        | should unassigned works correctly                                     | UI     | P1       | included | -                                                                                                                              |
+| TC-ASSIGN-004  | Farm        | should show 2 staff assigned to field in tree view                    | UI     | P1       | included | -                                                                                                                              |
+| TC-AUTH-001    | Auth        | should register new user successfully with valid data                 | API    | P0       | included | -                                                                                                                              |
+| TC-AUTH-002    | Auth        | should reject registration with invalid email format                  | API    | P0       | included | -                                                                                                                              |
+| TC-AUTH-003    | Auth        | should reject registration with duplicate email                       | API    | P0       | included | -                                                                                                                              |
+| TC-AUTH-004    | Auth        | should login successfully with valid credentials                      | API    | P0       | included | -                                                                                                                              |
+| TC-AUTH-005    | Auth        | should reject login with non-existent email                           | API    | P0       | included | -                                                                                                                              |
+| TC-AUTH-006    | Auth        | should reject login with wrong password                               | API    | P0       | included | -                                                                                                                              |
+| TC-AUTH-007    | Auth        | should validate valid token via GET request                           | API    | P0       | included | -                                                                                                                              |
+| TC-AUTH-008    | Auth        | should reject invalid token via GET request                           | API    | P0       | included | -                                                                                                                              |
+| TC-AUTH-009    | Auth        | should validate valid token via POST request                          | API    | P0       | included | -                                                                                                                              |
+| TC-AUTH-010    | Auth        | should reject invalid token via POST request                          | API    | P0       | included | -                                                                                                                              |
+| TC-AUTH-011    | Auth        | should logout successfully                                            | API    | P0       | included | -                                                                                                                              |
+| TC-AUTH-012    | Auth        | Anonymous fields request returns 401 without field data               | API    | P0       | included | -                                                                                                                              |
+| TC-CHART-001   | Charts      | Chart type switches without JavaScript errors                         | UI     | P2       | included | Planned contract; review expected behavior before implementation.                                                              |
+| TC-FARM-001    | Farm        | should create a new field in Staff & Fields view                      | UI     | P1       | included | -                                                                                                                              |
+| TC-FARM-002    | Farm        | should create a new animal herd in Staff & Fields view                | UI     | P1       | included | -                                                                                                                              |
+| TC-FARM-003    | Farm        | should create a new staff in Staff & Fields view                      | UI     | P1       | included | -                                                                                                                              |
+| TC-FARM-004    | Farm        | should edit a field name                                              | UI     | P1       | included | -                                                                                                                              |
+| TC-FARM-005    | Farm        | should delete a field                                                 | UI     | P1       | included | -                                                                                                                              |
+| TC-FARM-006    | Farm        | should update a staff                                                 | UI     | P1       | included | -                                                                                                                              |
+| TC-FARM-007    | Farm        | should delete a staff                                                 | UI     | P1       | included | -                                                                                                                              |
+| TC-FARM-008    | Farm        | should edit a animal                                                  | UI     | P1       | included | -                                                                                                                              |
+| TC-FARM-009    | Farm        | should delete a animal                                                | UI     | P1       | included | -                                                                                                                              |
+| TC-FARM-010    | Farm        | A newly created field can be retrieved with its name and area         | API    | P0       | included | Source implementation creates independent data, reads the final state, and deletes the field; execution is not yet recorded.   |
+| TC-FARM-012    | Farm        | Deleting an assigned field removes its field and assignment           | API    | P1       | included | Source implementation expects `200` and verifies that neither resource remains; execution is not yet recorded.                 |
+| TC-FARM-013    | Farm        | Fields search and pagination show the requested subset                | UI     | P1       | included | Source implementation needs correction: it does not search and expects `1/1` before moving to `2/2` after creating six fields. |
+| TC-FIN-001     | Finance     | verify account balance and transaction history                        | UI     | P1       | included | -                                                                                                                              |
+| TC-FIN-002     | Finance     | verify funds transfer between users                                   | UI     | P1       | included | -                                                                                                                              |
+| TC-FIN-003     | Finance     | verify prevent overdraft                                              | UI     | P1       | included | Review needed: final balance is currently read before the rejected transfer.                                                   |
+| TC-FIN-004     | Finance     | Transaction history respects limit and offset and exposes hasMore     | API    | P1       | included | -                                                                                                                              |
+| TC-FIN-005     | Finance     | Income and expense update the API account balance                     | API    | P1       | included | -                                                                                                                              |
+| TC-FIN-006     | Finance     | Transfer accepts the minimum amount 0.01                              | API    | P1       | included | -                                                                                                                              |
+| TC-FIN-007     | Finance     | Transfer accepts the maximum amount 999.99                            | API    | P1       | included | -                                                                                                                              |
+| TC-FIN-008     | Finance     | Transfer of the full available balance leaves zero                    | API    | P1       | included | -                                                                                                                              |
+| TC-FIN-009     | Finance     | Transfer above available balance leaves both accounts unchanged       | API    | P1       | included | -                                                                                                                              |
+| TC-FIN-010     | Finance     | Transfer to a nonexistent recipient is rejected                       | API    | P1       | included | -                                                                                                                              |
+| TC-FIN-011     | Finance     | A fresh user can read their financial account and balance             | API    | P1       | included | Checks the opening balance and account shape; does not compare `userId` with the test user ID.                                 |
+| TC-GUARD-001   | Auth        | should redirect anonymous user from /profile.html to login            | UI     | P0       | included | -                                                                                                                              |
+| TC-GUARD-002   | Auth        | should redirect anonymous user from /marketplace.html to login        | UI     | P0       | included | -                                                                                                                              |
+| TC-GUARD-003   | Auth        | should redirect anonymous user from /financial.html to login          | UI     | P0       | included | -                                                                                                                              |
+| TC-GUARD-004   | Auth        | Anonymous Staff and Fields main page redirects to login               | UI     | P0       | excluded | Deliberate UI redirect exclusion recorded in section 2; API authorization remains in scope.                                    |
+| TC-GUARD-005   | Auth        | Anonymous assignments page redirects to login                         | UI     | P0       | excluded | Deliberate UI redirect exclusion recorded in section 2; authenticated features remain in scope.                                |
+| TC-GUARD-006   | Auth        | Anonymous charts page redirects to login                              | UI     | P0       | excluded | Deliberate UI redirect exclusion recorded in section 2; chart behavior remains in scope.                                       |
+| TC-JOURNEY-001 | Journeys    | should create assignment for new farmer                               | E2E    | P0       | included | -                                                                                                                              |
+| TC-JOURNEY-002 | Journeys    | marketplace e2e test                                                  | E2E    | P0       | included | -                                                                                                                              |
+| TC-JOURNEY-003 | Journeys    | verify blocked transaction                                            | E2E    | P0       | included | -                                                                                                                              |
+| TC-LOGIN-001   | Auth        | should display correct user data after login                          | UI     | P0       | included | -                                                                                                                              |
+| TC-LOGIN-002   | Auth        | session management should work correctly                              | UI     | P0       | included | -                                                                                                                              |
+| TC-MARKET-001  | Marketplace | should buy random offer and verify transaction history                | UI     | P1       | included | -                                                                                                                              |
+| TC-MARKET-002  | Marketplace | should return error when offer is to expensive                        | UI     | P1       | included | -                                                                                                                              |
+| TC-MARKET-003  | Marketplace | create offer and verify in My Offers page                             | UI     | P1       | included | -                                                                                                                              |
+| TC-MARKET-004  | Marketplace | An owner can cancel an offer through API                              | API    | P1       | included | Planned contract; review expected behavior before implementation.                                                              |
+| TC-MARKET-005  | Marketplace | A different user cannot cancel another owner offer                    | API    | P1       | included | Planned contract; review expected behavior before implementation.                                                              |
+| TC-MARKET-006  | Marketplace | An owner can cancel an offer through UI                               | UI     | P1       | included | Planned contract; review expected behavior before implementation.                                                              |
+| TC-PROFILE-001 | Profile     | should display correct user information in profile sections           | UI     | P1       | included | Full-run observation: redirected to login; investigate shared-session invalidation.                                            |
+| TC-PROFILE-002 | Profile     | A fresh user can update the display name                              | UI     | P1       | included | Planned contract; review expected behavior before implementation.                                                              |
+| TC-PROFILE-003 | Profile     | A fresh user can delete their own account after confirmation          | UI     | P1       | included | Planned contract; review expected behavior before implementation.                                                              |
+| TC-PUBLIC-001  | Public      | Alerts page opens and displays its main controls                      | UI     | P2       | included | Planned contract; review expected behavior before implementation.                                                              |
+| TC-PUBLIC-002  | Public      | Contact rejects missing required fields                               | UI     | P2       | included | Planned contract; review expected behavior before implementation.                                                              |
+| TC-PUBLIC-003  | Public      | Contact accepts a valid submission                                    | UI     | P2       | included | Planned contract; review expected behavior before implementation.                                                              |
+| TC-REG-001     | Auth        | should register new user successfully                                 | UI     | P0       | included | Review needed: assertion still depends on a transient success message.                                                         |
+| TC-REG-002     | Auth        | should display validation errors for invalid email and short password | UI     | P0       | included | -                                                                                                                              |
+| TC-REG-003     | Auth        | should prevent registration with empty required fields                | UI     | P0       | included | Review needed: hidden success alone does not prove required-field validation.                                                  |
+| TC-REG-004     | Auth        | should reject password with 1 characters                              | UI     | P0       | included | -                                                                                                                              |
+| TC-REG-005     | Auth        | should reject password with 2 characters                              | UI     | P0       | included | -                                                                                                                              |
+| TC-REG-006     | Auth        | should reject registration for empty password                         | UI     | P0       | included | -                                                                                                                              |
+| TC-REG-007     | Auth        | should reject registration with duplicate email                       | UI     | P0       | included | -                                                                                                                              |
+| TC-REG-008     | Auth        | should reject invalid email: "plaintext"                              | UI     | P0       | included | -                                                                                                                              |
+| TC-REG-009     | Auth        | should reject invalid email: "@example.com"                           | UI     | P0       | included | -                                                                                                                              |
+| TC-REG-010     | Auth        | should reject invalid email: "user@"                                  | UI     | P0       | included | -                                                                                                                              |
+| TC-REG-011     | Auth        | should reject invalid email: "user @example.com"                      | UI     | P0       | included | -                                                                                                                              |
+| TC-SMOKE-001   | Public      | should display the correct page title 'Rolnopol' on homepage          | UI     | P0       | included | -                                                                                                                              |
+| TC-SMOKE-002   | Public      | should load login page successfully                                   | UI     | P0       | included | -                                                                                                                              |
+| TC-SMOKE-003   | Public      | should load API documentation page successfully                       | UI     | P0       | included | -                                                                                                                              |
+| TC-SMOKE-004   | Public      | should load documentation page successfully                           | UI     | P0       | included | -                                                                                                                              |
+| TC-SMOKE-005   | Public      | should not display marketplace for non-logged user                    | UI     | P0       | included | Overlaps TC-GUARD-002; both existing cases are counted separately.                                                             |
+| TC-SMOKE-006   | Public      | should load register page successfully                                | UI     | P0       | included | -                                                                                                                              |
+| TC-SMOKE-007   | Public      | api app health check                                                  | API    | P0       | included | -                                                                                                                              |
+| TC-VIS-001     | Visual      | should match homepage visual snapshot                                 | Visual | P2       | included | Missing baseline in current visual-project path; review the image before creating a baseline.                                  |
 
 <!-- coverage-catalog:end -->
 
@@ -575,14 +582,18 @@ should not be repeated merely because an old result is missing.
 2. Record an API and smoke baseline with `npm run coverage:run -- --project=api-tests`
    and then the smoke project. Each run replaces the current result; archive the
    output directory separately when a comparison is needed.
-3. Continue farm API contracts with invalid area, assigned-resource deletion,
-   and the remaining field, staff, and animal operations. Keep independent
-   users and resources for state-changing cases.
-4. Run the implemented financial API cases as a project baseline. Review the
+3. Correct `TC-FARM-013` before adding the next farm contract. It currently
+   combines UI pagination with an API spec, omits the declared search action,
+   and expects the wrong initial page count. Then run the API project to
+   establish a baseline for `TC-AUTH-012`, `TC-FARM-010`, and `TC-FARM-012`.
+4. Continue farm API contracts with invalid area, field update, assignment and
+   unassignment, then the remaining staff and animal operations. Keep
+   independent users and resources for state-changing cases.
+5. Run the implemented financial API cases as a project baseline. Review the
    account-owner assertion in `TC-FIN-011`, then continue the missing domains
    in stage 3. Preserve stable IDs and regenerate README when catalog
    descriptions or scope change.
-5. Diagnose the visual baseline separately, then measure the full suite and
+6. Diagnose the visual baseline separately, then measure the full suite and
    repeat P0 checks under comparable conditions as described in the roadmap.
 
 CLI/MCP browser exploration is optional when clarifying expected behavior.

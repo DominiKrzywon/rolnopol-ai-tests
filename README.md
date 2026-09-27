@@ -255,8 +255,7 @@ Implementation and execution states are computed in the report, not edited here.
 | TC-FARM-008    | Farm        | should edit a animal                                                  | UI     | P1       | included |
 | TC-FARM-009    | Farm        | should delete a animal                                                | UI     | P1       | included |
 | TC-FARM-010    | Farm        | A newly created field can be retrieved with its name and area         | API    | P0       | included |
-| TC-FARM-011    | Farm        | Invalid field area is rejected without creating a field               | API    | P1       | included |
-| TC-FARM-012    | Farm        | Deleting an assigned field follows the agreed deletion contract       | API    | P1       | included |
+| TC-FARM-012    | Farm        | Deleting an assigned field removes its field and assignment           | API    | P1       | included |
 | TC-FARM-013    | Farm        | Fields search and pagination show the requested subset                | UI     | P1       | included |
 | TC-FIN-001     | Finance     | verify account balance and transaction history                        | UI     | P1       | included |
 | TC-FIN-002     | Finance     | verify funds transfer between users                                   | UI     | P1       | included |

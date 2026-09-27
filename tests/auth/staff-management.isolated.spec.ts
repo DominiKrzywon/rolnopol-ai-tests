@@ -1,4 +1,6 @@
 import { faker } from '@faker-js/faker';
+import { randomUUID } from 'crypto';
+import { createField, deleteField } from 'src/api/farm.api';
 import { expect, test } from 'src/fixtures/data.fixture';
 import {
   FIELD_AREA,
@@ -263,6 +265,46 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
       await expect(
         managementPage.getAnimalCardByAmount(animalAmount),
       ).toBeHidden();
+    },
+  );
+
+  test(
+    'should paginate fields after search',
+    {
+      annotation: { type: 'case-id', description: 'TC-FARM-013' },
+      tag: ['@ui', '@farm', '@crud', '@happy-path'],
+    },
+    async ({ freshUser: _, request, managementPage }) => {
+      const uniqueId = randomUUID().slice(0, 8);
+      const prefix = `pagination-field-${uniqueId}`;
+
+      const fieldNames: string[] = Array.from(
+        { length: 6 },
+        (_, index) => `${prefix}-${index + 1}`,
+      );
+      const fieldIds: number[] = [];
+
+      for (const name of fieldNames) {
+        const fieldId = await createField(request, {
+          name,
+          area: FIELD_AREA,
+        });
+
+        fieldIds.push(fieldId);
+      }
+
+      try {
+        await managementPage.goto();
+        await managementPage.searchFields(prefix);
+        await expect(managementPage.fieldsPagination).toContainText('1/2');
+        await expect(managementPage.nextFieldsPageButton).toBeEnabled();
+
+        await managementPage.nextFieldsPageButton.click();
+        await expect(managementPage.fieldsPagination).toContainText('2/2');
+        await expect(managementPage.previousFieldsPageButton).toBeEnabled();
+      } finally {
+        await Promise.all(fieldIds.map((id) => deleteField(request, id)));
+      }
     },
   );
 });

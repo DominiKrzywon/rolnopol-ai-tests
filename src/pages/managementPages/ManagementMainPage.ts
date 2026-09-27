@@ -21,6 +21,13 @@ export class ManagementPage extends BasePage {
   readonly fieldAddedMessage: Locator;
   readonly searchFieldInput: Locator;
 
+  readonly fieldsList: Locator;
+  readonly fieldCards: Locator;
+  readonly fieldsPagination: Locator;
+  readonly fieldsPaginationInfo: Locator;
+  readonly nextFieldsPageButton: Locator;
+  readonly previousFieldsPageButton: Locator;
+
   readonly addStaffModal: Locator;
   readonly staffHeading: Locator;
   readonly staffNameModal: Locator;
@@ -96,6 +103,18 @@ export class ManagementPage extends BasePage {
     this.fieldAreaModalError = page.locator('#fieldAreaError');
     this.fieldAddedMessage = page.getByText('Field added!');
     this.searchFieldInput = page.getByPlaceholder('Search fields...');
+
+    this.fieldsList = page.locator('#fieldsList');
+    this.fieldCards = this.fieldsList.locator('li');
+    this.fieldsPagination = page.locator('#fieldsPagination');
+    this.fieldsPaginationInfo =
+      this.fieldsPagination.locator('.pagination-info');
+    this.nextFieldsPageButton = this.fieldsPagination.locator(
+      'button[data-page="next"]',
+    );
+    this.previousFieldsPageButton = this.fieldsPagination.locator(
+      'button[data-page="prev"]',
+    );
 
     this.addStaffModal = page.locator('#openAddStaffModal');
     this.staffHeading = page.getByRole('heading', { name: ' Staff' });
