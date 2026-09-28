@@ -4,11 +4,14 @@ import {
 } from '@playwright/test';
 import { topUpAmount } from 'src/actions/user.actions';
 import { loginAs, registerVerifiedUser } from 'src/api/auth.api';
-import { addTransaction, getAccountBalance } from 'src/api/financial.api';
+import {
+  addTransaction,
+  getAccountBalance,
+  getTransactions,
+} from 'src/api/financial.api';
 import { BASE_API_URL } from 'src/config/env.config';
 import { prepareRandomUser } from 'src/factories/user.factory';
 import { expect, test } from 'src/fixtures/auth.fixture';
-import { getTransactionsByDateRange } from 'src/helpers/financialHelpers';
 
 async function createLoggedInRecipient(
   recipientApi: APIRequestContext,
@@ -468,7 +471,7 @@ test.describe('Financial API', () => {
   );
 
   test(
-    'should be able to check date rage',
+    'should be able to check date range',
     {
       annotation: { type: 'case-id', description: 'TC-FIN-014' },
       tag: ['@api', '@financial', '@history'],
@@ -484,29 +487,32 @@ test.describe('Financial API', () => {
       const startDate = date(transactionTime - day);
       const endDate = date(transactionTime + day);
 
-      const matchingRange = await getTransactionsByDateRange(
+      const matchingRange = await getTransactions(
         request,
-        startDate,
-        endDate,
+        new URLSearchParams({ startDate, endDate }).toString(),
       );
 
       expect(matchingRange.total).toBe(1);
       expect(matchingRange.transactions).toHaveLength(1);
       expect(matchingRange.transactions[0].id).toBe(transaction.id);
 
-      const beforeRange = await getTransactionsByDateRange(
+      const beforeRange = await getTransactions(
         request,
-        date(transactionTime - 3 * day),
-        date(transactionTime - 2 * day),
+        new URLSearchParams({
+          startDate: date(transactionTime - 2 * day),
+          endDate: date(transactionTime - 3 * day),
+        }).toString(),
       );
 
       expect(beforeRange.total).toBe(0);
       expect(beforeRange.transactions).toEqual([]);
 
-      const afterRange = await getTransactionsByDateRange(
+      const afterRange = await getTransactions(
         request,
-        date(transactionTime + 2 * day),
-        date(transactionTime + 3 * day),
+        new URLSearchParams({
+          startDate: date(transactionTime + 2 * day),
+          endDate: date(transactionTime + 3 * day),
+        }).toString(),
       );
 
       expect(afterRange.total).toBe(0);

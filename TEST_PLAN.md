@@ -269,6 +269,7 @@ Implementation order:
 1. **Financial API**
    - [x] account and opening balance;
    - [x] history with `total`, `limit`, `offset`, and `hasMore`;
+   - [x] transaction-history filters by type, category, and date range;
    - [x] income and expense and their effect on the balance;
    - [x] transfer: minimum `0.01`, maximum `999.99`, balance equal to the
          amount, exceeding the balance, and a nonexistent recipient.
@@ -423,7 +424,10 @@ maintenance tasks are not scenario rows. Setup entries have no case ID.
 | TC-FIN-008     | Finance     | Transfer of the full available balance leaves zero                    | API    | P1       | included | -                                                                                                              |
 | TC-FIN-009     | Finance     | Transfer above available balance leaves both accounts unchanged       | API    | P1       | included | -                                                                                                              |
 | TC-FIN-010     | Finance     | Transfer to a nonexistent recipient is rejected                       | API    | P1       | included | -                                                                                                              |
-| TC-FIN-011     | Finance     | A fresh user can read their financial account and balance             | API    | P1       | included | Checks the opening balance and account shape; does not compare `userId` with the test user ID.                 |
+| TC-FIN-011     | Finance     | A fresh user can read their financial account and balance             | API    | P1       | included | Compares the account `userId` with the freshly logged-in user's ID; execution not recorded.                    |
+| TC-FIN-012     | Finance     | Transaction history filters by type                                   | API    | P1       | included | Creates income and expense, then checks that the income filter returns only the expected transaction.          |
+| TC-FIN-013     | Finance     | Transaction history filters by category                               | API    | P1       | included | Creates two income categories, then checks that the salary filter returns only the expected transaction.       |
+| TC-FIN-014     | Finance     | Transaction history filters by date range                             | API    | P1       | included | Checks a matching range and empty ranges before and after the created transaction; execution not recorded.     |
 | TC-GUARD-001   | Auth        | should redirect anonymous user from /profile.html to login            | UI     | P0       | included | -                                                                                                              |
 | TC-GUARD-002   | Auth        | should redirect anonymous user from /marketplace.html to login        | UI     | P0       | included | -                                                                                                              |
 | TC-GUARD-003   | Auth        | should redirect anonymous user from /financial.html to login          | UI     | P0       | included | -                                                                                                              |
@@ -580,13 +584,15 @@ should not be repeated merely because an old result is missing.
 3. Record the API-project baseline. A targeted run of `TC-AUTH-012` and
    `TC-FARM-010` passed on 2026-09-27 with one worker and no retries; include
    the remaining API cases in the baseline before comparing later runs.
-4. Review `TC-FIN-011`: the account response is checked, but its `userId` is
-   not compared with the freshly registered user's ID. Make that one assertion
-   improvement, then run the focused test and the API project.
-5. Continue the Financial API with transaction-history filters by type,
-   category, and date range. Add one contract at a time, using a fresh user and
-   transactions created by that test; refactor a helper only when the new test
-   duplicates a concrete setup or assertion.
+4. Review the new financial history tests `TC-FIN-012` through `TC-FIN-014`.
+   Give the date-range helper an explicit response check, or use the existing
+   financial API reader so a failed request has a clear diagnostic. Keep the
+   three scenario assertions in the spec. Run each focused case, then the API
+   project when a test environment is available.
+5. Financial API filters and the `TC-FIN-011` user ID comparison are implemented
+   in source as of September 28, 2026; execution is not recorded. Continue to
+   the next domain after the targeted financial run. The UI filter exercise in
+   Stage 4 remains separate.
 6. Continue Farm API contracts with invalid area, field update, assignment and
    unassignment, then the remaining staff and animal operations. Keep
    independent users and resources for state-changing cases. Diagnose the

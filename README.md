@@ -268,6 +268,9 @@ Implementation and execution states are computed in the report, not edited here.
 | TC-FIN-009     | Finance     | Transfer above available balance leaves both accounts unchanged       | API    | P1       | included |
 | TC-FIN-010     | Finance     | Transfer to a nonexistent recipient is rejected                       | API    | P1       | included |
 | TC-FIN-011     | Finance     | A fresh user can read their financial account and balance             | API    | P1       | included |
+| TC-FIN-012     | Finance     | Transaction history filters by type                                   | API    | P1       | included |
+| TC-FIN-013     | Finance     | Transaction history filters by category                               | API    | P1       | included |
+| TC-FIN-014     | Finance     | Transaction history filters by date range                             | API    | P1       | included |
 | TC-GUARD-001   | Auth        | should redirect anonymous user from /profile.html to login            | UI     | P0       | included |
 | TC-GUARD-002   | Auth        | should redirect anonymous user from /marketplace.html to login        | UI     | P0       | included |
 | TC-GUARD-003   | Auth        | should redirect anonymous user from /financial.html to login          | UI     | P0       | included |
