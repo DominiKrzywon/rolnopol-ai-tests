@@ -155,46 +155,38 @@ export function renderReport(report, readme, plan) {
     count === null
       ? `<p class="summary-metric"><strong>${label}: N/A</strong><small>No current evidence</small></p>`
       : `<p class="summary-metric"><strong>${label}: ${percentText(percent)}</strong><small>${count} / ${metrics.denominator} included scenarios${percent === null ? ' (no denominator)' : ''}</small></p>`;
-  const groupCoverage = (key, values) =>
-    values.map((label) => {
-      const included = report.cases.filter(
-        (item) => item.scenario[key] === label && item.scope === 'included',
-      );
-      const implemented = included.filter((item) => item.implemented).length;
-      return {
-        label,
-        implemented,
-        denominator: included.length,
-        percent: included.length ? (implemented / included.length) * 100 : null,
-      };
-    });
+  const selectedMetric =
+    metrics.selected === null
+      ? `<p class="summary-metric"><strong>Selected to run: N/A</strong><small>No test run supplied</small></p>`
+      : `<p class="summary-metric"><strong>Selected to run: ${metrics.selected}</strong><small>${metrics.selected} / ${metrics.denominator} included scenarios listed in this run</small></p>`;
   const renderBars = (groups) =>
     groups
       .map(
-        ({ label, implemented, denominator, percent }) =>
-          `<div class="coverage-group"><div class="coverage-label"><strong>${escapeHtml(label)}</strong><span>${percentText(percent)}</span></div><div class="coverage-track" role="meter" aria-label="${escapeHtml(label)} implemented coverage" aria-valuemin="0" aria-valuemax="100" ${percent === null ? '' : `aria-valuenow="${percent.toFixed(1)}"`} aria-valuetext="${percent === null ? 'No included scenarios' : `${implemented} of ${denominator} included scenarios implemented`}"><span class="coverage-fill" style="width:${percent ?? 0}%"></span></div><small>${implemented} / ${denominator} implemented${percent === null ? ' (no denominator)' : ''}</small></div>`,
+        ({
+          label,
+          implemented,
+          confirmed,
+          denominator,
+          implementedPercent,
+          confirmedPercent,
+        }) =>
+          `<div class="coverage-group"><div class="coverage-label"><strong>${escapeHtml(label)}</strong><span>${percentText(implementedPercent)}</span></div><div class="coverage-track" role="meter" aria-label="${escapeHtml(label)} implemented coverage" aria-valuemin="0" aria-valuemax="100" ${implementedPercent === null ? '' : `aria-valuenow="${implementedPercent.toFixed(1)}"`} aria-valuetext="${implementedPercent === null ? 'No included scenarios' : `${implemented} of ${denominator} included scenarios implemented`}"><span class="coverage-fill" style="width:${implementedPercent ?? 0}%"></span></div><small>Implemented: ${implemented} / ${denominator} &middot; Confirmed: ${confirmed === null ? 'N/A (no current evidence)' : `${confirmed} / ${denominator} (${percentText(confirmedPercent)})`}</small></div>`,
       )
       .join('');
-  const priorityBars = renderBars(
-    groupCoverage('priority', ['P0', 'P1', 'P2']),
-  );
-  const areaBars = renderBars(
-    groupCoverage('area', [
-      ...new Set(report.cases.map((item) => item.scenario.area)),
-    ]).sort(
-      (a, b) =>
-        (b.percent ?? -1) - (a.percent ?? -1) || a.label.localeCompare(b.label),
-    ),
-  );
+  const priorityBars = renderBars(report.breakdowns.priority);
+  const riskBars = renderBars(report.breakdowns.risk);
+  const areaBars = renderBars(report.breakdowns.area);
   const choices = (key) =>
-    [
-      ...new Set(
-        report.cases.map((item) =>
-          key === 'status' ? item.execution.status : item.scenario[key],
-        ),
-      ),
-    ]
-      .sort()
+    (key === 'risk'
+      ? report.breakdowns.risk.map((group) => group.label)
+      : [
+          ...new Set(
+            report.cases.map((item) =>
+              key === 'status' ? item.execution.status : item.scenario[key],
+            ),
+          ),
+        ].sort()
+    )
       .map((value) => `<option>${escapeHtml(value)}</option>`)
       .join('');
   const rows = report.cases
@@ -204,9 +196,9 @@ export function renderReport(report, readme, plan) {
       const toggle = (label, className = '') =>
         `<button type="button" class="detail-toggle ${className}" aria-expanded="false" aria-controls="details-${item.id}">${label}</button>`;
       const statusLabel = `${status === 'failed' ? '❌ ' : ''}${escapeHtml(status.toUpperCase())}`;
-      return `<tr id="case-${item.id}" data-case-row data-area="${escapeHtml(item.scenario.area)}" data-priority="${item.scenario.priority}" data-status="${status}">
-<td><strong>${item.id}</strong></td><td>${escapeHtml(item.scenario.area)}</td><td>${escapeHtml(item.scenario.title)}</td><td>${item.scenario.priority}</td><td>${failure ? toggle(statusLabel, `status ${status}`) : `<span class="status ${status}">${statusLabel}</span>`}</td><td class="failure-brief">${failure ? escapeHtml(failure.message) : '—'}</td><td>${toggle('Details')}</td></tr>
-<tr id="details-${item.id}" class="case-details" hidden><td colspan="7">${executionDetails(item)}</td></tr>`;
+      return `<tr id="case-${item.id}" data-case-row data-area="${escapeHtml(item.scenario.area)}" data-priority="${item.scenario.priority}" data-risk="${escapeHtml(item.scenario.risk)}" data-status="${status}">
+<td><strong>${item.id}</strong></td><td>${escapeHtml(item.scenario.area)}</td><td>${escapeHtml(item.scenario.title)}</td><td>${item.scenario.priority}</td><td>${escapeHtml(item.scenario.risk)}</td><td>${failure ? toggle(statusLabel, `status ${status}`) : `<span class="status ${status}">${statusLabel}</span>`}</td><td class="failure-brief">${failure ? escapeHtml(failure.message) : '—'}</td><td>${toggle('Details')}</td></tr>
+<tr id="details-${item.id}" class="case-details" hidden><td colspan="8">${executionDetails(item)}</td></tr>`;
     })
     .join('\n');
   const failedCases = report.cases.filter((item) =>
@@ -223,9 +215,10 @@ export function renderReport(report, readme, plan) {
 </style></head><body><header><nav><a href="#coverage">Coverage</a><a href="#readme">README</a><a href="#test_plan">Test plan</a></nav>
 <h1>Rolnopol scenario coverage</h1><p>Which planned scenarios have tests, and what did the selected run demonstrate? The catalog defines the denominator. Test mappings and passing results do not assess assertion quality.</p></header>
 <main><section id="coverage"><div class="coverage-overview">
-<section class="coverage-panel" aria-labelledby="scenario-summary"><h2 id="scenario-summary">Scenario coverage</h2>${summaryMetric('Implemented', metrics.implemented, metrics.automationPercent)}${summaryMetric('Confirmed', metrics.confirmed, metrics.confirmedPercent)}<p class="freshness">Result freshness: ${report.freshness} · ${escapeHtml(report.run?.startTime || 'No test run supplied')}</p></section>
-<section class="coverage-panel" id="priorities" aria-labelledby="priority-summary"><h2 id="priority-summary">Priority coverage</h2><p>Implemented scenarios / included scenarios in each priority.</p>${priorityBars}</section>
-<section class="coverage-panel" id="areas" aria-labelledby="area-summary"><h2 id="area-summary">Coverage by area</h2><p>Implemented scenarios / included scenarios in each area.</p>${areaBars}</section>
+<section class="coverage-panel" aria-labelledby="scenario-summary"><h2 id="scenario-summary">Scenario coverage</h2>${summaryMetric('Implemented', metrics.implemented, metrics.automationPercent)}${selectedMetric}${summaryMetric('Confirmed', metrics.confirmed, metrics.confirmedPercent)}<p class="freshness">Result freshness: ${report.freshness} · ${escapeHtml(report.run?.startTime || 'No test run supplied')}</p><p class="freshness">Confirmed counts only cases executed in this run; unselected cases remain unconfirmed.</p></section>
+<section class="coverage-panel" id="priorities" aria-labelledby="priority-summary"><h2 id="priority-summary">Priority coverage</h2><p>Implementation and current execution confirmation for each priority.</p>${priorityBars}</section>
+<section class="coverage-panel" id="risks" aria-labelledby="risk-summary"><h2 id="risk-summary">Risk coverage</h2><p>Initial impact estimate for this learning application, separate from execution priority.</p>${riskBars}</section>
+<section class="coverage-panel" id="areas" aria-labelledby="area-summary"><h2 id="area-summary">Coverage by area</h2><p>Implementation and current execution confirmation for each area.</p>${areaBars}</section>
 </div>
 <p class="notice">This measures the explicit scenario catalog, not application code coverage. Excluded cases and setup are outside the denominator. ${report.freshness !== 'current' ? 'Observed results below are not current execution confirmation.' : 'Unselected or blocked tests remain unconfirmed.'} ${report.run?.globalErrorCount ? `${report.run.globalErrorCount} global run errors: confirmation is unavailable.` : ''}</p>
 <p>Generated ${escapeHtml(report.generatedAt)} · Revision ${escapeHtml(report.snapshot.revision || 'unknown')} · Source fingerprint <code>${escapeHtml(report.snapshot.fingerprint.slice(0, 16))}</code></p>
@@ -236,13 +229,13 @@ export function renderReport(report, readme, plan) {
   )}</p>
 <details><summary>Run and setup evidence</summary><pre>${escapeHtml(JSON.stringify({ run: report.run, infrastructure: report.infrastructure }, null, 2))}</pre></details>
 ${failureSummary}
-<div class="filters"><label>Search<input id="search" type="search" placeholder="ID, scenario or file"></label><label>Area<select id="area"><option value="">All areas</option>${choices('area')}</select></label><label>Priority<select id="priority"><option value="">All priorities</option>${choices('priority')}</select></label><label>Status<select id="status"><option value="">All statuses</option>${choices('status')}</select></label></div><p id="visible" aria-live="polite"></p>
-<div class="table-scroll"><table id="cases"><thead><tr><th>ID</th><th>Area</th><th>Scenario</th><th>Priority</th><th>Status</th><th>Failure</th><th>Details</th></tr></thead><tbody>${rows}</tbody></table></div></section>
+<div class="filters"><label>Search<input id="search" type="search" placeholder="ID, scenario or file"></label><label>Area<select id="area"><option value="">All areas</option>${choices('area')}</select></label><label>Priority<select id="priority"><option value="">All priorities</option>${choices('priority')}</select></label><label>Risk<select id="risk"><option value="">All risks</option>${choices('risk')}</select></label><label>Status<select id="status"><option value="">All statuses</option>${choices('status')}</select></label></div><p id="visible" aria-live="polite"></p>
+<div class="table-scroll"><table id="cases"><thead><tr><th>ID</th><th>Area</th><th>Scenario</th><th>Priority</th><th>Risk</th><th>Status</th><th>Failure</th><th>Details</th></tr></thead><tbody>${rows}</tbody></table></div></section>
 <details id="readme" open><summary>README · parsed project documentation</summary><article>${renderMarkdown(readme, 'readme')}</article></details>
 <details id="test_plan"><summary>TEST_PLAN · parsed strategy and catalog</summary><article>${renderMarkdown(plan, 'test_plan')}</article></details>
 <footer>Standalone report · No AI, external fonts, scripts, or network requests required. Raw logs, credentials and attachments are not embedded.</footer></main>
 <script>
-const filters = ['search','area','priority','status'].map(id => document.getElementById(id));
+const filters = ['search','area','priority','risk','status'].map(id => document.getElementById(id));
 function filterRows(){let count=0;for(const row of document.querySelectorAll('#cases [data-case-row]')){const detail=row.nextElementSibling;const visible=(row.textContent+' '+detail.textContent).toLowerCase().includes(filters[0].value.toLowerCase())&&filters.slice(1).every(input=>!input.value||row.dataset[input.id]===input.value);row.hidden=!visible;detail.hidden=!visible||row.querySelector('.detail-toggle').getAttribute('aria-expanded')!=='true';if(visible)count++;}document.getElementById('visible').textContent=count+' scenarios shown';}
 function toggleDetails(row,open){row.querySelectorAll('.detail-toggle').forEach(button=>button.setAttribute('aria-expanded',String(open)));row.nextElementSibling.hidden=row.hidden||!open;}
 document.querySelectorAll('.detail-toggle').forEach(button=>button.addEventListener('click',()=>toggleDetails(button.closest('tr'),button.getAttribute('aria-expanded')!=='true')));

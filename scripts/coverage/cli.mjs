@@ -17,6 +17,7 @@ import {
   buildReport,
   parseCatalog,
   updateReadme,
+  validateCoverageReport,
   validateInventory,
 } from './model.mjs';
 import { loadPlaywrightLinks } from './playwright-links.mjs';
@@ -101,6 +102,7 @@ async function generate(resultPath) {
     ),
   );
   report.documents = { readme, testPlan: plan };
+  validateCoverageReport(report);
   writeJson(path.join(output, 'coverage.json'), report);
   writeFileSync(
     path.join(output, 'index.html'),
@@ -127,6 +129,10 @@ async function main() {
         'README index is out of date. Run npm run coverage:readme.',
       );
     }
+  } else if (command === 'verify') {
+    if (args.length) throw new Error('verify does not accept arguments');
+    validateCoverageReport(readJson(path.join(output, 'coverage.json')));
+    process.stdout.write('Coverage JSON is valid.\n');
   } else if (command === 'readme') {
     if (args.length) throw new Error('readme does not accept arguments');
     writeFileSync(path.join(root, 'README.md'), await expectedReadme());
@@ -187,7 +193,7 @@ async function main() {
     process.exitCode = code;
   } else {
     throw new Error(
-      'Usage: node scripts/coverage/cli.mjs collect|validate|readme|run|report',
+      'Usage: node scripts/coverage/cli.mjs collect|validate|verify|readme|run|report',
     );
   }
 }

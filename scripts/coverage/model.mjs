@@ -5,12 +5,14 @@ export const END = '<!-- coverage-catalog:end -->';
 export const INDEX_START = '<!-- coverage-index:start -->';
 export const INDEX_END = '<!-- coverage-index:end -->';
 const ID = /^TC-[A-Z]+-\d{3}$/;
+const RISK_LEVELS = ['critical', 'high', 'medium', 'low'];
 const columns = [
   'ID',
   'Area',
   'Scenario',
   'Layer',
   'Priority',
+  'Risk',
   'Scope',
   'Notes',
 ];
@@ -53,7 +55,7 @@ export function parseCatalog(markdown) {
       const cells = tableCells(line);
       if (cells.length !== columns.length)
         throw new Error(`Invalid catalog row: ${line}`);
-      const [id, area, scenario, layer, priority, scope, notes] = cells;
+      const [id, area, scenario, layer, priority, risk, scope, notes] = cells;
       if (!ID.test(id) || ids.has(id))
         throw new Error(`Invalid or duplicate catalog ID: ${id}`);
       if (
@@ -61,6 +63,7 @@ export function parseCatalog(markdown) {
         !scenario ||
         !['UI', 'API', 'E2E', 'Visual'].includes(layer) ||
         !['P0', 'P1', 'P2'].includes(priority) ||
+        !RISK_LEVELS.includes(risk) ||
         !['included', 'excluded'].includes(scope)
       ) {
         throw new Error(`Invalid fields for ${id}`);
@@ -69,7 +72,7 @@ export function parseCatalog(markdown) {
         throw new Error(`Excluded case ${id} needs a reason`);
       }
       ids.add(id);
-      return { id, area, scenario, layer, priority, scope, notes };
+      return { id, area, scenario, layer, priority, risk, scope, notes };
     });
 }
 
@@ -119,12 +122,12 @@ export function validateInventory(catalog, inventory) {
 export function readmeIndex(catalog) {
   const cell = (value) => value.replaceAll('|', '\\|');
   return (
-    '\n\n| ID | Area | Scenario | Layer | Priority | Scope |\n' +
-    '| --- | --- | --- | --- | --- | --- |\n' +
+    '\n\n| ID | Area | Scenario | Layer | Priority | Risk | Scope |\n' +
+    '| --- | --- | --- | --- | --- | --- | --- |\n' +
     catalog
       .map(
         (item) =>
-          `| ${[item.id, item.area, item.scenario, item.layer, item.priority, item.scope].map(cell).join(' | ')} |`,
+          `| ${[item.id, item.area, item.scenario, item.layer, item.priority, item.risk, item.scope].map(cell).join(' | ')} |`,
       )
       .join('\n') +
     '\n\n'
@@ -193,6 +196,32 @@ function aggregate(statuses) {
   if (statuses.every((status) => status === 'skipped')) return 'skipped';
   if (statuses.includes('expected-failure')) return 'expected-failure';
   return 'partial';
+}
+
+function coverageBreakdown(cases, key, labels, canConfirm) {
+  return labels.map((label) => {
+    const included = cases.filter(
+      (item) => item.scope === 'included' && item.scenario[key] === label,
+    );
+    const denominator = included.length;
+    const implemented = included.filter((item) => item.implemented).length;
+    const confirmed = canConfirm
+      ? included.filter((item) => item.execution.status === 'passed').length
+      : null;
+    return {
+      label,
+      denominator,
+      implemented,
+      confirmed,
+      implementedPercent: denominator
+        ? (implemented / denominator) * 100
+        : null,
+      confirmedPercent:
+        confirmed !== null && denominator
+          ? (confirmed / denominator) * 100
+          : null,
+    };
+  });
 }
 
 export function buildReport(
@@ -296,6 +325,7 @@ export function buildReport(
         title: item.scenario,
         area: item.area,
         priority: item.priority,
+        risk: item.risk,
         layer: item.layer,
       },
       scope: item.scope,
@@ -314,15 +344,37 @@ export function buildReport(
   });
   const included = cases.filter((item) => item.scope === 'included');
   const implemented = included.filter((item) => item.implemented).length;
-  const confirmed =
-    freshness === 'current' && run.errors.length === 0
-      ? included.filter((item) => item.execution.status === 'passed').length
-      : null;
+  const selected = run
+    ? included.filter((item) => item.execution.runs.length > 0).length
+    : null;
+  const canConfirm = freshness === 'current' && run.errors.length === 0;
+  const confirmed = canConfirm
+    ? included.filter((item) => item.execution.status === 'passed').length
+    : null;
+  const breakdowns = {
+    priority: coverageBreakdown(
+      cases,
+      'priority',
+      ['P0', 'P1', 'P2'],
+      canConfirm,
+    ),
+    risk: coverageBreakdown(cases, 'risk', RISK_LEVELS, canConfirm),
+    area: coverageBreakdown(
+      cases,
+      'area',
+      [...new Set(cases.map((item) => item.scenario.area))],
+      canConfirm,
+    ).sort(
+      (a, b) =>
+        (b.implementedPercent ?? -1) - (a.implementedPercent ?? -1) ||
+        a.label.localeCompare(b.label),
+    ),
+  };
   const counts = {};
   for (const item of cases)
     counts[item.execution.status] = (counts[item.execution.status] || 0) + 1;
   return {
-    schemaVersion: 2,
+    schemaVersion: 5,
     generatedAt: new Date().toISOString(),
     snapshot,
     scope:
@@ -330,9 +382,11 @@ export function buildReport(
     freshness,
     playwrightReport: { status: playwrightReport.status },
     counts,
+    breakdowns,
     metrics: {
       denominator: included.length,
       implemented,
+      selected,
       confirmed,
       automationPercent: included.length
         ? (implemented / included.length) * 100
@@ -361,4 +415,236 @@ export function buildReport(
     infrastructure,
     cases,
   };
+}
+
+const REPORT_STATUSES = new Set([
+  'excluded',
+  'planned',
+  'not-run',
+  'partial',
+  'skipped',
+  'failed',
+  'flaky',
+  'interrupted',
+  'expected-failure',
+  'passed',
+]);
+
+const isRecord = (value) =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+const isCount = (value) => Number.isInteger(value) && value >= 0;
+const isDuration = (value) =>
+  typeof value === 'number' && Number.isFinite(value) && value >= 0;
+const isPercent = (value) =>
+  value === null || (typeof value === 'number' && value >= 0 && value <= 100);
+
+function requireReport(condition, path) {
+  if (!condition) throw new Error(`Invalid coverage report: ${path}`);
+}
+
+export function validateCoverageReport(report) {
+  requireReport(
+    isRecord(report) && report.schemaVersion === 5,
+    'schemaVersion',
+  );
+  requireReport(typeof report.generatedAt === 'string', 'generatedAt');
+  requireReport(
+    isRecord(report.snapshot) &&
+      typeof report.snapshot.fingerprint === 'string' &&
+      report.snapshot.fingerprint.length > 0,
+    'snapshot.fingerprint',
+  );
+  requireReport(
+    ['current', 'stale', 'unknown', 'no-run'].includes(report.freshness),
+    'freshness',
+  );
+  requireReport(Array.isArray(report.cases), 'cases');
+  requireReport(Array.isArray(report.infrastructure), 'infrastructure');
+  requireReport(isRecord(report.counts), 'counts');
+  requireReport(isRecord(report.metrics), 'metrics');
+  requireReport(isRecord(report.breakdowns), 'breakdowns');
+  requireReport(
+    isRecord(report.documents) &&
+      typeof report.documents.readme === 'string' &&
+      typeof report.documents.testPlan === 'string',
+    'documents',
+  );
+  requireReport(report.run === null || isRecord(report.run), 'run');
+  requireReport(
+    (report.run === null) === (report.freshness === 'no-run'),
+    'run/freshness',
+  );
+
+  const seen = new Set();
+  const counts = {};
+  for (const item of report.cases) {
+    requireReport(isRecord(item) && ID.test(item.id), 'cases[].id');
+    requireReport(!seen.has(item.id), `duplicate case ${item.id}`);
+    seen.add(item.id);
+    requireReport(isRecord(item.scenario), `cases[${item.id}].scenario`);
+    requireReport(
+      ['P0', 'P1', 'P2'].includes(item.scenario.priority) &&
+        RISK_LEVELS.includes(item.scenario.risk) &&
+        typeof item.scenario.area === 'string' &&
+        item.scenario.area.length > 0 &&
+        typeof item.scenario.title === 'string' &&
+        typeof item.scenario.layer === 'string',
+      `cases[${item.id}].scenario fields`,
+    );
+    requireReport(
+      ['included', 'excluded'].includes(item.scope),
+      `cases[${item.id}].scope`,
+    );
+    requireReport(
+      typeof item.implemented === 'boolean',
+      `cases[${item.id}].implemented`,
+    );
+    requireReport(Array.isArray(item.tests), `cases[${item.id}].tests`);
+    requireReport(
+      item.implemented === item.tests.length > 0,
+      `cases[${item.id}].implemented/tests`,
+    );
+    requireReport(
+      (item.scope === 'excluded') === (item.execution?.status === 'excluded'),
+      `cases[${item.id}].scope/status`,
+    );
+    for (const test of item.tests) {
+      requireReport(
+        isRecord(test) &&
+          typeof test.file === 'string' &&
+          typeof test.project === 'string' &&
+          Array.isArray(test.caseIds) &&
+          test.caseIds.includes(item.id),
+        `cases[${item.id}].tests[]`,
+      );
+    }
+    requireReport(isRecord(item.execution), `cases[${item.id}].execution`);
+    requireReport(
+      REPORT_STATUSES.has(item.execution.status),
+      `cases[${item.id}].execution.status`,
+    );
+    requireReport(
+      Array.isArray(item.execution.runs),
+      `cases[${item.id}].execution.runs`,
+    );
+    for (const execution of item.execution.runs) {
+      requireReport(
+        isRecord(execution) &&
+          typeof execution.project === 'string' &&
+          REPORT_STATUSES.has(execution.status) &&
+          isDuration(execution.durationMs) &&
+          Array.isArray(execution.attempts) &&
+          (execution.failure === null || isRecord(execution.failure)) &&
+          (execution.playwrightTestId === null ||
+            typeof execution.playwrightTestId === 'string'),
+        `cases[${item.id}].execution.runs[]`,
+      );
+      for (const attempt of execution.attempts) {
+        requireReport(
+          isRecord(attempt) &&
+            typeof attempt.status === 'string' &&
+            (attempt.durationMs === undefined ||
+              isDuration(attempt.durationMs)) &&
+            (attempt.failure === null || isRecord(attempt.failure)),
+          `cases[${item.id}].execution.runs[].attempts[]`,
+        );
+      }
+    }
+    requireReport(
+      isDuration(item.execution.durationMs),
+      `cases[${item.id}].execution.durationMs`,
+    );
+    counts[item.execution.status] = (counts[item.execution.status] || 0) + 1;
+  }
+  requireReport(
+    Object.keys(report.counts).length === Object.keys(counts).length &&
+      Object.entries(counts).every(
+        ([status, count]) => report.counts[status] === count,
+      ),
+    'counts',
+  );
+
+  const included = report.cases.filter((item) => item.scope === 'included');
+  const implemented = included.filter((item) => item.implemented).length;
+  const selected = report.run
+    ? included.filter((item) => item.execution.runs.length > 0).length
+    : null;
+  const canConfirm =
+    report.freshness === 'current' && report.run?.globalErrorCount === 0;
+  const confirmed = canConfirm
+    ? included.filter((item) => item.execution.status === 'passed').length
+    : null;
+  const { metrics } = report;
+  requireReport(
+    metrics.denominator === included.length &&
+      metrics.implemented === implemented &&
+      metrics.selected === selected &&
+      metrics.confirmed === confirmed &&
+      isPercent(metrics.automationPercent) &&
+      isPercent(metrics.confirmedPercent) &&
+      metrics.automationPercent ===
+        (included.length ? (implemented / included.length) * 100 : null) &&
+      metrics.confirmedPercent ===
+        (confirmed !== null && included.length
+          ? (confirmed / included.length) * 100
+          : null),
+    'metrics',
+  );
+
+  for (const key of ['priority', 'risk', 'area']) {
+    const groups = report.breakdowns[key];
+    requireReport(Array.isArray(groups), `breakdowns.${key}`);
+    const expected = coverageBreakdown(
+      report.cases,
+      key,
+      key === 'priority'
+        ? ['P0', 'P1', 'P2']
+        : key === 'risk'
+          ? RISK_LEVELS
+          : [...new Set(report.cases.map((item) => item.scenario.area))],
+      canConfirm,
+    );
+    requireReport(
+      groups.length === expected.length,
+      `breakdowns.${key}.length`,
+    );
+    const byLabel = new Map(expected.map((group) => [group.label, group]));
+    const seenLabels = new Set();
+    for (const group of groups) {
+      requireReport(
+        isRecord(group) && typeof group.label === 'string',
+        `breakdowns.${key}[]`,
+      );
+      requireReport(
+        !seenLabels.has(group.label),
+        `breakdowns.${key} duplicate label`,
+      );
+      seenLabels.add(group.label);
+      const correct = byLabel.get(group.label);
+      requireReport(
+        correct &&
+          Object.keys(correct).every(
+            (field) => group[field] === correct[field],
+          ),
+        `breakdowns.${key}[${group.label}]`,
+      );
+    }
+  }
+  if (report.run !== null) {
+    requireReport(
+      isCount(report.run.globalErrorCount) &&
+        typeof report.run.startTime === 'string' &&
+        isDuration(report.run.durationMs) &&
+        Array.isArray(report.run.projects) &&
+        isRecord(report.run.stats),
+      'run',
+    );
+    if (report.freshness === 'current') {
+      requireReport(
+        report.run.provenance?.fingerprint === report.snapshot.fingerprint,
+        'run.provenance.fingerprint',
+      );
+    }
+  }
+  return report;
 }

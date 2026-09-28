@@ -36,13 +36,20 @@ export default defineConfig({
 
   projects: [
     {
+      name: 'health-check',
+      testMatch: ['**/health/health.spec.ts'],
+    },
+
+    {
       name: 'setup-demo-user',
+      dependencies: ['health-check'],
       testMatch: ['**/auth/**/*.setup.ts'],
       use: { ...devices['Desktop Chrome'] },
     },
 
     {
       name: 'smoke-tests',
+      dependencies: ['health-check'],
       testMatch: ['**/smoke/**.spec.ts'],
       use: { ...devices['Desktop Chrome'] },
     },
@@ -59,23 +66,27 @@ export default defineConfig({
 
     {
       name: 'no-auth-tests',
+      dependencies: ['health-check'],
       testMatch: ['**/auth/**/*.noauth.spec.ts'],
       use: { ...devices['Desktop Chrome'] },
     },
 
     {
       name: 'api-tests',
+      dependencies: ['health-check'],
       testMatch: ['**/api/**/*.spec.ts'],
     },
 
     {
       name: 'isolated-user-tests',
+      dependencies: ['health-check'],
       testMatch: ['**/*.isolated.spec.ts'],
       use: { ...devices['Desktop Chrome'] },
     },
 
     {
       name: 'visual-test',
+      dependencies: ['health-check'],
       testMatch: ['**/visual/**/*.spec.ts'],
       use: { ...devices['Desktop Chrome'] },
     },

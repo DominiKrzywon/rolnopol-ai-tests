@@ -14,6 +14,7 @@ import {
   buildReport,
   parseCatalog,
   updateReadme,
+  validateCoverageReport,
   validateInventory,
 } from './model.mjs';
 import {
@@ -31,6 +32,7 @@ const row = (id = 'TC-AUTH-001', scope = 'included') => ({
   scenario: 'Reject invalid login',
   layer: 'API',
   priority: 'P0',
+  risk: 'medium',
   scope,
   notes: '-',
 });
@@ -84,12 +86,17 @@ const run = (tests = [result()], fingerprint = 'current') => ({
   ],
 });
 const markdown = (rows) =>
-  `<!-- coverage-catalog:start -->\n| ID | Area | Scenario | Layer | Priority | Scope | Notes |\n| --- | --- | --- | --- | --- | --- | --- |\n${rows}\n<!-- coverage-catalog:end -->`;
+  `<!-- coverage-catalog:start -->\n| ID | Area | Scenario | Layer | Priority | Risk | Scope | Notes |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n${rows}\n<!-- coverage-catalog:end -->`;
 const catalogRow =
-  '| TC-AUTH-001 | Auth | Reject a \\| b | API | P0 | included | - |';
+  '| TC-AUTH-001 | Auth | Reject a \\| b | API | P0 | medium | included | - |';
 
 test('catalog parses escaped pipes and rejects duplicate IDs and malformed columns', () => {
   assert.equal(parseCatalog(markdown(catalogRow))[0].scenario, 'Reject a | b');
+  assert.equal(parseCatalog(markdown(catalogRow))[0].risk, 'medium');
+  assert.throws(
+    () => parseCatalog(markdown(catalogRow.replace('medium', 'urgent'))),
+    /Invalid fields/,
+  );
   assert.throws(
     () => parseCatalog(markdown(catalogRow + '\n' + catalogRow)),
     /duplicate/,
@@ -117,6 +124,7 @@ test('README generation preserves authored content and is idempotent', () => {
   assert.match(updated, /Footer$/);
   assert.equal(updateReadme(updated, catalog), updated);
   assert.match(updated, /TC-AUTH-002/);
+  assert.match(updated, /\| Risk \|/);
 });
 
 test('inventory validates IDs without treating planned gaps as errors', () => {
@@ -163,6 +171,17 @@ test('setup is outside the scenario denominator and cannot disguise scenario tes
   );
   assert.equal(report.metrics.denominator, 2);
   assert.equal(report.metrics.implemented, 1);
+  const withSetup = buildReport(
+    catalog,
+    inventory([unit(), setup]),
+    run([
+      result(),
+      result('passed', { projectName: 'setup-demo-user', annotations: [] }),
+    ]),
+    snapshot,
+  );
+  assert.equal(withSetup.metrics.selected, 1);
+  assert.equal(withSetup.infrastructure.length, 1);
   assert.throws(
     () =>
       validateInventory(
@@ -180,6 +199,15 @@ test('no run means implemented and planned, with no execution confirmation', () 
     ['not-run', 'planned'],
   );
   assert.equal(report.metrics.confirmed, null);
+  assert.equal(report.metrics.selected, null);
+  assert.equal(
+    buildReport(catalog, inventory(), run([]), snapshot).metrics.selected,
+    0,
+  );
+  assert.match(
+    renderReport(report, '# README', '# PLAN'),
+    /Selected to run: N\/A/,
+  );
   assert.equal(report.metrics.automationPercent, 50);
 });
 
@@ -253,6 +281,7 @@ test('repetitions and retries do not inflate scenario counts', () => {
     snapshot,
   );
   assert.equal(repeated.metrics.confirmed, 1);
+  assert.equal(repeated.metrics.selected, 1);
   assert.equal(repeated.cases[0].execution.runs.length, 2);
   const mixed = buildReport(
     catalog,
@@ -261,6 +290,7 @@ test('repetitions and retries do not inflate scenario counts', () => {
     snapshot,
   );
   assert.equal(mixed.cases[0].execution.status, 'flaky');
+  assert.equal(mixed.metrics.selected, 1);
   const retry = result('passed', {
     status: 'flaky',
     results: [
@@ -276,6 +306,10 @@ test('repetitions and retries do not inflate scenario counts', () => {
 
 test('explicit skips, blocked tests, interruptions and expected failures stay distinct', () => {
   const skip = result('skipped', { status: 'skipped' });
+  assert.equal(
+    buildReport(catalog, inventory(), run([skip]), snapshot).metrics.selected,
+    1,
+  );
   assert.equal(
     buildReport(catalog, inventory(), run([skip]), snapshot).cases[0].execution
       .status,
@@ -381,18 +415,87 @@ test('HTML embeds both documents, escapes scenario text and excludes raw logs', 
   assert.doesNotMatch(JSON.stringify(report), /secret-log/);
 });
 
+test('normalized JSON validates independently of HTML and rejects damaged metrics', () => {
+  const report = buildReport(catalog, inventory(), run(), snapshot);
+  report.documents = { readme: '# README', testPlan: '# PLAN' };
+  assert.equal(validateCoverageReport(report), report);
+
+  const wrongSelection = structuredClone(report);
+  wrongSelection.metrics.selected = 99;
+  assert.throws(() => validateCoverageReport(wrongSelection), /metrics/);
+
+  const invalidRisk = structuredClone(report);
+  invalidRisk.cases[0].scenario.risk = 'urgent';
+  assert.throws(() => validateCoverageReport(invalidRisk), /scenario fields/);
+
+  const damaged = structuredClone(report);
+  damaged.breakdowns.priority[0].implemented = 99;
+  assert.throws(
+    () => validateCoverageReport(damaged),
+    /breakdowns.priority\[P0\]/,
+  );
+
+  const missingCases = structuredClone(report);
+  delete missingCases.cases;
+  assert.throws(() => validateCoverageReport(missingCases), /cases/);
+
+  const reorderedCounts = structuredClone(report);
+  reorderedCounts.counts = Object.fromEntries(
+    Object.entries(reorderedCounts.counts).reverse(),
+  );
+  assert.equal(validateCoverageReport(reorderedCounts), reorderedCounts);
+
+  const missingAttempt = structuredClone(report);
+  missingAttempt.cases[0].execution.runs[0].attempts = null;
+  assert.throws(() => validateCoverageReport(missingAttempt), /execution.runs/);
+
+  const oldVersion = structuredClone(report);
+  oldVersion.schemaVersion = 2;
+  assert.throws(() => validateCoverageReport(oldVersion), /schemaVersion/);
+});
+
+test('group confirmation is unavailable without current evidence', () => {
+  for (const input of [null, run([], 'old')]) {
+    const report = buildReport(catalog, inventory(), input, snapshot);
+    assert.equal(report.breakdowns.priority[0].implemented, 1);
+    assert.equal(report.breakdowns.priority[0].confirmed, null);
+    assert.equal(report.breakdowns.priority[0].confirmedPercent, null);
+    assert.equal(report.breakdowns.risk[2].confirmed, null);
+    assert.match(
+      renderReport(report, '# README', '# PLAN'),
+      /Confirmed: N\/A \(no current evidence\)/,
+    );
+  }
+});
+
 test('coverage bars use included scenarios, group areas and handle empty priorities', () => {
   const report = buildReport(
     [
       ...catalog,
-      row('TC-AUTH-003', 'excluded'),
-      { ...row('TC-FARM-001'), area: 'Farm', priority: 'P1' },
+      { ...row('TC-AUTH-003', 'excluded'), risk: 'high' },
+      { ...row('TC-FARM-001'), area: 'Farm', priority: 'P1', risk: 'critical' },
     ],
     inventory(),
     run(),
     snapshot,
   );
+  assert.deepEqual(report.breakdowns.priority[0], {
+    label: 'P0',
+    denominator: 2,
+    implemented: 1,
+    confirmed: 1,
+    implementedPercent: 50,
+    confirmedPercent: 50,
+  });
+  assert.equal(report.breakdowns.risk[0].label, 'critical');
+  assert.equal(report.breakdowns.risk[0].denominator, 1);
+  assert.equal(report.breakdowns.risk[0].implemented, 0);
+  assert.equal(report.breakdowns.risk[1].denominator, 0);
+  assert.equal(report.breakdowns.risk[2].denominator, 2);
   const html = renderReport(report, '# Readme', '# Plan');
+  assert.match(html, /id="risks"/);
+  assert.match(html, /id="risk"><option value="">All risks/);
+  assert.match(html, /data-risk="critical"/);
   assert.match(
     html,
     /aria-label="P0 implemented coverage"[^>]*aria-valuenow="50\.0"[^>]*aria-valuetext="1 of 2 included scenarios implemented"/,
@@ -411,8 +514,13 @@ test('coverage bars use included scenarios, group areas and handle empty priorit
     /aria-label="Farm implemented coverage"[^>]*aria-valuenow="0\.0"/,
   );
   assert.match(html, /Implemented: 33\.3%/);
+  assert.match(
+    html,
+    /Selected to run: 1<\/strong><small>1 \/ 3 included scenarios/,
+  );
   assert.match(html, /Confirmed: 33\.3%/);
-  assert.ok(html.indexOf('id="priorities"') < html.indexOf('id="areas"'));
+  assert.ok(html.indexOf('id="priorities"') < html.indexOf('id="risks"'));
+  assert.ok(html.indexOf('id="risks"') < html.indexOf('id="areas"'));
   assert.ok(html.indexOf('id="priorities"') < html.indexOf('class="filters"'));
 });
 
@@ -523,7 +631,7 @@ test('flaky retries retain the failing attempt without making it the final statu
   ]);
   const report = buildReport(catalog, inventory(), input, snapshot);
   const execution = report.cases[0].execution;
-  assert.equal(report.schemaVersion, 2);
+  assert.equal(report.schemaVersion, 5);
   assert.equal(report.cases[0].scenario.title, catalog[0].scenario);
   assert.equal(execution.status, 'flaky');
   assert.equal(execution.durationMs, 21086);
@@ -661,7 +769,7 @@ test('saved failures are not labelled current and details have accessible contro
   assert.match(html, /Duration: 21\.0s/);
   assert.match(
     html,
-    /<th>ID<\/th><th>Area<\/th><th>Scenario<\/th><th>Priority<\/th><th>Status<\/th><th>Failure<\/th><th>Details<\/th>/,
+    /<th>ID<\/th><th>Area<\/th><th>Scenario<\/th><th>Priority<\/th><th>Risk<\/th><th>Status<\/th><th>Failure<\/th><th>Details<\/th>/,
   );
 });
 

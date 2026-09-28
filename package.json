@@ -20,6 +20,7 @@
     "tsc:check": "npx tsc --noEmit --pretty",
     "prepare": "husky",
     "coverage:validate": "node scripts/coverage/cli.mjs validate",
+    "coverage:verify": "node scripts/coverage/cli.mjs verify",
     "coverage:collect": "node scripts/coverage/cli.mjs collect",
     "coverage:run": "node scripts/coverage/cli.mjs run",
     "coverage:report": "node scripts/coverage/cli.mjs report",
