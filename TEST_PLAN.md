@@ -52,14 +52,21 @@ for counts; do not maintain a second live test counter here.
 
 ### API source review: September 27, 2026
 
-`tests/api/farm.api.spec.ts` declares `TC-AUTH-012`, `TC-FARM-010`,
-`TC-FARM-012`, and `TC-FARM-013`. The authorization and create-and-read
+`tests/api/farm.api.spec.ts` declares `TC-AUTH-012`, `TC-FARM-010`, and
+`TC-FARM-012`. The authorization and create-and-read
 contracts have source assertions; a targeted run of `TC-AUTH-012` and
 `TC-FARM-010` passed on September 27, 2026.
 
-The user reported that the current `TC-FARM-013` run passes. Record its command
-and outcome with the next comparable baseline; source presence alone is not
-execution evidence.
+`TC-FARM-013` is in the isolated UI suite. The user reported that its current
+run passes; record its command and outcome with the next comparable baseline.
+
+### API-project execution: September 30, 2026
+
+`npx playwright test --project=api-tests --workers=1 --retries=0` passed
+**28/28 collected entries**, including the health-check dependency. A targeted
+`TC-FARM-014` run passed **2/2 entries**, including health-check. These commands
+do not create a current scenario coverage report; the `coverage:run` baseline
+remains to be recorded separately.
 
 ### Full-run observation: September 13, 2026
 
@@ -151,6 +158,14 @@ HTML page routes and endpoints such as `/api/v1/staff` or `/api/v1/fields`
 are different elements. Opening a page does not prove access to protected data;
 the observed `401` responses are not a complete authorization audit either.
 I do not assume that the missing redirect is an intended application requirement.
+
+### Scope decision: zero field area through API
+
+On September 30, 2026, the user checked `POST /fields` with `area: 0` and
+observed `201`. The UI requires a positive area, but the current API does not
+enforce that rule. For this educational application, do not add a test requiring
+the API to reject zero area or report this difference as a defect. The temporary
+`TC-FARM-011` test was removed; no catalog row was assigned to it.
 
 ### Known environment constraints
 
@@ -276,12 +291,12 @@ Implementation order:
 2. **Farm API**
    - [x] create a field and retrieve it by ID with its name and area;
    - [x] delete an assigned field and confirm that its assignment is also gone;
-   - [ ] update a field and cover its invalid and boundary values;
+   - [x] update a field and verify the persisted values;
    - [ ] staff and animal CRUD;
    - [ ] assignment and unassignment;
    - [ ] establish and cover the product contract for deleting an assigned
          resource in each supported direction;
-   - [ ] boundaries for age, area, animal count, and required fields;
+   - [ ] agreed boundaries for age, animal count, and required fields;
    - [ ] district and allowed animal types.
    - [ ] correct the UI pagination scenario currently declared as `TC-FARM-013`:
          place it in an isolated UI spec, use unique field names, search for the
@@ -359,6 +374,23 @@ case, and an authorization failure, without copying the same cases into UI.
       the page simply to make the snapshot pass.
 - [ ] Retain the report after every CI run, and traces/screenshots only on failure.
 
+#### Optional quality experiments
+
+Keep these behind a concrete testing decision rather than treating them as a
+second active backlog:
+
+- The application code coverage pilot exists in `scripts/coverage/app-code.mjs`.
+  Record a reproducible run and its selected-file denominator before deciding
+  whether to expand it or publish it in CI. Keep it separate from scenario coverage.
+- Store comparable runs before calculating historical flaky-test indicators or
+  setting a coverage gate. One run cannot establish a trend or a threshold.
+- Add a narrow test-quality scanner only for recurring problems that the existing
+  ESLint, TypeScript, and scenario-ID checks do not catch. Start with one rule
+  and a focused test for it.
+- Try mutation testing on one small module when there is a specific assertion
+  strength question. Consider Pact, test-impact mapping, or a unified dashboard
+  only when a concrete integration or reporting decision needs them.
+
 ## 5. Scenario catalog and coverage contract
 
 This is the only manually maintained scenario registry. The initial catalog
@@ -400,6 +432,7 @@ retain a risk estimate, but remain outside coverage denominators.
 | TC-ASSIGN-002  | Farm        | should not show assigned staff in select dropdown                     | UI     | P1       | medium   | included | -                                                                                                              |
 | TC-ASSIGN-003  | Farm        | should unassigned works correctly                                     | UI     | P1       | high     | included | -                                                                                                              |
 | TC-ASSIGN-004  | Farm        | should show 2 staff assigned to field in tree view                    | UI     | P1       | medium   | included | -                                                                                                              |
+| TC-ASSIGN-005  | Farm        | A user can assign their staff member to their field through API       | API    | P1       | high     | included | Current test checks fieldId only; staffId, cleanup, and targeted execution need review.                        |
 | TC-AUTH-001    | Auth        | should register new user successfully with valid data                 | API    | P0       | high     | included | -                                                                                                              |
 | TC-AUTH-002    | Auth        | should reject registration with invalid email format                  | API    | P0       | medium   | included | -                                                                                                              |
 | TC-AUTH-003    | Auth        | should reject registration with duplicate email                       | API    | P0       | medium   | included | -                                                                                                              |
@@ -423,8 +456,9 @@ retain a risk estimate, but remain outside coverage denominators.
 | TC-FARM-008    | Farm        | should edit a animal                                                  | UI     | P1       | medium   | included | -                                                                                                              |
 | TC-FARM-009    | Farm        | should delete a animal                                                | UI     | P1       | high     | included | -                                                                                                              |
 | TC-FARM-010    | Farm        | A newly created field can be retrieved with its name and area         | API    | P0       | medium   | included | Targeted API run passed 2026-09-27 (one worker, no retries).                                                   |
-| TC-FARM-012    | Farm        | Deleting an assigned field removes its field and assignment           | API    | P1       | high     | included | Source implementation expects `200` and verifies that neither resource remains; execution is not yet recorded. |
+| TC-FARM-012    | Farm        | Deleting an assigned field removes its field and assignment           | API    | P1       | high     | included | Source asserts status 200 and resources absent; API-project run passed on 2026-09-30 (1 worker, zero retries). |
 | TC-FARM-013    | Farm        | Fields search and pagination show the requested subset                | UI     | P1       | medium   | included | User-reported pass 2026-09-27; command/result pending.                                                         |
+| TC-FARM-014    | Farm        | Updating a field persists its new name and area                       | API    | P1       | medium   | included | Checks PUT response and GET read-back; targeted and API-project runs passed 2026-09-30.                        |
 | TC-FIN-001     | Finance     | verify account balance and transaction history                        | UI     | P1       | medium   | included | -                                                                                                              |
 | TC-FIN-002     | Finance     | verify funds transfer between users                                   | UI     | P1       | critical | included | -                                                                                                              |
 | TC-FIN-003     | Finance     | verify prevent overdraft                                              | UI     | P1       | critical | included | Review needed: final balance is currently read before the rejected transfer.                                   |
@@ -435,10 +469,11 @@ retain a risk estimate, but remain outside coverage denominators.
 | TC-FIN-008     | Finance     | Transfer of the full available balance leaves zero                    | API    | P1       | high     | included | -                                                                                                              |
 | TC-FIN-009     | Finance     | Transfer above available balance leaves both accounts unchanged       | API    | P1       | critical | included | -                                                                                                              |
 | TC-FIN-010     | Finance     | Transfer to a nonexistent recipient is rejected                       | API    | P1       | high     | included | -                                                                                                              |
-| TC-FIN-011     | Finance     | A fresh user can read their financial account and balance             | API    | P1       | high     | included | Compares the account `userId` with the freshly logged-in user's ID; execution not recorded.                    |
+| TC-FIN-011     | Finance     | A fresh user can read their financial account and balance             | API    | P1       | high     | included | Compares account `userId` with the fresh user's ID; API-project run passed 2026-09-30.                         |
 | TC-FIN-012     | Finance     | Transaction history filters by type                                   | API    | P1       | medium   | included | Creates income and expense, then checks that the income filter returns only the expected transaction.          |
 | TC-FIN-013     | Finance     | Transaction history filters by category                               | API    | P1       | medium   | included | Creates two income categories, then checks that the salary filter returns only the expected transaction.       |
-| TC-FIN-014     | Finance     | Transaction history filters by date range                             | API    | P1       | medium   | included | Checks a matching range and empty ranges before and after the created transaction; execution not recorded.     |
+| TC-FIN-014     | Finance     | Transaction history filters by date range                             | API    | P1       | medium   | included | Checks matching and empty ranges; API-project run passed 2026-09-30.                                           |
+| TC-FIN-015     | Finance     | Transfer above 999.99 ROL is rejected without changing either balance | API    | P1       | high     | included | API-project run passed 2026-09-30 (one worker, zero retries).                                                  |
 | TC-GUARD-001   | Auth        | should redirect anonymous user from /profile.html to login            | UI     | P0       | high     | included | -                                                                                                              |
 | TC-GUARD-002   | Auth        | should redirect anonymous user from /marketplace.html to login        | UI     | P0       | high     | included | -                                                                                                              |
 | TC-GUARD-003   | Auth        | should redirect anonymous user from /financial.html to login          | UI     | P0       | high     | included | -                                                                                                              |
@@ -604,7 +639,7 @@ should not be repeated merely because an old result is missing.
    in source as of September 28, 2026; execution is not recorded. Continue to
    the next domain after the targeted financial run. The UI filter exercise in
    Stage 4 remains separate.
-6. Continue Farm API contracts with invalid area, field update, assignment and
+6. Continue Farm API contracts with field update, assignment and
    unassignment, then the remaining staff and animal operations. Keep
    independent users and resources for state-changing cases. Diagnose the
    visual baseline separately before measuring the full suite.

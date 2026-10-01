@@ -2,9 +2,6 @@ import { faker } from '@faker-js/faker';
 import {
   createAssignment,
   createField,
-  createStaff,
-  deleteField,
-  deleteStaff,
   getAssignments,
   getFields,
 } from 'src/api/farm.api';
@@ -39,27 +36,17 @@ test.describe('Farm API', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-010' },
       tag: ['@api', '@farm', '@crud', '@happy-path'],
     },
-    async ({ freshUser: _, request }) => {
-      const fieldData = {
-        name: `api-field-${faker.string.uuid()}`,
+    async ({ freshUser: _, request, createdField }) => {
+      const fieldId = createdField.id;
+      const fields = await getFields(request);
+      const retrievedField = fields.find((field) => field.id === fieldId);
+
+      expect(retrievedField).toBeDefined();
+      expect(retrievedField).toMatchObject({
+        id: fieldId,
+        name: createdField.name,
         area: FIELD_AREA,
-      };
-
-      const fieldId = await createField(request, fieldData);
-
-      try {
-        const fields = await getFields(request);
-        const retrievedField = fields.find((field) => field.id === fieldId);
-
-        expect(retrievedField).toBeDefined();
-        expect(retrievedField).toMatchObject({
-          id: fieldId,
-          name: fieldData.name,
-          area: fieldData.area,
-        });
-      } finally {
-        await deleteField(request, fieldId);
-      }
+      });
     },
   );
 
@@ -69,12 +56,8 @@ test.describe('Farm API', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-012' },
       tag: ['@api', '@farm', '@crud', '@happy-path'],
     },
-    async ({ freshUser: _, request }) => {
-      const staffId = await createStaff(request, {
-        name: faker.person.firstName(),
-        surname: faker.person.lastName(),
-        age: Number(faker.number.int({ min: 18, max: 99 })),
-      });
+    async ({ freshUser: _, request, createdStaff }) => {
+      const staffId = createdStaff.id;
 
       const fieldData = {
         name: `api-field-${faker.string.uuid()}`,
@@ -88,24 +71,99 @@ test.describe('Farm API', () => {
         staffId,
       });
 
-      try {
-        const response = await request.delete(
-          `${BASE_API_URL}/fields/${fieldId}`,
-        );
-        const body = await response.json();
+      const response = await request.delete(
+        `${BASE_API_URL}/fields/${fieldId}`,
+      );
+      const body = await response.json();
 
-        const fieldsAfter = await getFields(request);
-        const assignmentsAfter = await getAssignments(request);
+      const fieldsAfter = await getFields(request);
+      const assignmentsAfter = await getAssignments(request);
 
-        expect(response.status()).toBe(200);
-        expect(body.success).toBe(true);
-        expect(fieldsAfter.some((field) => field.id === fieldId)).toBe(false);
-        expect(
-          assignmentsAfter.some((assignment) => assignment.id === assignmentId),
-        ).toBe(false);
-      } finally {
-        await deleteStaff(request, staffId);
-      }
+      expect(response.status()).toBe(200);
+      expect(body.success).toBe(true);
+      expect(fieldsAfter.some((field) => field.id === fieldId)).toBe(false);
+      expect(
+        assignmentsAfter.some((assignment) => assignment.id === assignmentId),
+      ).toBe(false);
+    },
+  );
+
+  test(
+    'should be able to update field',
+    {
+      annotation: { type: 'case-id', description: 'TC-FARM-014' },
+      tag: ['@api', '@farm', '@crud', '@happy-path'],
+    },
+    async ({ freshUser: _, request, createdField }) => {
+      const expectedMessage = 'Updated successfully';
+      const updatedFieldName = `api-field-updated-${faker.string.uuid()}`;
+      const fieldId = createdField.id;
+
+      const response = await request.put(`${BASE_API_URL}/fields/${fieldId}`, {
+        data: {
+          name: updatedFieldName,
+          area: FIELD_AREA + 100,
+        },
+      });
+      const body = await response.json();
+
+      const fields = await getFields(request);
+
+      expect(response.status()).toBe(200);
+      expect(body.message).toBe(expectedMessage);
+      expect(body.success).toBe(true);
+      expect(body.data).toMatchObject({
+        id: fieldId,
+        name: updatedFieldName,
+        area: FIELD_AREA + 100,
+      });
+      expect(fields.find((field) => field.id === fieldId)?.name).toBe(
+        updatedFieldName,
+      );
+      expect(fields.find((field) => field.id === fieldId)?.area).toBe(
+        FIELD_AREA + 100,
+      );
+    },
+  );
+
+  test(
+    'should assign staff to a field through API',
+    {
+      annotation: { type: 'case-id', description: 'TC-ASSIGN-005' },
+      tag: ['@api', '@farm', '@assignment', '@happy-path'],
+    },
+    async ({ freshUser: _, request, createdStaff, createdField }) => {
+      const staffId = createdStaff.id;
+      const fieldId = createdField.id;
+
+      const response = await request.post(`${BASE_API_URL}/fields/assign`, {
+        data: {
+          fieldId,
+          staffId,
+        },
+      });
+
+      const body = await response.json();
+      expect(response.status()).toBe(201);
+      expect(body.success).toBe(true);
+      expect(body.data).toMatchObject({
+        id: expect.any(Number),
+        fieldId,
+        staffId,
+      });
+
+      const assignmentId = body.data.id;
+
+      const assignments = await getAssignments(request);
+
+      const createdAssignment = assignments.find(
+        (assignment) =>
+          assignment.fieldId === fieldId &&
+          assignment.staffId === staffId &&
+          assignment.id === assignmentId,
+      );
+
+      expect(createdAssignment).toBeDefined();
     },
   );
 });

@@ -307,6 +307,59 @@ test.describe('Financial API', () => {
   );
 
   test(
+    'should reject a transfer above the 999.99 ROL limit',
+    {
+      annotation: {
+        type: 'case-id',
+        description: 'TC-FIN-015',
+      },
+      tag: ['@api', '@financial', '@transfer', '@negative'],
+    },
+    async ({ freshUser: _, request }) => {
+      const expectedErrorMessage =
+        'Cannot transfer more than 999.99 ROL at once';
+      const recipientApi = await playwrightRequest.newContext();
+
+      try {
+        const amount = 1000;
+        const recipientId = await createLoggedInRecipient(recipientApi);
+
+        await topUpAmount(request, amount);
+
+        const senderBalanceBefore = await getAccountBalance(request);
+        const recipientBalanceBefore = await getAccountBalance(recipientApi);
+
+        expect(senderBalanceBefore).toEqual(amount);
+        expect(recipientBalanceBefore).toEqual(0);
+
+        const response = await request.post(
+          `${BASE_API_URL}/financial/transfer`,
+          {
+            data: {
+              toUserId: recipientId,
+              amount,
+              description: 'Above transfer limit',
+            },
+          },
+        );
+        const body = await response.json();
+
+        const senderBalanceAfter = await getAccountBalance(request);
+        const recipientBalanceAfter = await getAccountBalance(recipientApi);
+
+        expect(response.status()).toBe(400);
+        expect(body.success).toBe(false);
+        expect(body.error).toBe(expectedErrorMessage);
+
+        expect(senderBalanceAfter).toEqual(amount);
+        expect(recipientBalanceAfter).toEqual(0);
+      } finally {
+        await recipientApi.dispose();
+      }
+    },
+  );
+
+  test(
     'should not allowed to transfer to non existing ID',
     {
       annotation: {

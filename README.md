@@ -246,6 +246,7 @@ Implementation and execution states are computed in the report, not edited here.
 | TC-ASSIGN-002  | Farm        | should not show assigned staff in select dropdown                     | UI     | P1       | medium   | included |
 | TC-ASSIGN-003  | Farm        | should unassigned works correctly                                     | UI     | P1       | high     | included |
 | TC-ASSIGN-004  | Farm        | should show 2 staff assigned to field in tree view                    | UI     | P1       | medium   | included |
+| TC-ASSIGN-005  | Farm        | A user can assign their staff member to their field through API       | API    | P1       | high     | included |
 | TC-AUTH-001    | Auth        | should register new user successfully with valid data                 | API    | P0       | high     | included |
 | TC-AUTH-002    | Auth        | should reject registration with invalid email format                  | API    | P0       | medium   | included |
 | TC-AUTH-003    | Auth        | should reject registration with duplicate email                       | API    | P0       | medium   | included |
@@ -271,6 +272,7 @@ Implementation and execution states are computed in the report, not edited here.
 | TC-FARM-010    | Farm        | A newly created field can be retrieved with its name and area         | API    | P0       | medium   | included |
 | TC-FARM-012    | Farm        | Deleting an assigned field removes its field and assignment           | API    | P1       | high     | included |
 | TC-FARM-013    | Farm        | Fields search and pagination show the requested subset                | UI     | P1       | medium   | included |
+| TC-FARM-014    | Farm        | Updating a field persists its new name and area                       | API    | P1       | medium   | included |
 | TC-FIN-001     | Finance     | verify account balance and transaction history                        | UI     | P1       | medium   | included |
 | TC-FIN-002     | Finance     | verify funds transfer between users                                   | UI     | P1       | critical | included |
 | TC-FIN-003     | Finance     | verify prevent overdraft                                              | UI     | P1       | critical | included |
@@ -285,6 +287,7 @@ Implementation and execution states are computed in the report, not edited here.
 | TC-FIN-012     | Finance     | Transaction history filters by type                                   | API    | P1       | medium   | included |
 | TC-FIN-013     | Finance     | Transaction history filters by category                               | API    | P1       | medium   | included |
 | TC-FIN-014     | Finance     | Transaction history filters by date range                             | API    | P1       | medium   | included |
+| TC-FIN-015     | Finance     | Transfer above 999.99 ROL is rejected without changing either balance | API    | P1       | high     | included |
 | TC-GUARD-001   | Auth        | should redirect anonymous user from /profile.html to login            | UI     | P0       | high     | included |
 | TC-GUARD-002   | Auth        | should redirect anonymous user from /marketplace.html to login        | UI     | P0       | high     | included |
 | TC-GUARD-003   | Auth        | should redirect anonymous user from /financial.html to login          | UI     | P0       | high     | included |

@@ -32,7 +32,7 @@ export const test = baseTest.extend<DataFixtures>({
 
     await use({ id, name });
 
-    await deleteField(request, id).catch(() => {});
+    await deleteField(request, id);
   },
 
   createdStaff: async ({ freshUser: _, request }, use) => {
@@ -43,7 +43,7 @@ export const test = baseTest.extend<DataFixtures>({
 
     await use({ id, name, surname, age });
 
-    await deleteStaff(request, id).catch(() => {});
+    await deleteStaff(request, id);
   },
 
   createdAnimal: async ({ freshUser: _, request }, use) => {
@@ -56,7 +56,7 @@ export const test = baseTest.extend<DataFixtures>({
 
     await use({ id, type, amount });
 
-    await deleteAnimal(request, id).catch(() => {});
+    await deleteAnimal(request, id);
   },
 });
 
