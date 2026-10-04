@@ -276,6 +276,10 @@ Implementation and execution states are computed in the report, not edited here.
 | TC-FARM-014    | Farm        | Updating a field persists its new name and area                        | API    | P1       | medium   | included |
 | TC-FARM-015    | Farm        | A newly created staff member appears with their name, surname, and age | API    | P1       | high     | included |
 | TC-FARM-016    | Farm        | A newly created animal herd appears with its type and amount           | API    | P1       | medium   | included |
+| TC-FARM-017    | Farm        | Updating a staff member persists the changed name, surname, and age    | API    | P1       | medium   | included |
+| TC-FARM-018    | Farm        | Updating an animal herd persists the changed type and amount           | API    | P1       | medium   | included |
+| TC-FARM-019    | Farm        | Deleting a staff member removes that member from the staff list        | API    | P1       | high     | included |
+| TC-FARM-020    | Farm        | Deleting an animal herd removes that herd from the animal list         | API    | P1       | medium   | included |
 | TC-FIN-001     | Finance     | verify account balance and transaction history                         | UI     | P1       | medium   | included |
 | TC-FIN-002     | Finance     | verify funds transfer between users                                    | UI     | P1       | critical | included |
 | TC-FIN-003     | Finance     | verify prevent overdraft                                               | UI     | P1       | critical | included |

@@ -253,4 +253,46 @@ test.describe('Farm API', () => {
       });
     },
   );
+
+  test(
+    'should be able to update staff',
+    {
+      annotation: { type: 'case-id', description: 'TC-FARM-017' },
+      tag: ['@api', '@farm', '@crud', '@happy-path'],
+    },
+    async ({ freshUser: _, request, createdStaff }) => {
+      const expectedMessage = 'Updated successfully';
+      const updatedStaffName = `staff-name-updated-${faker.string.uuid()}`;
+      const updatedStaffSurname = `staff-surname-updated-${faker.string.uuid()}`;
+      const staffId = createdStaff.id;
+
+      const response = await request.put(`${BASE_API_URL}/staff/${staffId}`, {
+        data: {
+          name: updatedStaffName,
+          surname: updatedStaffSurname,
+          age: createdStaff.age + 10,
+        },
+      });
+      const body = await response.json();
+
+      const responseAfterUpdate = await request.get(`${BASE_API_URL}/staff`);
+      expect(responseAfterUpdate.status()).toBe(200);
+
+      const bodyResponseAfter = (await responseAfterUpdate.json()) as {
+        data: CreatedStaff[];
+      };
+      const updatedStaff = bodyResponseAfter.data.find(
+        (staff) => staff.id === staffId,
+      );
+
+      expect(response.status()).toBe(200);
+      expect(body.message).toBe(expectedMessage);
+      expect(updatedStaff).toMatchObject({
+        id: staffId,
+        name: updatedStaffName,
+        surname: updatedStaffSurname,
+        age: createdStaff.age + 10,
+      });
+    },
+  );
 });
