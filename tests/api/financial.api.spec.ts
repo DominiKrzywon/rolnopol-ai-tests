@@ -11,7 +11,7 @@ import {
 } from 'src/api/financial.api';
 import { BASE_API_URL } from 'src/config/env.config';
 import { prepareRandomUser } from 'src/factories/user.factory';
-import { expect, test } from 'src/fixtures/auth.fixture';
+import { expect, test as baseTest } from 'src/fixtures/auth.fixture';
 
 async function createLoggedInRecipient(
   recipientApi: APIRequestContext,
@@ -22,6 +22,21 @@ async function createLoggedInRecipient(
   const session = await loginAs(recipientApi, recipient);
   return session.id;
 }
+
+const test = baseTest.extend<{
+  transferRecipient: { recipientApi: APIRequestContext; recipientId: number };
+}>({
+  transferRecipient: async ({ request: _request }, use) => {
+    const recipientApi = await playwrightRequest.newContext();
+
+    try {
+      const recipientId = await createLoggedInRecipient(recipientApi);
+      await use({ recipientApi, recipientId });
+    } finally {
+      await recipientApi.dispose();
+    }
+  },
+});
 
 test.describe('Financial API', () => {
   test(
@@ -111,44 +126,42 @@ test.describe('Financial API', () => {
       },
       tag: ['@api', '@financial', '@transfer'],
     },
-    async ({ freshUser: _, request }) => {
+    async ({ freshUser: _, request, transferRecipient }) => {
       const expectedTransferMessage = 'Transfer completed successfully';
-      const recipientApi = await playwrightRequest.newContext();
 
-      try {
-        const recipientId = await createLoggedInRecipient(recipientApi);
-        const recipientBalanceBefore = await getAccountBalance(recipientApi);
-        const transferAmount = 0.01;
+      const transferAmount = 0.01;
 
-        await topUpAmount(request, 1);
+      await topUpAmount(request, 1);
 
-        const balance = await getAccountBalance(request);
-        const transfer = await request.post(
-          `${BASE_API_URL}/financial/transfer`,
-          {
-            data: {
-              toUserId: recipientId,
-              amount: transferAmount,
-              description: 'Test transfer',
-            },
+      const balance = await getAccountBalance(request);
+      const recipientBalanceBefore = await getAccountBalance(
+        transferRecipient.recipientApi,
+      );
+      const transfer = await request.post(
+        `${BASE_API_URL}/financial/transfer`,
+        {
+          data: {
+            toUserId: transferRecipient.recipientId,
+            amount: transferAmount,
+            description: 'Test transfer',
           },
-        );
-        const transferResponseBody = await transfer.json();
+        },
+      );
+      const transferResponseBody = await transfer.json();
 
-        expect(transferResponseBody.message).toEqual(expectedTransferMessage);
-        expect(transfer.status()).toBe(200);
-        expect(transferResponseBody.success).toBe(true);
+      expect(transferResponseBody.message).toEqual(expectedTransferMessage);
+      expect(transfer.status()).toBe(200);
+      expect(transferResponseBody.success).toBe(true);
 
-        const balanceAfterTransfer = await getAccountBalance(request);
-        expect(balanceAfterTransfer).toBe(balance - transferAmount);
+      const balanceAfterTransfer = await getAccountBalance(request);
+      expect(balanceAfterTransfer).toBe(balance - transferAmount);
 
-        const recipientBalanceAfter = await getAccountBalance(recipientApi);
-        expect(recipientBalanceAfter).toBe(
-          recipientBalanceBefore + transferAmount,
-        );
-      } finally {
-        await recipientApi.dispose();
-      }
+      const recipientBalanceAfter = await getAccountBalance(
+        transferRecipient.recipientApi,
+      );
+      expect(recipientBalanceAfter).toBe(
+        recipientBalanceBefore + transferAmount,
+      );
     },
   );
 
@@ -161,45 +174,43 @@ test.describe('Financial API', () => {
       },
       tag: ['@api', '@financial', '@transfer'],
     },
-    async ({ freshUser: _, request }) => {
-      const recipientApi = await playwrightRequest.newContext();
+    async ({ freshUser: _, request, transferRecipient }) => {
       const expectedTransferMessage = 'Transfer completed successfully';
-      try {
-        const amount = 999.99;
+      const amount = 999.99;
 
-        const recipientId = await createLoggedInRecipient(recipientApi);
-        await topUpAmount(request, 1000);
+      await topUpAmount(request, 1000);
 
-        const senderAccountBalance = await getAccountBalance(request);
-        const recipientAccountBalance = await getAccountBalance(recipientApi);
+      const senderAccountBalance = await getAccountBalance(request);
+      const recipientAccountBalance = await getAccountBalance(
+        transferRecipient.recipientApi,
+      );
 
-        expect(senderAccountBalance).toBeGreaterThan(amount);
-        expect(recipientAccountBalance).toBe(0);
+      expect(senderAccountBalance).toBeGreaterThan(amount);
+      expect(recipientAccountBalance).toBe(0);
 
-        const transfer = await request.post(
-          `${BASE_API_URL}/financial/transfer`,
-          {
-            data: {
-              toUserId: recipientId,
-              amount,
-              description: 'Test transfer',
-            },
+      const transfer = await request.post(
+        `${BASE_API_URL}/financial/transfer`,
+        {
+          data: {
+            toUserId: transferRecipient.recipientId,
+            amount,
+            description: 'Test transfer',
           },
-        );
+        },
+      );
 
-        const transferBody = await transfer.json();
-        expect(transfer.status()).toBe(200);
-        expect(transferBody.message).toEqual(expectedTransferMessage);
-        expect(transferBody.success).toBe(true);
+      const transferBody = await transfer.json();
+      expect(transfer.status()).toBe(200);
+      expect(transferBody.message).toEqual(expectedTransferMessage);
+      expect(transferBody.success).toBe(true);
 
-        const senderAccountAfter = await getAccountBalance(request);
-        const recipientAccountAfter = await getAccountBalance(recipientApi);
+      const senderAccountAfter = await getAccountBalance(request);
+      const recipientAccountAfter = await getAccountBalance(
+        transferRecipient.recipientApi,
+      );
 
-        expect(senderAccountAfter).toBe(senderAccountBalance - amount);
-        expect(recipientAccountAfter).toBe(recipientAccountBalance + amount);
-      } finally {
-        await recipientApi.dispose();
-      }
+      expect(senderAccountAfter).toBe(senderAccountBalance - amount);
+      expect(recipientAccountAfter).toBe(recipientAccountBalance + amount);
     },
   );
 
@@ -212,46 +223,44 @@ test.describe('Financial API', () => {
       },
       tag: ['@api', '@financial', '@transfer'],
     },
-    async ({ freshUser: _, request }) => {
+    async ({ freshUser: _, request, transferRecipient }) => {
       const expectedTransferMessage = 'Transfer completed successfully';
-      const recipientApi = await playwrightRequest.newContext();
 
-      try {
-        const amount = 666.66;
-        const recipientId = await createLoggedInRecipient(recipientApi);
+      const amount = 666.66;
 
-        await topUpAmount(request, amount);
-        const senderBalance = await getAccountBalance(request);
-        expect(senderBalance).toBeGreaterThan(0);
-        expect(senderBalance).toBeLessThanOrEqual(999.99);
+      await topUpAmount(request, amount);
+      const senderBalance = await getAccountBalance(request);
+      expect(senderBalance).toBeGreaterThan(0);
+      expect(senderBalance).toBeLessThanOrEqual(999.99);
 
-        const recipientBalanceBefore = await getAccountBalance(recipientApi);
+      const recipientBalanceBefore = await getAccountBalance(
+        transferRecipient.recipientApi,
+      );
 
-        const response = await request.post(
-          `${BASE_API_URL}/financial/transfer`,
-          {
-            data: {
-              toUserId: recipientId,
-              amount: senderBalance,
-              description: 'Full balance transfer',
-            },
+      const response = await request.post(
+        `${BASE_API_URL}/financial/transfer`,
+        {
+          data: {
+            toUserId: transferRecipient.recipientId,
+            amount: senderBalance,
+            description: 'Full balance transfer',
           },
-        );
-        const body = await response.json();
-        expect(body.success).toBe(true);
-        expect(body.message).toBe(expectedTransferMessage);
-        expect(response.status()).toBe(200);
+        },
+      );
+      const body = await response.json();
+      expect(body.success).toBe(true);
+      expect(body.message).toBe(expectedTransferMessage);
+      expect(response.status()).toBe(200);
 
-        const senderBalanceAfter = await getAccountBalance(request);
-        const recipientBalanceAfter = await getAccountBalance(recipientApi);
+      const senderBalanceAfter = await getAccountBalance(request);
+      const recipientBalanceAfter = await getAccountBalance(
+        transferRecipient.recipientApi,
+      );
 
-        expect(senderBalanceAfter).toEqual(0);
-        expect(recipientBalanceAfter).toEqual(
-          recipientBalanceBefore + senderBalance,
-        );
-      } finally {
-        await recipientApi.dispose();
-      }
+      expect(senderBalanceAfter).toEqual(0);
+      expect(recipientBalanceAfter).toEqual(
+        recipientBalanceBefore + senderBalance,
+      );
     },
   );
 
@@ -264,45 +273,43 @@ test.describe('Financial API', () => {
       },
       tag: ['@api', '@financial', '@transfer', '@negative'],
     },
-    async ({ freshUser: _, request }) => {
+    async ({ freshUser: _, request, transferRecipient }) => {
       const expectedErrorMessage = 'Insufficient funds for transfer';
-      const recipientApi = await playwrightRequest.newContext();
 
-      try {
-        const amount = 50;
-        const recipientId = await createLoggedInRecipient(recipientApi);
+      const amount = 50;
 
-        await topUpAmount(request, amount);
-        const senderBalanceBefore = await getAccountBalance(request);
-        const recipientBalanceBefore = await getAccountBalance(recipientApi);
+      await topUpAmount(request, amount);
+      const senderBalanceBefore = await getAccountBalance(request);
+      const recipientBalanceBefore = await getAccountBalance(
+        transferRecipient.recipientApi,
+      );
 
-        expect(senderBalanceBefore).toEqual(amount);
-        expect(recipientBalanceBefore).toEqual(0);
+      expect(senderBalanceBefore).toEqual(amount);
+      expect(recipientBalanceBefore).toEqual(0);
 
-        const response = await request.post(
-          `${BASE_API_URL}/financial/transfer`,
-          {
-            data: {
-              toUserId: recipientId,
-              amount: senderBalanceBefore + 0.01,
-              description: 'Wrong balance',
-            },
+      const response = await request.post(
+        `${BASE_API_URL}/financial/transfer`,
+        {
+          data: {
+            toUserId: transferRecipient.recipientId,
+            amount: senderBalanceBefore + 0.01,
+            description: 'Wrong balance',
           },
-        );
-        const body = await response.json();
+        },
+      );
+      const body = await response.json();
 
-        expect(response.status()).toBe(400);
-        expect(body.success).toBe(false);
-        expect(body.error).toBe(expectedErrorMessage);
+      expect(response.status()).toBe(400);
+      expect(body.success).toBe(false);
+      expect(body.error).toBe(expectedErrorMessage);
 
-        const senderBalanceAfter = await getAccountBalance(request);
-        const recipientBalanceAfter = await getAccountBalance(recipientApi);
+      const senderBalanceAfter = await getAccountBalance(request);
+      const recipientBalanceAfter = await getAccountBalance(
+        transferRecipient.recipientApi,
+      );
 
-        expect(senderBalanceAfter).toEqual(senderBalanceBefore);
-        expect(recipientBalanceAfter).toEqual(recipientBalanceBefore);
-      } finally {
-        await recipientApi.dispose();
-      }
+      expect(senderBalanceAfter).toEqual(senderBalanceBefore);
+      expect(recipientBalanceAfter).toEqual(recipientBalanceBefore);
     },
   );
 
@@ -315,47 +322,45 @@ test.describe('Financial API', () => {
       },
       tag: ['@api', '@financial', '@transfer', '@negative'],
     },
-    async ({ freshUser: _, request }) => {
+    async ({ freshUser: _, request, transferRecipient }) => {
       const expectedErrorMessage =
         'Cannot transfer more than 999.99 ROL at once';
-      const recipientApi = await playwrightRequest.newContext();
 
-      try {
-        const amount = 1000;
-        const recipientId = await createLoggedInRecipient(recipientApi);
+      const amount = 1000;
 
-        await topUpAmount(request, amount);
+      await topUpAmount(request, amount);
 
-        const senderBalanceBefore = await getAccountBalance(request);
-        const recipientBalanceBefore = await getAccountBalance(recipientApi);
+      const senderBalanceBefore = await getAccountBalance(request);
+      const recipientBalanceBefore = await getAccountBalance(
+        transferRecipient.recipientApi,
+      );
 
-        expect(senderBalanceBefore).toEqual(amount);
-        expect(recipientBalanceBefore).toEqual(0);
+      expect(senderBalanceBefore).toEqual(amount);
+      expect(recipientBalanceBefore).toEqual(0);
 
-        const response = await request.post(
-          `${BASE_API_URL}/financial/transfer`,
-          {
-            data: {
-              toUserId: recipientId,
-              amount,
-              description: 'Above transfer limit',
-            },
+      const response = await request.post(
+        `${BASE_API_URL}/financial/transfer`,
+        {
+          data: {
+            toUserId: transferRecipient.recipientId,
+            amount,
+            description: 'Above transfer limit',
           },
-        );
-        const body = await response.json();
+        },
+      );
+      const body = await response.json();
 
-        const senderBalanceAfter = await getAccountBalance(request);
-        const recipientBalanceAfter = await getAccountBalance(recipientApi);
+      const senderBalanceAfter = await getAccountBalance(request);
+      const recipientBalanceAfter = await getAccountBalance(
+        transferRecipient.recipientApi,
+      );
 
-        expect(response.status()).toBe(400);
-        expect(body.success).toBe(false);
-        expect(body.error).toBe(expectedErrorMessage);
+      expect(response.status()).toBe(400);
+      expect(body.success).toBe(false);
+      expect(body.error).toBe(expectedErrorMessage);
 
-        expect(senderBalanceAfter).toEqual(amount);
-        expect(recipientBalanceAfter).toEqual(0);
-      } finally {
-        await recipientApi.dispose();
-      }
+      expect(senderBalanceAfter).toEqual(amount);
+      expect(recipientBalanceAfter).toEqual(0);
     },
   );
 

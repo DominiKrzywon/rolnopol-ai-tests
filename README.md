@@ -240,96 +240,99 @@ Implementation and execution states are computed in the report, not edited here.
 
 <!-- coverage-index:start -->
 
-| ID             | Area        | Scenario                                                              | Layer  | Priority | Risk     | Scope    |
-| -------------- | ----------- | --------------------------------------------------------------------- | ------ | -------- | -------- | -------- |
-| TC-ASSIGN-001  | Farm        | should assignment for new staff and field                             | UI     | P1       | high     | included |
-| TC-ASSIGN-002  | Farm        | should not show assigned staff in select dropdown                     | UI     | P1       | medium   | included |
-| TC-ASSIGN-003  | Farm        | should unassigned works correctly                                     | UI     | P1       | high     | included |
-| TC-ASSIGN-004  | Farm        | should show 2 staff assigned to field in tree view                    | UI     | P1       | medium   | included |
-| TC-ASSIGN-005  | Farm        | A user can assign their staff member to their field through API       | API    | P1       | high     | included |
-| TC-AUTH-001    | Auth        | should register new user successfully with valid data                 | API    | P0       | high     | included |
-| TC-AUTH-002    | Auth        | should reject registration with invalid email format                  | API    | P0       | medium   | included |
-| TC-AUTH-003    | Auth        | should reject registration with duplicate email                       | API    | P0       | medium   | included |
-| TC-AUTH-004    | Auth        | should login successfully with valid credentials                      | API    | P0       | high     | included |
-| TC-AUTH-005    | Auth        | should reject login with non-existent email                           | API    | P0       | medium   | included |
-| TC-AUTH-006    | Auth        | should reject login with wrong password                               | API    | P0       | high     | included |
-| TC-AUTH-007    | Auth        | should validate valid token via GET request                           | API    | P0       | high     | included |
-| TC-AUTH-008    | Auth        | should reject invalid token via GET request                           | API    | P0       | critical | included |
-| TC-AUTH-009    | Auth        | should validate valid token via POST request                          | API    | P0       | high     | included |
-| TC-AUTH-010    | Auth        | should reject invalid token via POST request                          | API    | P0       | critical | included |
-| TC-AUTH-011    | Auth        | should logout successfully                                            | API    | P0       | high     | included |
-| TC-AUTH-012    | Auth        | Anonymous fields request returns 401 without field data               | API    | P0       | critical | included |
-| TC-CHART-001   | Charts      | Chart type switches without JavaScript errors                         | UI     | P2       | low      | included |
-| TC-FARM-001    | Farm        | should create a new field in Staff & Fields view                      | UI     | P1       | high     | included |
-| TC-FARM-002    | Farm        | should create a new animal herd in Staff & Fields view                | UI     | P1       | medium   | included |
-| TC-FARM-003    | Farm        | should create a new staff in Staff & Fields view                      | UI     | P1       | high     | included |
-| TC-FARM-004    | Farm        | should edit a field name                                              | UI     | P1       | medium   | included |
-| TC-FARM-005    | Farm        | should delete a field                                                 | UI     | P1       | high     | included |
-| TC-FARM-006    | Farm        | should update a staff                                                 | UI     | P1       | medium   | included |
-| TC-FARM-007    | Farm        | should delete a staff                                                 | UI     | P1       | high     | included |
-| TC-FARM-008    | Farm        | should edit a animal                                                  | UI     | P1       | medium   | included |
-| TC-FARM-009    | Farm        | should delete a animal                                                | UI     | P1       | high     | included |
-| TC-FARM-010    | Farm        | A newly created field can be retrieved with its name and area         | API    | P0       | medium   | included |
-| TC-FARM-012    | Farm        | Deleting an assigned field removes its field and assignment           | API    | P1       | high     | included |
-| TC-FARM-013    | Farm        | Fields search and pagination show the requested subset                | UI     | P1       | medium   | included |
-| TC-FARM-014    | Farm        | Updating a field persists its new name and area                       | API    | P1       | medium   | included |
-| TC-FIN-001     | Finance     | verify account balance and transaction history                        | UI     | P1       | medium   | included |
-| TC-FIN-002     | Finance     | verify funds transfer between users                                   | UI     | P1       | critical | included |
-| TC-FIN-003     | Finance     | verify prevent overdraft                                              | UI     | P1       | critical | included |
-| TC-FIN-004     | Finance     | Transaction history respects limit and offset and exposes hasMore     | API    | P1       | medium   | included |
-| TC-FIN-005     | Finance     | Income and expense update the API account balance                     | API    | P1       | critical | included |
-| TC-FIN-006     | Finance     | Transfer accepts the minimum amount 0.01                              | API    | P1       | high     | included |
-| TC-FIN-007     | Finance     | Transfer accepts the maximum amount 999.99                            | API    | P1       | high     | included |
-| TC-FIN-008     | Finance     | Transfer of the full available balance leaves zero                    | API    | P1       | high     | included |
-| TC-FIN-009     | Finance     | Transfer above available balance leaves both accounts unchanged       | API    | P1       | critical | included |
-| TC-FIN-010     | Finance     | Transfer to a nonexistent recipient is rejected                       | API    | P1       | high     | included |
-| TC-FIN-011     | Finance     | A fresh user can read their financial account and balance             | API    | P1       | high     | included |
-| TC-FIN-012     | Finance     | Transaction history filters by type                                   | API    | P1       | medium   | included |
-| TC-FIN-013     | Finance     | Transaction history filters by category                               | API    | P1       | medium   | included |
-| TC-FIN-014     | Finance     | Transaction history filters by date range                             | API    | P1       | medium   | included |
-| TC-FIN-015     | Finance     | Transfer above 999.99 ROL is rejected without changing either balance | API    | P1       | high     | included |
-| TC-GUARD-001   | Auth        | should redirect anonymous user from /profile.html to login            | UI     | P0       | high     | included |
-| TC-GUARD-002   | Auth        | should redirect anonymous user from /marketplace.html to login        | UI     | P0       | high     | included |
-| TC-GUARD-003   | Auth        | should redirect anonymous user from /financial.html to login          | UI     | P0       | high     | included |
-| TC-GUARD-004   | Auth        | Anonymous Staff and Fields main page redirects to login               | UI     | P0       | high     | excluded |
-| TC-GUARD-005   | Auth        | Anonymous assignments page redirects to login                         | UI     | P0       | high     | excluded |
-| TC-GUARD-006   | Auth        | Anonymous charts page redirects to login                              | UI     | P0       | low      | excluded |
-| TC-JOURNEY-001 | Journeys    | should create assignment for new farmer                               | E2E    | P0       | high     | included |
-| TC-JOURNEY-002 | Journeys    | marketplace e2e test                                                  | E2E    | P0       | high     | included |
-| TC-JOURNEY-003 | Journeys    | verify blocked transaction                                            | E2E    | P0       | critical | included |
-| TC-LOGIN-001   | Auth        | should display correct user data after login                          | UI     | P0       | medium   | included |
-| TC-LOGIN-002   | Auth        | session management should work correctly                              | UI     | P0       | high     | included |
-| TC-MARKET-001  | Marketplace | should buy random offer and verify transaction history                | UI     | P1       | high     | included |
-| TC-MARKET-002  | Marketplace | should return error when offer is to expensive                        | UI     | P1       | high     | included |
-| TC-MARKET-003  | Marketplace | create offer and verify in My Offers page                             | UI     | P1       | medium   | included |
-| TC-MARKET-004  | Marketplace | An owner can cancel an offer through API                              | API    | P1       | high     | included |
-| TC-MARKET-005  | Marketplace | A different user cannot cancel another owner offer                    | API    | P1       | critical | included |
-| TC-MARKET-006  | Marketplace | An owner can cancel an offer through UI                               | UI     | P1       | high     | included |
-| TC-PROFILE-001 | Profile     | should display correct user information in profile sections           | UI     | P1       | medium   | included |
-| TC-PROFILE-002 | Profile     | A fresh user can update the display name                              | UI     | P1       | medium   | included |
-| TC-PROFILE-003 | Profile     | A fresh user can delete their own account after confirmation          | UI     | P1       | high     | included |
-| TC-PUBLIC-001  | Public      | Alerts page opens and displays its main controls                      | UI     | P2       | low      | included |
-| TC-PUBLIC-002  | Public      | Contact rejects missing required fields                               | UI     | P2       | medium   | included |
-| TC-PUBLIC-003  | Public      | Contact accepts a valid submission                                    | UI     | P2       | medium   | included |
-| TC-REG-001     | Auth        | should register new user successfully                                 | UI     | P0       | high     | included |
-| TC-REG-002     | Auth        | should display validation errors for invalid email and short password | UI     | P0       | medium   | included |
-| TC-REG-003     | Auth        | should prevent registration with empty required fields                | UI     | P0       | medium   | included |
-| TC-REG-004     | Auth        | should reject password with 1 characters                              | UI     | P0       | high     | included |
-| TC-REG-005     | Auth        | should reject password with 2 characters                              | UI     | P0       | high     | included |
-| TC-REG-006     | Auth        | should reject registration for empty password                         | UI     | P0       | high     | included |
-| TC-REG-007     | Auth        | should reject registration with duplicate email                       | UI     | P0       | medium   | included |
-| TC-REG-008     | Auth        | should reject invalid email: "plaintext"                              | UI     | P0       | medium   | included |
-| TC-REG-009     | Auth        | should reject invalid email: "@example.com"                           | UI     | P0       | medium   | included |
-| TC-REG-010     | Auth        | should reject invalid email: "user@"                                  | UI     | P0       | medium   | included |
-| TC-REG-011     | Auth        | should reject invalid email: "user @example.com"                      | UI     | P0       | medium   | included |
-| TC-SMOKE-001   | Public      | should display the correct page title 'Rolnopol' on homepage          | UI     | P0       | low      | included |
-| TC-SMOKE-002   | Public      | should load login page successfully                                   | UI     | P0       | medium   | included |
-| TC-SMOKE-003   | Public      | should load API documentation page successfully                       | UI     | P0       | low      | included |
-| TC-SMOKE-004   | Public      | should load documentation page successfully                           | UI     | P0       | low      | included |
-| TC-SMOKE-005   | Public      | should not display marketplace for non-logged user                    | UI     | P0       | high     | included |
-| TC-SMOKE-006   | Public      | should load register page successfully                                | UI     | P0       | medium   | included |
-| TC-SMOKE-007   | Public      | api app health check                                                  | API    | P0       | high     | included |
-| TC-VIS-001     | Visual      | should match homepage visual snapshot                                 | Visual | P2       | low      | included |
+| ID             | Area        | Scenario                                                               | Layer  | Priority | Risk     | Scope    |
+| -------------- | ----------- | ---------------------------------------------------------------------- | ------ | -------- | -------- | -------- |
+| TC-ASSIGN-001  | Farm        | should assignment for new staff and field                              | UI     | P1       | high     | included |
+| TC-ASSIGN-002  | Farm        | should not show assigned staff in select dropdown                      | UI     | P1       | medium   | included |
+| TC-ASSIGN-003  | Farm        | should unassigned works correctly                                      | UI     | P1       | high     | included |
+| TC-ASSIGN-004  | Farm        | should show 2 staff assigned to field in tree view                     | UI     | P1       | medium   | included |
+| TC-ASSIGN-005  | Farm        | A user can assign their staff member to their field through API        | API    | P1       | high     | included |
+| TC-ASSIGN-006  | Farm        | Removing a staff assignment leaves it absent from the assignment list  | API    | P1       | high     | included |
+| TC-AUTH-001    | Auth        | should register new user successfully with valid data                  | API    | P0       | high     | included |
+| TC-AUTH-002    | Auth        | should reject registration with invalid email format                   | API    | P0       | medium   | included |
+| TC-AUTH-003    | Auth        | should reject registration with duplicate email                        | API    | P0       | medium   | included |
+| TC-AUTH-004    | Auth        | should login successfully with valid credentials                       | API    | P0       | high     | included |
+| TC-AUTH-005    | Auth        | should reject login with non-existent email                            | API    | P0       | medium   | included |
+| TC-AUTH-006    | Auth        | should reject login with wrong password                                | API    | P0       | high     | included |
+| TC-AUTH-007    | Auth        | should validate valid token via GET request                            | API    | P0       | high     | included |
+| TC-AUTH-008    | Auth        | should reject invalid token via GET request                            | API    | P0       | critical | included |
+| TC-AUTH-009    | Auth        | should validate valid token via POST request                           | API    | P0       | high     | included |
+| TC-AUTH-010    | Auth        | should reject invalid token via POST request                           | API    | P0       | critical | included |
+| TC-AUTH-011    | Auth        | should logout successfully                                             | API    | P0       | high     | included |
+| TC-AUTH-012    | Auth        | Anonymous fields request returns 401 without field data                | API    | P0       | critical | included |
+| TC-CHART-001   | Charts      | Chart type switches without JavaScript errors                          | UI     | P2       | low      | included |
+| TC-FARM-001    | Farm        | should create a new field in Staff & Fields view                       | UI     | P1       | high     | included |
+| TC-FARM-002    | Farm        | should create a new animal herd in Staff & Fields view                 | UI     | P1       | medium   | included |
+| TC-FARM-003    | Farm        | should create a new staff in Staff & Fields view                       | UI     | P1       | high     | included |
+| TC-FARM-004    | Farm        | should edit a field name                                               | UI     | P1       | medium   | included |
+| TC-FARM-005    | Farm        | should delete a field                                                  | UI     | P1       | high     | included |
+| TC-FARM-006    | Farm        | should update a staff                                                  | UI     | P1       | medium   | included |
+| TC-FARM-007    | Farm        | should delete a staff                                                  | UI     | P1       | high     | included |
+| TC-FARM-008    | Farm        | should edit a animal                                                   | UI     | P1       | medium   | included |
+| TC-FARM-009    | Farm        | should delete a animal                                                 | UI     | P1       | high     | included |
+| TC-FARM-010    | Farm        | A newly created field can be retrieved with its name and area          | API    | P0       | medium   | included |
+| TC-FARM-012    | Farm        | Deleting an assigned field removes its field and assignment            | API    | P1       | high     | included |
+| TC-FARM-013    | Farm        | Fields search and pagination show the requested subset                 | UI     | P1       | medium   | included |
+| TC-FARM-014    | Farm        | Updating a field persists its new name and area                        | API    | P1       | medium   | included |
+| TC-FARM-015    | Farm        | A newly created staff member appears with their name, surname, and age | API    | P1       | high     | included |
+| TC-FARM-016    | Farm        | A newly created animal herd appears with its type and amount           | API    | P1       | medium   | included |
+| TC-FIN-001     | Finance     | verify account balance and transaction history                         | UI     | P1       | medium   | included |
+| TC-FIN-002     | Finance     | verify funds transfer between users                                    | UI     | P1       | critical | included |
+| TC-FIN-003     | Finance     | verify prevent overdraft                                               | UI     | P1       | critical | included |
+| TC-FIN-004     | Finance     | Transaction history respects limit and offset and exposes hasMore      | API    | P1       | medium   | included |
+| TC-FIN-005     | Finance     | Income and expense update the API account balance                      | API    | P1       | critical | included |
+| TC-FIN-006     | Finance     | Transfer accepts the minimum amount 0.01                               | API    | P1       | high     | included |
+| TC-FIN-007     | Finance     | Transfer accepts the maximum amount 999.99                             | API    | P1       | high     | included |
+| TC-FIN-008     | Finance     | Transfer of the full available balance leaves zero                     | API    | P1       | high     | included |
+| TC-FIN-009     | Finance     | Transfer above available balance leaves both accounts unchanged        | API    | P1       | critical | included |
+| TC-FIN-010     | Finance     | Transfer to a nonexistent recipient is rejected                        | API    | P1       | high     | included |
+| TC-FIN-011     | Finance     | A fresh user can read their financial account and balance              | API    | P1       | high     | included |
+| TC-FIN-012     | Finance     | Transaction history filters by type                                    | API    | P1       | medium   | included |
+| TC-FIN-013     | Finance     | Transaction history filters by category                                | API    | P1       | medium   | included |
+| TC-FIN-014     | Finance     | Transaction history filters by date range                              | API    | P1       | medium   | included |
+| TC-FIN-015     | Finance     | Transfer above 999.99 ROL is rejected without changing either balance  | API    | P1       | high     | included |
+| TC-GUARD-001   | Auth        | should redirect anonymous user from /profile.html to login             | UI     | P0       | high     | included |
+| TC-GUARD-002   | Auth        | should redirect anonymous user from /marketplace.html to login         | UI     | P0       | high     | included |
+| TC-GUARD-003   | Auth        | should redirect anonymous user from /financial.html to login           | UI     | P0       | high     | included |
+| TC-GUARD-004   | Auth        | Anonymous Staff and Fields main page redirects to login                | UI     | P0       | high     | excluded |
+| TC-GUARD-005   | Auth        | Anonymous assignments page redirects to login                          | UI     | P0       | high     | excluded |
+| TC-GUARD-006   | Auth        | Anonymous charts page redirects to login                               | UI     | P0       | low      | excluded |
+| TC-JOURNEY-001 | Journeys    | should create assignment for new farmer                                | E2E    | P0       | high     | included |
+| TC-JOURNEY-002 | Journeys    | marketplace e2e test                                                   | E2E    | P0       | high     | included |
+| TC-JOURNEY-003 | Journeys    | verify blocked transaction                                             | E2E    | P0       | critical | included |
+| TC-LOGIN-001   | Auth        | should display correct user data after login                           | UI     | P0       | medium   | included |
+| TC-LOGIN-002   | Auth        | session management should work correctly                               | UI     | P0       | high     | included |
+| TC-MARKET-001  | Marketplace | should buy random offer and verify transaction history                 | UI     | P1       | high     | included |
+| TC-MARKET-002  | Marketplace | should return error when offer is to expensive                         | UI     | P1       | high     | included |
+| TC-MARKET-003  | Marketplace | create offer and verify in My Offers page                              | UI     | P1       | medium   | included |
+| TC-MARKET-004  | Marketplace | An owner can cancel an offer through API                               | API    | P1       | high     | included |
+| TC-MARKET-005  | Marketplace | A different user cannot cancel another owner offer                     | API    | P1       | critical | included |
+| TC-MARKET-006  | Marketplace | An owner can cancel an offer through UI                                | UI     | P1       | high     | included |
+| TC-PROFILE-001 | Profile     | should display correct user information in profile sections            | UI     | P1       | medium   | included |
+| TC-PROFILE-002 | Profile     | A fresh user can update the display name                               | UI     | P1       | medium   | included |
+| TC-PROFILE-003 | Profile     | A fresh user can delete their own account after confirmation           | UI     | P1       | high     | included |
+| TC-PUBLIC-001  | Public      | Alerts page opens and displays its main controls                       | UI     | P2       | low      | included |
+| TC-PUBLIC-002  | Public      | Contact rejects missing required fields                                | UI     | P2       | medium   | included |
+| TC-PUBLIC-003  | Public      | Contact accepts a valid submission                                     | UI     | P2       | medium   | included |
+| TC-REG-001     | Auth        | should register new user successfully                                  | UI     | P0       | high     | included |
+| TC-REG-002     | Auth        | should display validation errors for invalid email and short password  | UI     | P0       | medium   | included |
+| TC-REG-003     | Auth        | should prevent registration with empty required fields                 | UI     | P0       | medium   | included |
+| TC-REG-004     | Auth        | should reject password with 1 characters                               | UI     | P0       | high     | included |
+| TC-REG-005     | Auth        | should reject password with 2 characters                               | UI     | P0       | high     | included |
+| TC-REG-006     | Auth        | should reject registration for empty password                          | UI     | P0       | high     | included |
+| TC-REG-007     | Auth        | should reject registration with duplicate email                        | UI     | P0       | medium   | included |
+| TC-REG-008     | Auth        | should reject invalid email: "plaintext"                               | UI     | P0       | medium   | included |
+| TC-REG-009     | Auth        | should reject invalid email: "@example.com"                            | UI     | P0       | medium   | included |
+| TC-REG-010     | Auth        | should reject invalid email: "user@"                                   | UI     | P0       | medium   | included |
+| TC-REG-011     | Auth        | should reject invalid email: "user @example.com"                       | UI     | P0       | medium   | included |
+| TC-SMOKE-001   | Public      | should display the correct page title 'Rolnopol' on homepage           | UI     | P0       | low      | included |
+| TC-SMOKE-002   | Public      | should load login page successfully                                    | UI     | P0       | medium   | included |
+| TC-SMOKE-003   | Public      | should load API documentation page successfully                        | UI     | P0       | low      | included |
+| TC-SMOKE-004   | Public      | should load documentation page successfully                            | UI     | P0       | low      | included |
+| TC-SMOKE-005   | Public      | should not display marketplace for non-logged user                     | UI     | P0       | high     | included |
+| TC-SMOKE-006   | Public      | should load register page successfully                                 | UI     | P0       | medium   | included |
+| TC-SMOKE-007   | Public      | api app health check                                                   | API    | P0       | high     | included |
+| TC-VIS-001     | Visual      | should match homepage visual snapshot                                  | Visual | P2       | low      | included |
 
 <!-- coverage-index:end -->
 
