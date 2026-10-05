@@ -32,3 +32,9 @@ const ANIMAL_TYPES = [
 export function getRandomAnimalType(): string {
   return faker.helpers.arrayElement(ANIMAL_TYPES);
 }
+
+export function getDifferentAnimalType(currentType: string): string {
+  return faker.helpers.arrayElement(
+    ANIMAL_TYPES.filter((type) => type !== currentType),
+  );
+}

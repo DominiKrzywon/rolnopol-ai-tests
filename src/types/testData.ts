@@ -15,3 +15,8 @@ export interface CreatedAnimal {
   type: string;
   amount: number;
 }
+
+export type StaffListResponse = {
+  success: boolean;
+  data: CreatedStaff[];
+};

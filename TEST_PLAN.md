@@ -68,6 +68,16 @@ run passes; record its command and outcome with the next comparable baseline.
 do not create a current scenario coverage report; the `coverage:run` baseline
 remains to be recorded separately.
 
+### Farm API progress: October 5, 2026
+
+`TC-FARM-017` through `TC-FARM-020` are implemented in
+`tests/api/farm.api.spec.ts`. The user reported that all tests pass after the
+animal deletion response assertion was corrected. The command, collected entry
+count, and report for that run were not provided, so this is not a recorded
+suite baseline. Earlier on October 5, a focused `TC-FARM-020` run with one
+worker and zero retries passed **2/2 entries**, including health-check, before
+the final deletion-message assertion was added.
+
 ### Full-run observation: September 13, 2026
 
 The first `npm run coverage:run` verification (one worker, zero retries)
@@ -292,7 +302,8 @@ Implementation order:
    - [x] create a field and retrieve it by ID with its name and area;
    - [x] delete an assigned field and confirm that its assignment is also gone;
    - [x] update a field and verify the persisted values;
-   - [ ] staff and animal CRUD;
+   - [x] staff and animal CRUD have API assertions; the user reported a passing
+         run on October 5, but its command and entry count are not recorded;
    - [x] assignment and unassignment have API assertions; targeted execution
          evidence for both cases is still incomplete in this plan;
    - [ ] establish and cover the product contract for deleting an assigned
@@ -463,10 +474,10 @@ retain a risk estimate, but remain outside coverage denominators.
 | TC-FARM-014    | Farm        | Updating a field persists its new name and area                        | API    | P1       | medium   | included | Checks PUT response and GET read-back; targeted and API-project runs passed 2026-09-30.                                        |
 | TC-FARM-015    | Farm        | A newly created staff member appears with their name, surname, and age | API    | P1       | high     | included | Focused run passed 2026-10-04 (2/2 including health-check); ESLint and TypeScript checks passed.                               |
 | TC-FARM-016    | Farm        | A newly created animal herd appears with its type and amount           | API    | P1       | medium   | included | Source uses createdAnimal and getAnimals to check ID, type, and amount; focused run not recorded.                              |
-| TC-FARM-017    | Farm        | Updating a staff member persists the changed name, surname, and age    | API    | P1       | medium   | included | Planned; confirm the update contract, then check the response and a fresh staff list.                                          |
-| TC-FARM-018    | Farm        | Updating an animal herd persists the changed type and amount           | API    | P1       | medium   | included | Planned; confirm the update contract, then check the response and getAnimals read-back.                                        |
-| TC-FARM-019    | Farm        | Deleting a staff member removes that member from the staff list        | API    | P1       | high     | included | Planned; create an owned member and avoid a second delete in fixture cleanup.                                                  |
-| TC-FARM-020    | Farm        | Deleting an animal herd removes that herd from the animal list         | API    | P1       | medium   | included | Planned; create an owned herd and avoid a second delete in fixture cleanup.                                                    |
+| TC-FARM-017    | Farm        | Updating a staff member persists the changed name, surname, and age    | API    | P1       | medium   | included | Checks PUT response and updated values in a later staff list; user-reported pass 2026-10-05, command unknown.                  |
+| TC-FARM-018    | Farm        | Updating an animal herd persists the changed type and amount           | API    | P1       | medium   | included | Checks PUT response and updated values in a later animal list; user-reported pass 2026-10-05, command unknown.                 |
+| TC-FARM-019    | Farm        | Deleting a staff member removes that member from the staff list        | API    | P1       | high     | included | Checks DELETE status and absence from later staff list; user-reported pass 2026-10-05, command unknown.                        |
+| TC-FARM-020    | Farm        | Deleting an animal herd removes that herd from the animal list         | API    | P1       | medium   | included | Checks DELETE response and absence from later animal list; user-reported pass 2026-10-05, command unknown.                     |
 | TC-FIN-001     | Finance     | verify account balance and transaction history                         | UI     | P1       | medium   | included | -                                                                                                                              |
 | TC-FIN-002     | Finance     | verify funds transfer between users                                    | UI     | P1       | critical | included | -                                                                                                                              |
 | TC-FIN-003     | Finance     | verify prevent overdraft                                               | UI     | P1       | critical | included | Review needed: final balance is currently read before the rejected transfer.                                                   |
@@ -656,23 +667,14 @@ should not be repeated merely because an old result is missing.
    `npm run coverage:run -- --project=api-tests --grep "creating and reading new worker via API"`:
    2/2 entries including health-check, one worker, zero retries. Focused ESLint
    and TypeScript checks passed.
-7. Implement the next farm API cases one at a time in `tests/api/farm.api.spec.ts`.
-   Give each test exactly one static `case-id` annotation. These tags describe
-   its layer, domain, operation, and outcome; they do not replace the ID.
-
-   | Order | ID            | Tags                                    | Small implementation target                                                                                                                                                                                                                                      |
-   | ----- | ------------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-   | 1     | `TC-FARM-017` | `@api`, `@farm`, `@crud`, `@happy-path` | With `freshUser` and `createdStaff`, confirm the staff update endpoint and payload, change name, surname, and age, then assert the response and a separate staff read by ID. Follow the response/read-back pattern in `TC-FARM-014`.                             |
-   | 2     | `TC-FARM-018` | `@api`, `@farm`, `@crud`, `@happy-path` | With `freshUser` and `createdAnimal`, confirm the animal update contract, change type and amount, then assert the response and the matching ID in `getAnimals`.                                                                                                  |
-   | 3     | `TC-FARM-019` | `@api`, `@farm`, `@crud`, `@delete`     | Create a staff member owned by a fresh user, delete it through the API, and verify its ID is absent from a later staff read. Check the delete status and response contract. Do not use `createdStaff` unchanged: its fixture deletes the member during teardown. |
-   | 4     | `TC-FARM-020` | `@api`, `@farm`, `@crud`, `@delete`     | Create an animal herd owned by a fresh user, delete it through the API, and verify its ID is absent from `getAnimals`. Check the delete status and response contract. Do not use `createdAnimal` unchanged for the same teardown reason.                         |
-
-   Confirm each endpoint's expected behavior before locking in its assertions;
-   existing UI behavior and Swagger are evidence to inspect, not the contract by
-   themselves. After each case, run `npm run coverage:run -- --project=api-tests --grep "<exact test name>"`
-   and `npm run check:ci`. Run the API project after the four focused cases.
-   Keep users and resources independent for state-changing tests. Diagnose the
-   visual baseline separately before measuring the full suite.
+7. `TC-FARM-017` through `TC-FARM-020` are implemented. The user reported all
+   tests passing on October 5, 2026, after correcting the animal deletion
+   response path to `data.message`. A focused `TC-FARM-020` run passed before
+   that final assertion was added; the later passing command and entry count
+   were not recorded. Do not repeat these implementation exercises. When
+   resuming, record a comparable API-project baseline and continue the open
+   Stage 3 farm contract work or Marketplace API work. Keep the visual baseline
+   diagnosis separate from the API work.
 
 CLI/MCP browser exploration is optional when clarifying expected behavior.
 Neither exploration tools nor an agent are dependencies of the coverage report.

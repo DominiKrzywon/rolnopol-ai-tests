@@ -1,7 +1,9 @@
 import { faker } from '@faker-js/faker';
 import {
+  createAnimal,
   createAssignment,
   createField,
+  createStaff,
   getAnimals,
   getAssignments,
   getFields,
@@ -9,8 +11,11 @@ import {
 import { BASE_API_URL } from 'src/config/env.config';
 import { expect } from 'src/fixtures/auth.fixture';
 import { test } from 'src/fixtures/data.fixture';
-import { FIELD_AREA } from 'src/helpers/testDataHelpers';
-import { CreatedStaff } from 'src/types/testData';
+import {
+  FIELD_AREA,
+  getDifferentAnimalType,
+} from 'src/helpers/testDataHelpers';
+import { CreatedStaff, StaffListResponse } from 'src/types/testData';
 
 test.describe('Farm API', () => {
   test(
@@ -255,7 +260,7 @@ test.describe('Farm API', () => {
   );
 
   test(
-    'should be able to update staff',
+    'should be able to update staff via API',
     {
       annotation: { type: 'case-id', description: 'TC-FARM-017' },
       tag: ['@api', '@farm', '@crud', '@happy-path'],
@@ -276,7 +281,6 @@ test.describe('Farm API', () => {
       const body = await response.json();
 
       const responseAfterUpdate = await request.get(`${BASE_API_URL}/staff`);
-      expect(responseAfterUpdate.status()).toBe(200);
 
       const bodyResponseAfter = (await responseAfterUpdate.json()) as {
         data: CreatedStaff[];
@@ -286,13 +290,123 @@ test.describe('Farm API', () => {
       );
 
       expect(response.status()).toBe(200);
+      expect(body.success).toBe(true);
       expect(body.message).toBe(expectedMessage);
+      expect(responseAfterUpdate.status()).toBe(200);
       expect(updatedStaff).toMatchObject({
         id: staffId,
         name: updatedStaffName,
         surname: updatedStaffSurname,
         age: createdStaff.age + 10,
       });
+    },
+  );
+
+  test(
+    'should be able to update herd via API',
+    {
+      annotation: { type: 'case-id', description: 'TC-FARM-018' },
+      tag: ['@api', '@farm', '@crud', '@happy-path'],
+    },
+    async ({ freshUser: _, request, createdAnimal }) => {
+      const expectedMessage = 'Animal updated';
+      const updatedHerdType = getDifferentAnimalType(createdAnimal.type);
+      const animalId = createdAnimal.id;
+
+      const response = await request.put(
+        `${BASE_API_URL}/animals/${animalId}`,
+        {
+          data: {
+            type: updatedHerdType,
+            amount: createdAnimal.amount + 10,
+          },
+        },
+      );
+      const body = await response.json();
+
+      const findAnimal = await getAnimals(request);
+      const animals = findAnimal.find(
+        (animal) => animal.id === createdAnimal.id,
+      );
+
+      expect(response.status()).toBe(200);
+      expect(body.success).toBe(true);
+      expect(body.message).toBe(expectedMessage);
+      expect(animals).toMatchObject({
+        id: createdAnimal.id,
+        type: updatedHerdType,
+        amount: createdAnimal.amount + 10,
+      });
+    },
+  );
+
+  test(
+    'should be able to delete staff via API',
+    {
+      annotation: { type: 'case-id', description: 'TC-FARM-019' },
+      tag: ['@api', '@farm', '@crud', '@happy-path'],
+    },
+    async ({ freshUser: _, request }) => {
+      const userId = await createStaff(request, {
+        name: faker.person.firstName(),
+        surname: faker.person.lastName(),
+        age: 20,
+      });
+
+      const responseBeforeDeleted = await request.get(`${BASE_API_URL}/staff`);
+      const bodyBeforeDeleted =
+        (await responseBeforeDeleted.json()) as StaffListResponse;
+
+      expect(responseBeforeDeleted.status()).toBe(200);
+      expect(bodyBeforeDeleted.data.some((item) => item.id === userId)).toBe(
+        true,
+      );
+
+      const deleteStaffResponse = await request.delete(
+        `${BASE_API_URL}/staff/${userId}`,
+      );
+      expect(deleteStaffResponse.status()).toBe(200);
+
+      const responseAfterDelete = await request.get(`${BASE_API_URL}/staff`);
+      const bodyAfterDeleted =
+        (await responseAfterDelete.json()) as StaffListResponse;
+
+      expect(bodyAfterDeleted.data.some((item) => item.id === userId)).toBe(
+        false,
+      );
+    },
+  );
+
+  test(
+    'should be able to delete herd via API',
+    {
+      annotation: { type: 'case-id', description: 'TC-FARM-020' },
+      tag: ['@api', '@farm', '@crud', '@happy-path'],
+    },
+    async ({ freshUser: _, request }) => {
+      const expectedMessage = 'Animal deleted';
+      const herdId = await createAnimal(request, {
+        type: 'cow',
+        amount: 20,
+      });
+
+      const animal = await getAnimals(request);
+
+      expect(animal.some((animal) => animal.id === herdId)).toBe(true);
+
+      const deleteAnimalResponse = await request.delete(
+        `${BASE_API_URL}/animals/${herdId}`,
+      );
+      expect(deleteAnimalResponse.status()).toBe(200);
+
+      const deleteAnimalData = await deleteAnimalResponse.json();
+      expect(deleteAnimalData.success).toBe(true);
+      expect(deleteAnimalData.data.message).toBe(expectedMessage);
+
+      const animalAfterDeleted = await getAnimals(request);
+      expect(animalAfterDeleted.some((animal) => animal.id === herdId)).toBe(
+        false,
+      );
     },
   );
 });
