@@ -2,6 +2,7 @@ import { APIRequestContext } from '@playwright/test';
 import { deleteJson, getJson, postJson } from 'src/api/httpClient';
 import { BASE_API_URL } from 'src/config/env.config';
 import { Animal, Assignment, Field } from 'src/models/farm';
+import { CreatedStaff } from 'src/types/testData';
 
 export async function getFields(request: APIRequestContext): Promise<Field[]> {
   return getJson<Field[]>(request, `${BASE_API_URL}/fields`);
@@ -11,6 +12,12 @@ export async function getAnimals(
   request: APIRequestContext,
 ): Promise<Animal[]> {
   return getJson<Animal[]>(request, `${BASE_API_URL}/animals`);
+}
+
+export async function getStaff(
+  request: APIRequestContext,
+): Promise<CreatedStaff[]> {
+  return getJson<CreatedStaff[]>(request, `${BASE_API_URL}/staff`);
 }
 
 export async function createField(

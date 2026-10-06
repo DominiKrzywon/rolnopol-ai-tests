@@ -7,6 +7,7 @@ import {
   getAnimals,
   getAssignments,
   getFields,
+  getStaff,
 } from 'src/api/farm.api';
 import { BASE_API_URL } from 'src/config/env.config';
 import { expect } from 'src/fixtures/auth.fixture';
@@ -347,7 +348,7 @@ test.describe('Farm API', () => {
       tag: ['@api', '@farm', '@crud', '@happy-path'],
     },
     async ({ freshUser: _, request }) => {
-      const userId = await createStaff(request, {
+      const staffId = await createStaff(request, {
         name: faker.person.firstName(),
         surname: faker.person.lastName(),
         age: 20,
@@ -358,22 +359,17 @@ test.describe('Farm API', () => {
         (await responseBeforeDeleted.json()) as StaffListResponse;
 
       expect(responseBeforeDeleted.status()).toBe(200);
-      expect(bodyBeforeDeleted.data.some((item) => item.id === userId)).toBe(
+      expect(bodyBeforeDeleted.data.some((item) => item.id === staffId)).toBe(
         true,
       );
 
       const deleteStaffResponse = await request.delete(
-        `${BASE_API_URL}/staff/${userId}`,
+        `${BASE_API_URL}/staff/${staffId}`,
       );
       expect(deleteStaffResponse.status()).toBe(200);
 
-      const responseAfterDelete = await request.get(`${BASE_API_URL}/staff`);
-      const bodyAfterDeleted =
-        (await responseAfterDelete.json()) as StaffListResponse;
-
-      expect(bodyAfterDeleted.data.some((item) => item.id === userId)).toBe(
-        false,
-      );
+      const staffAfterDelete = await getStaff(request);
+      expect(staffAfterDelete.some((item) => item.id === staffId)).toBe(false);
     },
   );
 
@@ -407,6 +403,86 @@ test.describe('Farm API', () => {
       expect(animalAfterDeleted.some((animal) => animal.id === herdId)).toBe(
         false,
       );
+    },
+  );
+
+  test(
+    'should delete assigned staff and remove its assignment',
+    {
+      annotation: { type: 'case-id', description: 'TC-FARM-021' },
+      tag: ['@api', '@farm', '@crud', '@happy-path'],
+    },
+    async ({ freshUser: _, request, createdField }) => {
+      const expectedMessage = 'staf deleted';
+      const staffId = await createStaff(request, {
+        name: faker.person.firstName(),
+        surname: faker.person.lastName(),
+        age: 20,
+      });
+      const fieldId = createdField.id;
+      const assignmentId = await createAssignment(request, {
+        fieldId,
+        staffId,
+      });
+
+      const responseBeforeDeleted = await getAssignments(request);
+
+      expect(responseBeforeDeleted).toMatchObject([
+        { id: assignmentId, fieldId, staffId },
+      ]);
+
+      const deletedStaffResponse = await request.delete(
+        `${BASE_API_URL}/staff/${staffId}`,
+      );
+      const deletedStaffData = await deletedStaffResponse.json();
+
+      expect(deletedStaffResponse.status()).toBe(200);
+      expect(deletedStaffData.success).toBe(true);
+      expect(deletedStaffData.data.message).toEqual(expectedMessage);
+
+      const assignmentsAfterDelete = await getAssignments(request);
+      expect(
+        assignmentsAfterDelete.some(
+          (assignment) => assignment.id === assignmentId,
+        ),
+      ).toBe(false);
+
+      const staffAfterDelete = await getStaff(request);
+      expect(staffAfterDelete.some((staff) => staff.id === staffId)).toBe(
+        false,
+      );
+
+      const fieldsAfterDelete = await getFields(request);
+      expect(fieldsAfterDelete.some((field) => field.id === fieldId)).toBe(
+        true,
+      );
+    },
+  );
+
+  test(
+    'should reject unsupported animal type without creating a herd',
+    {
+      annotation: { type: 'case-id', description: 'TC-FARM-022' },
+      tag: ['@api', '@farm', '@validation', '@negative'],
+    },
+    async ({ freshUser: _, request }) => {
+      const expectedErrorMessage =
+        'Invalid animal type. Allowed: chicken, chick, cow, pig, majesticHog, piglet, sheep, lamb, goat, duck, turkey, rabbit, fish, shrimp, oyster, squid, kraken, wyvern, moth, aiHarvester, aiDrone, aiAssistant, aiRobot, dinosaur, diplodocus, unicorn, ent, voidBeast, rat, goose, snail, bee, hedgehog, owl, lobster, yak, boar, ant, tardigrade, tortoise.';
+      const animalsBefore = await getAnimals(request);
+      expect(animalsBefore).toHaveLength(0);
+      const response = await request.post(`${BASE_API_URL}/animals`, {
+        data: {
+          type: 'dragon',
+          amount: 20,
+        },
+      });
+      const body = await response.json();
+
+      const animalsAfter = await getAnimals(request);
+      expect(animalsAfter).toEqual(animalsBefore);
+      expect(response.status()).toBe(400);
+      expect(body.success).toBe(false);
+      expect(body.error).toEqual(expectedErrorMessage);
     },
   );
 });

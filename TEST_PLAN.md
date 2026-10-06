@@ -78,6 +78,27 @@ suite baseline. Earlier on October 5, a focused `TC-FARM-020` run with one
 worker and zero retries passed **2/2 entries**, including health-check, before
 the final deletion-message assertion was added.
 
+### Source review and next exercises: October 6, 2026
+
+This update comes from source inspection; no tests were executed for it.
+
+- `TC-FARM-020` checks that the herd exists before deletion, the DELETE status
+  and success envelope, `data.message`, and absence of the herd ID afterwards.
+  The user again reported that the test passes; its implementation is complete.
+- `TC-FARM-013` already lives in `staff-management.isolated.spec.ts`, creates six
+  uniquely named fields, searches by their shared prefix, checks `1/2` then `2/2`,
+  and deletes its fields in `finally`. The old implementation task is complete.
+- `TC-FIN-003` obtains the starting balance through API and reads it again after
+  the rejected transfer. The historical hardcoded-balance and stale-read tasks
+  are complete in source; this review does not establish a new passing run.
+- `TC-REG-001` already checks status `201`, the login header, and `/login.html`.
+  Its remaining correction is to remove the transient success-message assertion.
+- `TC-FIN-014` already uses `getTransactions`, whose `getJson` reader rejects
+  unsuccessful responses. Do not repeat the old reader-replacement exercise.
+
+The next small exercises are detailed in section 10. Unresolved validation and
+resource-deletion contracts need agreement before adding new scenario IDs.
+
 ### Full-run observation: September 13, 2026
 
 The first `npm run coverage:run` verification (one worker, zero retries)
@@ -211,9 +232,9 @@ the API to reject zero area or report this difference as a defect. The temporary
 - [x] Remove `tests/api/probe.spec.ts` after recording findings, or turn the
       probe into a named contract test without `console.log`.
 - [x] Keep one successful-registration UI test. The duplicate adds no learning value.
-- [ ] The successful-registration test should check response status `201`
-      and the final `/login.html` URL. It should not look for a disappearing
-      message on the previous page.
+- [ ] Remove the transient success-message assertion from `TC-REG-001`.
+      Status `201`, the login header, and the final `/login.html` URL are already
+      asserted; retain those checks and record a focused run.
 - [x] Prepare the duplicate case through API, then open a fresh registration
       page and check `409` and the visible UI message.
 - [x] Run each short password as a separate test case so the report identifies
@@ -239,7 +260,9 @@ Completion criterion: the three commands above pass without retries.
 - [ ] Every state-changing test must create its own user and resources.
 - [x] Obtain the transfer recipient ID by registering a fresh account,
       without logging into the shared `EMPTY_USER`.
-- [ ] Do not hardcode the `18450` balance; obtain the initial state through API.
+- [x] Obtain the initial balance through API rather than hardcoding `18450`.
+      `TC-FIN-003` also reads the balance after the rejected transfer; source
+      inspected on October 6, 2026, without a new execution result.
 - [ ] Start with `workers: 1`, then measure `2` and `3`.
       Do not add retries as a remedy for rate limiter 429 responses.
 - [x] Validate environment values when accessed. Coverage collection supplies
@@ -258,9 +281,12 @@ commits alongside contract tests:
 - [ ] Do not add 204 handling or `putJson` until a real contract test shows the need.
 - [ ] Move happy-path `loginAs` and `registerVerifiedUser` to `postJson`,
       but retain raw `APIResponse` in functions used for 4xx assertions.
-- [ ] For unused `transferFunds`, `getTransactions`, `getAssignments`,
-      `createAssignment`, `deleteAssignment`, `cancelAllMyOffers`, and
-      `deleteOneOffer`, decide whether to cover them with contracts or remove them.
+- [ ] Decide whether to exercise or remove the currently unused API helpers
+      `transferFunds`, `deleteAssignment`, and `cancelAllMyOffers`.
+      `getTransactions`, `getAssignments`, and `createAssignment` are used in
+      current API tests; `deleteOneOffer` is called by `cancelAllMyOffers`.
+      Recheck callers before removal; the similarly named Financial Page Object
+      method is a separate UI action.
 - [ ] Extend financial, farm, and marketplace response models only from real
       responses captured in API tests.
 - [ ] Remove `expect()` from `MarketplacePage`, separate helpers into constants
@@ -310,9 +336,10 @@ Implementation order:
          resource in each supported direction;
    - [ ] agreed boundaries for age, animal count, and required fields;
    - [ ] district and allowed animal types.
-   - [ ] correct the UI pagination scenario currently declared as `TC-FARM-013`:
-         place it in an isolated UI spec, use unique field names, search for the
-         requested subset, and assert `1/2` then `2/2` for six fields.
+   - [x] correct the UI pagination scenario `TC-FARM-013`: it is in an isolated
+         UI spec, uses unique field names, searches for the requested subset,
+         and asserts `1/2` then `2/2` for six fields. Source inspected on
+         October 6, 2026; no new run recorded.
 3. **Marketplace API**
    - [ ] offer listing and `my-offers`;
    - [ ] creating and cancelling an owned offer;
@@ -480,7 +507,7 @@ retain a risk estimate, but remain outside coverage denominators.
 | TC-FARM-020    | Farm        | Deleting an animal herd removes that herd from the animal list         | API    | P1       | medium   | included | Checks DELETE response and absence from later animal list; user-reported pass 2026-10-05, command unknown.                     |
 | TC-FIN-001     | Finance     | verify account balance and transaction history                         | UI     | P1       | medium   | included | -                                                                                                                              |
 | TC-FIN-002     | Finance     | verify funds transfer between users                                    | UI     | P1       | critical | included | -                                                                                                                              |
-| TC-FIN-003     | Finance     | verify prevent overdraft                                               | UI     | P1       | critical | included | Review needed: final balance is currently read before the rejected transfer.                                                   |
+| TC-FIN-003     | Finance     | verify prevent overdraft                                               | UI     | P1       | critical | included | Source reviewed 2026-10-06: initial API balance and a new read after rejection; no new run recorded.                           |
 | TC-FIN-004     | Finance     | Transaction history respects limit and offset and exposes hasMore      | API    | P1       | medium   | included | -                                                                                                                              |
 | TC-FIN-005     | Finance     | Income and expense update the API account balance                      | API    | P1       | critical | included | -                                                                                                                              |
 | TC-FIN-006     | Finance     | Transfer accepts the minimum amount 0.01                               | API    | P1       | high     | included | -                                                                                                                              |
@@ -638,43 +665,96 @@ release threshold is inferred from one run.
 
 ## 10. Upcoming exercises with the mentor
 
-Use the existing stages as the single backlog. Completed code changes above
-should not be repeated merely because an old result is missing.
+This is the immediate sequence selected from the existing stages, not a second
+backlog. The learner implements each code change; the mentor explains and reviews
+it. Keep one behavior per exercise and one small implementation per commit.
 
-1. Review the known registration and overdraft assertion gaps in catalog Notes.
-   Make each correction separately and verify the affected file and project.
-2. Record an API and smoke baseline with `npm run coverage:run -- --project=api-tests`
-   and then the smoke project. Each run replaces the current result; archive the
-   output directory separately when a comparison is needed.
-3. Record the API-project baseline. A targeted run of `TC-AUTH-012` and
-   `TC-FARM-010` passed on 2026-09-27 with one worker and no retries; include
-   the remaining API cases in the baseline before comparing later runs.
-4. Review the new financial history tests `TC-FIN-012` through `TC-FIN-014`.
-   Give the date-range helper an explicit response check, or use the existing
-   financial API reader so a failed request has a clear diagnostic. Keep the
-   three scenario assertions in the spec. Run each focused case, then the API
-   project when a test environment is available.
-5. Financial API filters and the `TC-FIN-011` user ID comparison are implemented
-   in source as of September 28, 2026; execution is not recorded. Continue to
-   the next domain after the targeted financial run. The UI filter exercise in
-   Stage 4 remains separate.
-6. `TC-ASSIGN-005`, `TC-FARM-015`, and `TC-FARM-016` are implemented in
-   `tests/api/farm.api.spec.ts`. For `TC-ASSIGN-005` and `TC-FARM-016`, record
-   focused run commands and results; source presence is not a pass. A user
-   reported the updated `TC-ASSIGN-006` passed on 2026-10-04, but its exact
-   command and collected entry count are unknown. After correcting its assertion,
-   `TC-FARM-015` passed on 2026-10-04 with
-   `npm run coverage:run -- --project=api-tests --grep "creating and reading new worker via API"`:
-   2/2 entries including health-check, one worker, zero retries. Focused ESLint
-   and TypeScript checks passed.
-7. `TC-FARM-017` through `TC-FARM-020` are implemented. The user reported all
-   tests passing on October 5, 2026, after correcting the animal deletion
-   response path to `data.message`. A focused `TC-FARM-020` run passed before
-   that final assertion was added; the later passing command and entry count
-   were not recorded. Do not repeat these implementation exercises. When
-   resuming, record a comparable API-project baseline and continue the open
-   Stage 3 farm contract work or Marketplace API work. Keep the visual baseline
-   diagnosis separate from the API work.
+On October 6, the learner chose to defer coverage-run diagnosis and continue
+private learning exercises. The user reports passing tests; the collection error
+does not provide an execution baseline. Report tooling is not a prerequisite
+for the following exercises. Ordinary focused Playwright runs remain useful.
+
+1. **Optional small Farm refactor before the next scenario.** The proposed
+   `getStaff` reader and its smallest migration are described in
+   [REFACTOR.md](REFACTOR.md#small-farm-reader-exercise-proposed-on-october-6-2026).
+   Use the existing `getJson` mechanism for state reads. Start with the final
+   read in `TC-FARM-019`; preserve raw responses where tests assert exact HTTP
+   statuses. This is a proposal for learner implementation, not a completed
+   refactor or a reason to rewrite all API tests.
+
+2. **Finish the small registration correction — Stage 0, `TC-REG-001`.** In
+   `tests/auth/registration.noauth.spec.ts`, remove only
+   `expect(registerPage.successMessage).toBeVisible()` with its `await`.
+   Keep the existing response wait started before submission, status `201`,
+   login header, and final URL checks. The goal is to verify successful
+   registration without racing a message that disappears on navigation.
+   Run the focused case:
+
+   ```bash
+   npx playwright test tests/auth/registration.noauth.spec.ts --project=no-auth-tests --grep "should register new user successfully" --workers=1 --retries=0
+   ```
+
+   Then verify the affected project and `npm run check:ci`. This test belongs
+   to `no-auth-tests`, not `smoke-tests`.
+
+3. **Delete a staff member assigned to a field — Stage 3 Farm.** First establish
+   whether the agreed contract removes the assignment or rejects deletion.
+   Do not infer that direction solely from `TC-FARM-012`, which deletes a field.
+   Once agreed, add one case to `tests/api/farm.api.spec.ts`, with a new catalog
+   ID and the existing farm tags. Reuse `createdField`, create the staff member
+   explicitly, and use `createAssignment` / `getAssignments` from
+   `src/api/farm.api.ts`. Confirm the pair exists before the action. For accepted
+   deletion, assert the response, staff and assignment absence, and field
+   preservation. For rejected deletion, assert the error and preservation of all
+   three. Give the explicitly created staff member cleanup appropriate to the
+   chosen contract; `createdStaff` would otherwise delete it again on teardown.
+   The smallest first action is contract discovery and a written expectation;
+   implementing the single scenario follows as a separate step.
+
+4. **Add one negative Farm contract — Stage 3 animal types.** Establish the
+   allowed types and choose one unsupported value; agree on the rejection
+   status/error before implementation. Use a fresh user and raw
+   `request.post` for the rejected request, since `createAnimal` uses a throwing
+   helper. Assert status, `success: false`, the agreed error, and an unchanged
+   animal list. Do not combine animal count, staff age, required fields, and
+   district into this test. Each can become a later boundary exercise after its
+   API contract is agreed. Keep the documented zero-field-area exclusion.
+
+5. **Cancel an owned offer — Stage 3 Marketplace, `TC-MARKET-004`.** First
+   establish offer creation and cancellation responses, including whether
+   `my-offers` retains a cancelled entry. Add
+   `tests/api/marketplace.api.spec.ts` (already matched by `api-tests`), import
+   the existing data fixtures, and prepare one owned field plus one offer through
+   API. Verify that exact offer is active before DELETE. Assert the cancellation
+   response, its absence from active listings, and the agreed `my-offers` state.
+   Reuse `getMarketplaceOffers` for reads; use raw `request.delete` when asserting
+   the DELETE response. Keep offer cleanup before field-fixture teardown.
+   No new generic client or fixture layer is needed for this first scenario.
+
+6. **Reject cancellation by another user — `TC-MARKET-005`.** Extend the same
+   API spec with one separate case. Prepare owner A's offer and a fresh user B
+   with a separate request context; use B to attempt deletion of A's offer.
+   Agree on the authorization status/error, then assert that rejection and
+   reread as A to confirm the offer remains active. Reuse the separate-account
+   request-context pattern in `tests/api/financial.api.spec.ts`; dispose the
+   context and clean up A's own data explicitly. Do not relogin either user on
+   the other user's request context.
+
+For each new scenario, first update the catalog and add exactly one static
+`case-id`, then run `npm run coverage:readme` and `npm run coverage:validate`.
+Verify the focused case with one worker and zero retries, then its project and
+`npm run check:ci`. Use `--grep` with the actual test title; case-ID annotations
+are not title filters. Record outcomes separately from implementation checkboxes.
+
+After this sequence, select one agreed age/count/required-field boundary or
+Marketplace purchase rule. The remaining registration-required-field assertion
+(`TC-REG-003`), smoke baseline, session/project organization, visual baseline,
+and CI work stay in their existing stages; they are not prerequisites for every
+individual API exercise. Keep visual diagnosis separate from API contract work.
+
+When report tooling becomes useful again, record an API baseline with
+`npm run coverage:run -- --project=api-tests --workers=1 --retries=0`.
+Each coverage run replaces the current result; archive it before comparing runs.
 
 CLI/MCP browser exploration is optional when clarifying expected behavior.
 Neither exploration tools nor an agent are dependencies of the coverage report.
