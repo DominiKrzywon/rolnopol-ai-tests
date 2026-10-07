@@ -1,4 +1,6 @@
 import { faker } from '@faker-js/faker';
+import { APIRequestContext } from '@playwright/test';
+import { deleteOneOffer } from 'src/api/marketplace.api';
 
 export function generateUniqueEmail(prefix: string = 'testuser'): string {
   const timestamp = Date.now();
@@ -37,4 +39,14 @@ export function getDifferentAnimalType(currentType: string): string {
   return faker.helpers.arrayElement(
     ANIMAL_TYPES.filter((type) => type !== currentType),
   );
+}
+
+export async function cleanupOffer(
+  request: APIRequestContext,
+  offerId: number | undefined,
+  cancelled: boolean,
+): Promise<void> {
+  if (offerId !== undefined && !cancelled) {
+    await deleteOneOffer(request, offerId);
+  }
 }
