@@ -142,25 +142,13 @@ test.describe('Farm API', () => {
     },
     async ({ freshUser: _, request, createdStaff, createdField }) => {
       const expectedDeletedMessage = 'Assignment removed';
-      const staffId = createdStaff.id;
       const fieldId = createdField.id;
+      const staffId = createdStaff.id;
 
-      const response = await request.post(`${BASE_API_URL}/fields/assign`, {
-        data: {
-          fieldId,
-          staffId,
-        },
-      });
-      expect(response.status()).toBe(201);
-
-      const createdBody = await response.json();
-      expect(createdBody.data).toMatchObject({
-        id: expect.any(Number),
+      const assignmentId = await createAssignment(request, {
         fieldId,
         staffId,
       });
-
-      const assignmentId = createdBody.data.id;
 
       const deleteResponse = await request.delete(
         `${BASE_API_URL}/fields/assign/${assignmentId}`,
