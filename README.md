@@ -280,6 +280,8 @@ Implementation and execution states are computed in the report, not edited here.
 | TC-FARM-018    | Farm        | Updating an animal herd persists the changed type and amount           | API    | P1       | medium   | included |
 | TC-FARM-019    | Farm        | Deleting a staff member removes that member from the staff list        | API    | P1       | high     | included |
 | TC-FARM-020    | Farm        | Deleting an animal herd removes that herd from the animal list         | API    | P1       | medium   | included |
+| TC-FARM-021    | Farm        | Deleting assigned staff removes the assignment and preserves the field | API    | P1       | high     | included |
+| TC-FARM-022    | Farm        | An unsupported animal type is rejected without creating a herd         | API    | P1       | medium   | included |
 | TC-FIN-001     | Finance     | verify account balance and transaction history                         | UI     | P1       | medium   | included |
 | TC-FIN-002     | Finance     | verify funds transfer between users                                    | UI     | P1       | critical | included |
 | TC-FIN-003     | Finance     | verify prevent overdraft                                               | UI     | P1       | critical | included |
@@ -312,6 +314,7 @@ Implementation and execution states are computed in the report, not edited here.
 | TC-MARKET-004  | Marketplace | An owner can cancel an offer through API                               | API    | P1       | high     | included |
 | TC-MARKET-005  | Marketplace | A different user cannot cancel another owner offer                     | API    | P1       | critical | included |
 | TC-MARKET-006  | Marketplace | An owner can cancel an offer through UI                                | UI     | P1       | high     | included |
+| TC-MARKET-007  | Marketplace | An owner cannot buy their own offer                                    | API    | P1       | high     | included |
 | TC-PROFILE-001 | Profile     | should display correct user information in profile sections            | UI     | P1       | medium   | included |
 | TC-PROFILE-002 | Profile     | A fresh user can update the display name                               | UI     | P1       | medium   | included |
 | TC-PROFILE-003 | Profile     | A fresh user can delete their own account after confirmation           | UI     | P1       | high     | included |

@@ -21,13 +21,21 @@ export async function deleteOneOffer(
   await deleteJson(request, `${BASE_API_URL}/marketplace/offers/${offerId}`);
 }
 
-export async function cancelAllMyOffers(
+export async function getMyOffers(
   request: APIRequestContext,
-): Promise<void> {
+): Promise<MarketplaceOffer[]> {
   const { offers } = await getJson<{ offers: MarketplaceOffer[] }>(
     request,
     `${BASE_API_URL}/marketplace/my-offers`,
   );
+
+  return offers;
+}
+
+export async function cancelAllMyOffers(
+  request: APIRequestContext,
+): Promise<void> {
+  const offers = await getMyOffers(request);
 
   await Promise.all(
     offers
@@ -40,10 +48,7 @@ export async function cancelOfferIfActive(
   request: APIRequestContext,
   offerId: number,
 ): Promise<void> {
-  const { offers } = await getJson<{ offers: MarketplaceOffer[] }>(
-    request,
-    `${BASE_API_URL}/marketplace/my-offers`,
-  );
+  const offers = await getMyOffers(request);
   const offer = offers.find((item) => item.id === offerId);
 
   if (offer?.status === 'active') {

@@ -1,7 +1,6 @@
 ﻿import { request as playwrightRequest } from '@playwright/test';
 import { loginAs, registerVerifiedUser } from 'src/api/auth.api';
 import { getAccountBalance } from 'src/api/financial.api';
-import { getMarketplaceOffers } from 'src/api/marketplace.api';
 import { BASE_API_URL } from 'src/config/env.config';
 import { prepareRandomUser } from 'src/factories/user.factory';
 import { expect, test } from 'src/fixtures/data.fixture';
@@ -15,7 +14,6 @@ test.describe('marketplace API', () => {
     },
     async ({ request, activeFieldOffer }) => {
       const { offerId, fieldId } = activeFieldOffer;
-      await getMarketplaceOffers(request);
 
       const beforeResponse = await request.get(
         `${BASE_API_URL}/marketplace/my-offers`,
@@ -65,15 +63,14 @@ test.describe('marketplace API', () => {
   );
 
   test(
-    'should not delete other user offer',
+    'should reject cancellation of another user offer',
     {
       annotation: { type: 'case-id', description: 'TC-MARKET-005' },
-      tag: ['@api', '@marketplace', '@crud', '@happy-path'],
+      tag: ['@api', '@marketplace', '@crud', '@negative'],
     },
     async ({ request, activeFieldOffer }) => {
       const expectedErrorMessage = 'Not authorized to cancel this offer';
       const { offerId, fieldId } = activeFieldOffer;
-      await getMarketplaceOffers(request);
 
       const otherUserApi = await playwrightRequest.newContext();
       try {
@@ -117,15 +114,14 @@ test.describe('marketplace API', () => {
   );
 
   test(
-    'should not by able to buy his offer',
+    'should reject buying an owned offer',
     {
-      annotation: { type: 'case-id', description: 'TC-MARKET-006' },
-      tag: ['@api', '@marketplace', '@crud', '@happy-path'],
+      annotation: { type: 'case-id', description: 'TC-MARKET-007' },
+      tag: ['@api', '@marketplace', '@crud', '@negative'],
     },
     async ({ request, activeFieldOffer }) => {
       const expectedErrorMessage = 'Cannot buy your own offer';
       const { offerId, fieldId } = activeFieldOffer;
-      await getMarketplaceOffers(request);
 
       const balanceBefore = await getAccountBalance(request);
 

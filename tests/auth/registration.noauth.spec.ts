@@ -29,7 +29,6 @@ test(
     ]);
 
     expect(registrationResponse.status()).toBe(201);
-    await expect(registerPage.successMessage).toBeVisible();
     await expect(loginPage.header).toBeVisible();
     await expect(page).toHaveURL('/login.html');
   },

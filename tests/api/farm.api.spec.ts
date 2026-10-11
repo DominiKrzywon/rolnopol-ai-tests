@@ -44,7 +44,7 @@ test.describe('Farm API', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-010' },
       tag: ['@api', '@farm', '@crud', '@happy-path'],
     },
-    async ({ freshUser: _, request, createdField }) => {
+    async ({ request, createdField }) => {
       const fieldId = createdField.id;
       const fields = await getFields(request);
       const retrievedField = fields.find((field) => field.id === fieldId);
@@ -64,7 +64,7 @@ test.describe('Farm API', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-012' },
       tag: ['@api', '@farm', '@crud', '@happy-path'],
     },
-    async ({ freshUser: _, request, createdStaff }) => {
+    async ({ request, createdStaff }) => {
       const staffId = createdStaff.id;
 
       const fieldData = {
@@ -102,7 +102,7 @@ test.describe('Farm API', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-014' },
       tag: ['@api', '@farm', '@crud', '@happy-path'],
     },
-    async ({ freshUser: _, request, createdField }) => {
+    async ({ request, createdField }) => {
       const expectedMessage = 'Updated successfully';
       const updatedFieldName = `api-field-updated-${faker.string.uuid()}`;
       const fieldId = createdField.id;
@@ -140,7 +140,7 @@ test.describe('Farm API', () => {
       annotation: { type: 'case-id', description: 'TC-ASSIGN-006' },
       tag: ['@api', '@farm', '@assignment', '@happy-path'],
     },
-    async ({ freshUser: _, request, createdStaff, createdField }) => {
+    async ({ request, createdStaff, createdField }) => {
       const expectedDeletedMessage = 'Assignment removed';
       const fieldId = createdField.id;
       const staffId = createdStaff.id;
@@ -172,7 +172,7 @@ test.describe('Farm API', () => {
       annotation: { type: 'case-id', description: 'TC-ASSIGN-005' },
       tag: ['@api', '@farm', '@assignment', '@happy-path'],
     },
-    async ({ freshUser: _, request, createdStaff, createdField }) => {
+    async ({ request, createdStaff, createdField }) => {
       const staffId = createdStaff.id;
       const fieldId = createdField.id;
 
@@ -213,7 +213,7 @@ test.describe('Farm API', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-015' },
       tag: ['@api', '@farm', '@assignment', '@happy-path'],
     },
-    async ({ freshUser: _, request, createdStaff }) => {
+    async ({ request, createdStaff }) => {
       const response = await request.get(`${BASE_API_URL}/staff`);
       const body = (await response.json()) as { data: CreatedStaff[] };
       const worker = body.data.find((item) => item.id === createdStaff.id);
@@ -234,7 +234,7 @@ test.describe('Farm API', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-016' },
       tag: ['@api', '@farm', '@assignment', '@happy-path'],
     },
-    async ({ freshUser: _, request, createdAnimal }) => {
+    async ({ request, createdAnimal }) => {
       const findAnimal = await getAnimals(request);
       const animal = findAnimal.find(
         (animal) => animal.id === createdAnimal.id,
@@ -254,7 +254,7 @@ test.describe('Farm API', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-017' },
       tag: ['@api', '@farm', '@crud', '@happy-path'],
     },
-    async ({ freshUser: _, request, createdStaff }) => {
+    async ({ request, createdStaff }) => {
       const expectedMessage = 'Updated successfully';
       const updatedStaffName = `staff-name-updated-${faker.string.uuid()}`;
       const updatedStaffSurname = `staff-surname-updated-${faker.string.uuid()}`;
@@ -297,7 +297,7 @@ test.describe('Farm API', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-018' },
       tag: ['@api', '@farm', '@crud', '@happy-path'],
     },
-    async ({ freshUser: _, request, createdAnimal }) => {
+    async ({ request, createdAnimal }) => {
       const expectedMessage = 'Animal updated';
       const updatedHerdType = getDifferentAnimalType(createdAnimal.type);
       const animalId = createdAnimal.id;
@@ -335,7 +335,7 @@ test.describe('Farm API', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-019' },
       tag: ['@api', '@farm', '@crud', '@happy-path'],
     },
-    async ({ freshUser: _, request }) => {
+    async ({ apiSession: _, request }) => {
       const staffId = await createStaff(request, {
         name: faker.person.firstName(),
         surname: faker.person.lastName(),
@@ -367,7 +367,7 @@ test.describe('Farm API', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-020' },
       tag: ['@api', '@farm', '@crud', '@happy-path'],
     },
-    async ({ freshUser: _, request }) => {
+    async ({ apiSession: _, request }) => {
       const expectedMessage = 'Animal deleted';
       const herdId = await createAnimal(request, {
         type: 'cow',
@@ -400,7 +400,7 @@ test.describe('Farm API', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-021' },
       tag: ['@api', '@farm', '@crud', '@happy-path'],
     },
-    async ({ freshUser: _, request, createdField }) => {
+    async ({ request, createdField }) => {
       const expectedMessage = 'staf deleted';
       const staffId = await createStaff(request, {
         name: faker.person.firstName(),
@@ -453,7 +453,7 @@ test.describe('Farm API', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-022' },
       tag: ['@api', '@farm', '@validation', '@negative'],
     },
-    async ({ freshUser: _, request }) => {
+    async ({ apiSession: _, request }) => {
       const expectedErrorMessage =
         'Invalid animal type. Allowed: chicken, chick, cow, pig, majesticHog, piglet, sheep, lamb, goat, duck, turkey, rabbit, fish, shrimp, oyster, squid, kraken, wyvern, moth, aiHarvester, aiDrone, aiAssistant, aiRobot, dinosaur, diplodocus, unicorn, ent, voidBeast, rat, goose, snail, bee, hedgehog, owl, lobster, yak, boar, ant, tardigrade, tortoise.';
       const animalsBefore = await getAnimals(request);

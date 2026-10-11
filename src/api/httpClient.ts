@@ -1,4 +1,5 @@
 import { APIRequestContext } from '@playwright/test';
+import { ApiEnvelope } from 'src/models/ApiResponse';
 
 export class ApiError extends Error {
   constructor(
@@ -28,10 +29,7 @@ async function send<T>(
     throw new ApiError(method, url, response.status(), body);
   }
 
-  let parsed: {
-    success: boolean;
-    data?: T;
-  };
+  let parsed: ApiEnvelope<T>;
 
   try {
     parsed = JSON.parse(body);
@@ -44,7 +42,7 @@ async function send<T>(
     );
   }
 
-  if (parsed.success === false) {
+  if (parsed.success !== true) {
     throw new ApiError(method, url, response.status(), body);
   }
 

@@ -32,7 +32,7 @@ type DataFixtures = {
 };
 
 export const test = baseTest.extend<DataFixtures>({
-  createdField: async ({ freshUser: _, request }, use) => {
+  createdField: async ({ apiSession: _, request }, use) => {
     const name = faker.word.noun();
     const id = await createField(request, { name, area: FIELD_AREA });
 
@@ -41,7 +41,7 @@ export const test = baseTest.extend<DataFixtures>({
     await deleteField(request, id);
   },
 
-  createdStaff: async ({ freshUser: _, request }, use) => {
+  createdStaff: async ({ apiSession: _, request }, use) => {
     const name = faker.person.firstName();
     const surname = faker.person.lastName();
     const age = STAFF_AGE;
@@ -52,7 +52,7 @@ export const test = baseTest.extend<DataFixtures>({
     await deleteStaff(request, id);
   },
 
-  createdAnimal: async ({ freshUser: _, request }, use) => {
+  createdAnimal: async ({ apiSession: _, request }, use) => {
     const type = getRandomAnimalType();
     const amount = faker.number.int({ min: 10_000, max: 99_999 });
     const id = await createAnimal(request, {

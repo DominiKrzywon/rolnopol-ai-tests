@@ -125,7 +125,7 @@ test.describe('Staff & Fields Management - Delete Field', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-004' },
       tag: ['@crud', '@farm', '@resources', '@edit'],
     },
-    async ({ managementPage, createdField }) => {
+    async ({ freshUser: _, managementPage, createdField }) => {
       const { name: fieldName } = createdField;
       const newFieldName = faker.word.noun();
 
@@ -150,7 +150,7 @@ test.describe('Staff & Fields Management - Delete Field', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-005' },
       tag: ['@crud', '@farm', '@resources', '@delete'],
     },
-    async ({ managementPage, createdField }) => {
+    async ({ freshUser: _, managementPage, createdField }) => {
       const { name: fieldName } = createdField;
 
       await managementPage.goto();
@@ -173,7 +173,7 @@ test.describe('Staff & Fields Management - Delete Staff', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-006' },
       tag: ['@crud', '@farm', '@resources', '@edit'],
     },
-    async ({ managementPage, createdStaff }) => {
+    async ({ freshUser: _, managementPage, createdStaff }) => {
       const { name: staffName } = createdStaff;
       const newName = faker.internet.username();
       const newSurname = faker.internet.username();
@@ -197,7 +197,7 @@ test.describe('Staff & Fields Management - Delete Staff', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-007' },
       tag: ['@crud', '@farm', '@resources', '@delete'],
     },
-    async ({ managementPage, createdStaff }) => {
+    async ({ freshUser: _, managementPage, createdStaff }) => {
       const { name: staffName, surname: staffSurname } = createdStaff;
       await managementPage.goto();
       await managementPage.searchStaff(staffName);
@@ -221,7 +221,7 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-008' },
       tag: ['@crud', '@farm', '@resources', '@edit'],
     },
-    async ({ managementPage, createdAnimal }) => {
+    async ({ freshUser: _, managementPage, createdAnimal }) => {
       const { type: animalType, amount: animalAmount } = createdAnimal;
       const newType = getRandomAnimalType();
 
@@ -251,7 +251,7 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-009' },
       tag: ['@crud', '@farm', '@resources', '@delete'],
     },
-    async ({ managementPage, createdAnimal }) => {
+    async ({ freshUser: _, managementPage, createdAnimal }) => {
       const { type: animalType, amount: animalAmount } = createdAnimal;
       await managementPage.goto();
       await managementPage

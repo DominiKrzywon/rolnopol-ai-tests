@@ -45,8 +45,7 @@ test.describe('Financial API', () => {
       annotation: { type: 'case-id', description: 'TC-FIN-011' },
       tag: ['@api', '@financial', '@balance'],
     },
-    async ({ freshUser, request }) => {
-      const session = await loginAs(request, freshUser);
+    async ({ apiSession, request }) => {
       const response = await request.get(`${BASE_API_URL}/financial/account`);
       const body = await response.json();
 
@@ -55,7 +54,7 @@ test.describe('Financial API', () => {
       expect(body.data.account).toMatchObject({
         id: expect.any(Number),
         balance: 0,
-        userId: session.id,
+        userId: apiSession.session.id,
         currency: 'ROL',
       });
     },
@@ -70,7 +69,7 @@ test.describe('Financial API', () => {
       },
       tag: ['@api', '@financial', '@income', '@expense'],
     },
-    async ({ freshUser: _, request }) => {
+    async ({ apiSession: _, request }) => {
       const incomeAmount = 25.5;
       const expenseAmount = 10.25;
 
@@ -126,7 +125,7 @@ test.describe('Financial API', () => {
       },
       tag: ['@api', '@financial', '@transfer'],
     },
-    async ({ freshUser: _, request, transferRecipient }) => {
+    async ({ apiSession: _, request, transferRecipient }) => {
       const expectedTransferMessage = 'Transfer completed successfully';
 
       const transferAmount = 0.01;
@@ -174,7 +173,7 @@ test.describe('Financial API', () => {
       },
       tag: ['@api', '@financial', '@transfer'],
     },
-    async ({ freshUser: _, request, transferRecipient }) => {
+    async ({ apiSession: _, request, transferRecipient }) => {
       const expectedTransferMessage = 'Transfer completed successfully';
       const amount = 999.99;
 
@@ -223,7 +222,7 @@ test.describe('Financial API', () => {
       },
       tag: ['@api', '@financial', '@transfer'],
     },
-    async ({ freshUser: _, request, transferRecipient }) => {
+    async ({ apiSession: _, request, transferRecipient }) => {
       const expectedTransferMessage = 'Transfer completed successfully';
 
       const amount = 666.66;
@@ -273,7 +272,7 @@ test.describe('Financial API', () => {
       },
       tag: ['@api', '@financial', '@transfer', '@negative'],
     },
-    async ({ freshUser: _, request, transferRecipient }) => {
+    async ({ apiSession: _, request, transferRecipient }) => {
       const expectedErrorMessage = 'Insufficient funds for transfer';
 
       const amount = 50;
@@ -322,7 +321,7 @@ test.describe('Financial API', () => {
       },
       tag: ['@api', '@financial', '@transfer', '@negative'],
     },
-    async ({ freshUser: _, request, transferRecipient }) => {
+    async ({ apiSession: _, request, transferRecipient }) => {
       const expectedErrorMessage =
         'Cannot transfer more than 999.99 ROL at once';
 
@@ -373,7 +372,7 @@ test.describe('Financial API', () => {
       },
       tag: ['@api', '@financial', '@transfer', '@negative'],
     },
-    async ({ freshUser: _, request }) => {
+    async ({ apiSession: _, request }) => {
       const expectedErrorMessage = 'Recipient user does not exist';
 
       await topUpAmount(request, 10);
@@ -408,7 +407,7 @@ test.describe('Financial API', () => {
       },
       tag: ['@api', '@financial', '@history'],
     },
-    async ({ freshUser: _, request }) => {
+    async ({ apiSession: _, request }) => {
       const amount1 = 50;
       const amount2 = 100;
       const amount3 = 150;
@@ -467,7 +466,7 @@ test.describe('Financial API', () => {
       annotation: { type: 'case-id', description: 'TC-FIN-012' },
       tag: ['@api', '@financial', '@history'],
     },
-    async ({ freshUser: _, request }) => {
+    async ({ apiSession: _, request }) => {
       const amountIncome = 100;
       const amountExpense = 50;
       const income = await topUpAmount(request, amountIncome);
@@ -500,7 +499,7 @@ test.describe('Financial API', () => {
       annotation: { type: 'case-id', description: 'TC-FIN-013' },
       tag: ['@api', '@financial', '@history'],
     },
-    async ({ freshUser: _, request }) => {
+    async ({ apiSession: _, request }) => {
       const incomeAmount = 50;
 
       await topUpAmount(request, incomeAmount);
@@ -534,7 +533,7 @@ test.describe('Financial API', () => {
       annotation: { type: 'case-id', description: 'TC-FIN-014' },
       tag: ['@api', '@financial', '@history'],
     },
-    async ({ freshUser: _, request }) => {
+    async ({ apiSession: _, request }) => {
       const transactionAmount = 100;
       const transaction = await topUpAmount(request, transactionAmount);
       const transactionTime = new Date(transaction.timestamp).getTime();

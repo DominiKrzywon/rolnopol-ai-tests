@@ -5,11 +5,16 @@ import {
 } from 'src/api/auth.api';
 import { prepareRandomUser } from 'src/factories/user.factory';
 import { expect, test as baseTest } from 'src/fixtures/test.fixture';
+import { Session } from 'src/models/Session';
 import { User } from 'src/models/User';
 
 type AuthFixtures = {
   registeredUser: User;
   freshUser: User;
+  apiSession: {
+    user: User;
+    session: Session;
+  };
 };
 
 export const test = baseTest.extend<AuthFixtures>({
@@ -21,11 +26,15 @@ export const test = baseTest.extend<AuthFixtures>({
     await use(user);
   },
 
-  freshUser: async ({ registeredUser, request, context }, use) => {
+  apiSession: async ({ registeredUser, request }, use) => {
     const session = await loginAs(request, registeredUser);
-    await applySessionCookies(context, request, session);
+    await use({ user: registeredUser, session });
+  },
 
-    await use(registeredUser);
+  freshUser: async ({ apiSession, request, context }, use) => {
+    await applySessionCookies(context, request, apiSession.session);
+
+    await use(apiSession.user);
   },
 });
 
