@@ -1,17 +1,12 @@
 import { topUpAmount } from 'src/actions/user.actions';
-import {
-  createAnimal,
-  deleteAnimal,
-  getAnimals,
-  getFields,
-} from 'src/api/farm.api';
+import { createAnimal, deleteAnimal, getFields } from 'src/api/farm.api';
 import { addTransaction, getAccountBalance } from 'src/api/financial.api';
 import {
   cancelAllMyOffers,
   getMarketplaceOffers,
+  getMyOffers,
 } from 'src/api/marketplace.api';
-import { expect, test } from 'src/fixtures/data.fixture';
-import { PurchasedOffer } from 'src/pages/MarketplacePage';
+import { expect, test } from 'src/fixtures/marketplace.fixture';
 
 test.describe('Marketplace e2e tests', () => {
   test.beforeEach(async ({ freshUser: _, request }) => {
@@ -19,28 +14,46 @@ test.describe('Marketplace e2e tests', () => {
   });
 
   test(
-    'should buy random offer and verify transaction history',
+    'should buy an owned test field offer and verify transaction history',
     {
       annotation: { type: 'case-id', description: 'TC-MARKET-001' },
       tag: ['@marketplace', '@purchase', '@happy-path'],
     },
-    async ({ request, marketplacePage }) => {
-      let purchasedOffer: PurchasedOffer;
-      let ownedIdsBeforePurchase: number[];
+    async ({ request, marketplacePage, fieldOfferForPurchase }) => {
+      const { fieldId, fieldName, offerId, price, description, sellerApi } =
+        fieldOfferForPurchase;
 
-      await test.step('should buy random offer', async () => {
+      await test.step('verify prepared offer and buy it', async () => {
         const expectedSuccessMessage = 'Purchase completed successfully!';
-        const fieldsBefore = await getFields(request);
-        const animalsBefore = await getAnimals(request);
+        const offers = await getMyOffers(sellerApi);
+        const offer = offers.find((item) => item.id === offerId);
+
+        expect(offer, `Expected seller offer with ID ${offerId}`).toBeDefined();
+        expect(offer).toMatchObject({
+          id: offerId,
+          itemType: 'field',
+          itemId: fieldId,
+          price,
+          description,
+          status: 'active',
+          details: {
+            name: fieldName,
+          },
+        });
+
+        const sellerFields = await getFields(sellerApi);
+        expect(sellerFields).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ id: fieldId, name: fieldName }),
+          ]),
+        );
+
+        const buyerFields = await getFields(request);
+        expect(buyerFields.map((field) => field.id)).not.toContain(fieldId);
 
         await marketplacePage.goto();
-        purchasedOffer = await marketplacePage.clickRandomBuyNow();
+        await marketplacePage.buyOfferByDescription(description);
 
-        ownedIdsBeforePurchase =
-          // eslint-disable-next-line playwright/no-conditional-in-test
-          purchasedOffer.itemType === 'field'
-            ? fieldsBefore.map((f) => f.id)
-            : animalsBefore.map((a) => a.id);
         await expect(marketplacePage.notificationMessage).toHaveText(
           expectedSuccessMessage,
         );
@@ -48,27 +61,26 @@ test.describe('Marketplace e2e tests', () => {
 
       await test.step('verify purchase in transaction history', async () => {
         await marketplacePage.transactionHistory.click();
-        await expect(marketplacePage.transactionType.last()).toHaveText(
-          `Purchase: ${purchasedOffer.name}`,
+
+        await expect(marketplacePage.transactionType).toHaveCount(1);
+        await expect(marketplacePage.transactionType).toHaveText(
+          `Purchase: field #${fieldId}`,
         );
-        expect(await marketplacePage.getLastTransactionAmount()).toEqual(
-          -purchasedOffer.price,
-        );
+        await expect(marketplacePage.transactionAmount).toHaveCount(1);
+        expect(await marketplacePage.getLastTransactionAmount()).toBe(-price);
       });
 
       await test.step('verify ownership transfer', async () => {
-        const ownedAfterPurchase =
-          // eslint-disable-next-line playwright/no-conditional-in-test
-          purchasedOffer.itemType === 'field'
-            ? await getFields(request)
-            : await getAnimals(request);
-        const newlyOwnedIds = ownedAfterPurchase
-          .map((resource) => resource.id)
-          .filter((id) => !ownedIdsBeforePurchase.includes(id));
-        expect(
-          newlyOwnedIds,
-          `buyer should own exactly one new ${purchasedOffer.itemType} after buying "${purchasedOffer.name}"`,
-        ).toHaveLength(1);
+        const buyerFields = await getFields(request);
+
+        expect(buyerFields).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ id: fieldId, name: fieldName }),
+          ]),
+        );
+
+        const sellerFields = await getFields(sellerApi);
+        expect(sellerFields.map((field) => field.id)).not.toContain(fieldId);
       });
     },
   );

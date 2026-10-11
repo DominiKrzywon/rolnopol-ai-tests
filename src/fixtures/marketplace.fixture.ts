@@ -23,7 +23,7 @@ type MarketplaceFixtures = {
 };
 
 export const test = baseTest.extend<MarketplaceFixtures>({
-  fieldOfferForPurchase: async ({ apiSession: _, request }, use) => {
+  fieldOfferForPurchase: async ({ apiSession: _ }, use) => {
     const sellerApi = await playwrightRequest.newContext({
       baseURL: ENV.BASE_URL,
     });
@@ -35,7 +35,7 @@ export const test = baseTest.extend<MarketplaceFixtures>({
       const fieldName = `field_name${randomUUID()}`;
       const description = `Offer for ${fieldName}`;
       const price = 250;
-      const fieldId = await createField(request, {
+      const fieldId = await createField(sellerApi, {
         name: fieldName,
         area: FIELD_AREA,
       });
