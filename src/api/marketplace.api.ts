@@ -58,12 +58,17 @@ export async function cancelOfferIfActive(
 
 export async function createFieldOffer(
   request: APIRequestContext,
-  data: { fieldId: number; price: number },
+  data: { fieldId: number; price: number; description?: string },
 ): Promise<number> {
   const created = await postJson<{ offer: { id: number } }>(
     request,
     `${BASE_API_URL}/marketplace/offers`,
-    { itemType: 'field', itemId: data.fieldId, price: data.price },
+    {
+      itemType: 'field',
+      itemId: data.fieldId,
+      price: data.price,
+      description: data.description,
+    },
   );
 
   const offerId = created?.offer?.id;

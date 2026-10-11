@@ -232,7 +232,7 @@ the API to reject zero area or report this difference as a defect. The temporary
 - [x] Remove `tests/api/probe.spec.ts` after recording findings, or turn the
       probe into a named contract test without `console.log`.
 - [x] Keep one successful-registration UI test. The duplicate adds no learning value.
-- [ ] Remove the transient success-message assertion from `TC-REG-001`.
+- [x] Remove the transient success-message assertion from `TC-REG-001`.
       Status `201`, the login header, and the final `/login.html` URL are already
       asserted; retain those checks and record a focused run.
 - [x] Prepare the duplicate case through API, then open a fresh registration
@@ -276,21 +276,26 @@ invalidate each other's sessions.
 This backlog was retained from an older refactoring plan. Implement it in small
 commits alongside contract tests:
 
-- [ ] Use the shared `ApiEnvelope<T>` in `httpClient`, expose the API's
-      `error`, and improve the message for `success: false` with a 2xx status.
+- [x] Use the shared `ApiEnvelope<T>` in `httpClient` and reject envelopes
+      whose `success` is not `true` (source inspected October 11, 2026).
+      Failure diagnostics include the response body through `ApiError`.
+      Focused runtime contract checks remain pending; this is a behavior change.
 - [ ] Do not add 204 handling or `putJson` until a real contract test shows the need.
 - [ ] Move happy-path `loginAs` and `registerVerifiedUser` to `postJson`,
       but retain raw `APIResponse` in functions used for 4xx assertions.
 - [ ] Decide whether to exercise or remove the currently unused API helpers
-      `transferFunds`, `deleteAssignment`, and `cancelAllMyOffers`.
+      `transferFunds` and `deleteAssignment`.
       `getTransactions`, `getAssignments`, and `createAssignment` are used in
-      current API tests; `deleteOneOffer` is called by `cancelAllMyOffers`.
+      current API tests; `cancelAllMyOffers` is now used by `TC-MARKET-003`
+      cleanup, and calls `deleteOneOffer`.
       Recheck callers before removal; the similarly named Financial Page Object
       method is a separate UI action.
 - [ ] Extend financial, farm, and marketplace response models only from real
       responses captured in API tests.
-- [ ] Remove `expect()` from `MarketplacePage`, separate helpers into constants
-      and factories, and clarify names of overlapping UI/API actions.
+- [x] Remove `expect()` from `MarketplacePage` (October 11 working-tree review).
+      Explicit `selectOption(String(itemId))` waits for the requested option.
+- [ ] Separate helpers into constants and factories only where responsibilities
+      justify it, and clarify names of overlapping UI/API actions.
 
 ### Stage 2 — a small, fast P0 suite
 
@@ -673,10 +678,12 @@ release threshold is inferred from one run.
 
 ## 10. Upcoming exercises with the mentor
 
-This sequence was refreshed from source inspection on October 10, 2026.
+This sequence was refreshed from source inspection on October 11, 2026.
 The learner implements code changes; the mentor explains, reviews, and may
 update Markdown records. Keep each implementation small and separately reviewable.
-No tests were executed for this update; implementation is not a passing baseline.
+No application tests were executed for this update. `npm run check:ci` passed
+on the inspected working tree before documentation edits; implementation is not
+a passing application baseline.
 
 The earlier `getStaff` exercise is implemented, including its use in
 `TC-FARM-019`. Assigned-staff deletion (`TC-FARM-021`) and unsupported-animal-type
@@ -743,10 +750,11 @@ Record results separately from implementation checkboxes. For scenario changes,
 run the focused case, then its project and `check:ci`. For new IDs, synchronize
 both the catalog and generated README index.
 
-### Next refactoring cycle: shared API boundaries
+### Historical refactoring proposals: October 10, 2026
 
-Source inspection on October 10 identified three concrete options. Start with
-step 5; steps 6 and 7 are later design exercises, not prerequisites for new tests.
+Steps 5 and 6 below are implemented in commit `8596fda`; step 7 is implemented
+in the current working tree. These paragraphs preserve the original proposals,
+not current implementation instructions. The active next steps follow them.
 
 5. **Make the HTTP envelope explicit in two small changes ? Stage 1b.**
    First use the existing `ApiEnvelope<T>` for the parsed response in
@@ -790,9 +798,130 @@ step 5; steps 6 and 7 are later design exercises, not prerequisites for new test
    affected scenarios and their projects. Do not combine this with rebuilding
    purchase tests or shared Marketplace test data.
 
+### Agreed decision: leave TC-MARKET-003 as implemented
+
+On October 11, 2026, the learner explicitly chose to retain the current test.
+They reported an error with the previous `createdAnimal` version and a passing
+result with the current manual cow setup. The cause was not diagnosed, and no
+command or report was supplied; this is a learner-reported result.
+
+Keep the complete current `TC-MARKET-003`, including manual animal setup,
+listing read, offer assertions, and nested cleanup. Do not propose restoring
+`createdAnimal`, removing the listing read, or refactoring this case in routine
+reviews or repository scans. Do not ask the learner to justify this decision
+again. Revisit only if the learner explicitly selects it or a new reproducible
+failure requires investigation. This learning-scope decision supersedes the
+previous steps 8 and 9 and the earlier REFACTOR recommendation. It does not
+establish that the fixture itself is broken or that the listing read is required.
+
+### Active exercise: isolate and simplify TC-MARKET-001
+
+The learner selected the former purchase-isolation step (step 10; item 3 in the
+review summary). Implementation remains the learner's task. Preserve the case
+ID, UI purchase, notification, transaction history, and ownership verification.
+The planned scenario uses one test-owned field; it intentionally replaces random
+field/animal coverage with a deterministic field purchase. An animal purchase
+can be a separately selected exercise later.
+
+The two `playwright/no-conditional-in-test` suppressions in
+`tests/auth/marketplace.isolated.spec.ts` guard ternaries selecting fields versus
+animals. With a known field, remove the ternaries and both suppressions. Do not
+move those same branches into a helper solely to silence ESLint.
+
+1. **Define the data contract and ownership boundary.** Reuse the buyer from
+   the existing `freshUser` hook and its `request`; preserve the current top-up.
+   Propose `fieldOfferForPurchase` in a new
+   `src/fixtures/marketplace.fixture.ts`, extending `src/fixtures/data.fixture.ts`.
+   It should expose `fieldId`, `fieldName`, `offerId`, `price`, and `description`.
+   The fixture owns a separate seller request context, registration, login,
+   resource setup, cleanup, and disposal. It does not buy the offer or assert
+   the scenario. Review this contract before writing the full fixture.
+
+   Existing patterns: `apiSession` in `auth.fixture.ts`, separate
+   `playwrightRequest.newContext()` in `tests/api/marketplace.api.spec.ts`,
+   and the lifecycle in `activeFieldOffer`. Do not reuse `activeFieldOffer`
+   unchanged: it creates the resource for the buyer and deletes with its owner's
+   original context, which does not model this two-user purchase.
+
+2. **Prepare a seller and one identifiable field offer through API.** Use
+   `prepareRandomUser`, `registerVerifiedUser`, `loginAs`, and farm API
+   `createField`. Explicitly configure the new context with `baseURL: ENV.BASE_URL`
+   and no buyer storage state. Start its `try/finally` immediately after context
+   creation. Choose a unique field name and description, and an affordable price
+   such as 250. Extend existing `createFieldOffer` with optional `description`
+   and forward it in the payload, preserving the existing offer fixture's three scenario consumers.
+   Inspect the creation response/actual endpoint to confirm description storage.
+   Retain IDs as soon as creation succeeds so partial setup can be cleaned up.
+   Do not create another API client or log in the buyer again.
+
+   Small target: the fixture yields an active offer for the expected field and
+   seller. Verify the setup first with `getMyOffers` in the focused scenario;
+   never print the returned credentials or session. Run TypeScript and ESLint
+   before proceeding to UI changes.
+
+3. **Replace the random UI purchase.** Request `fieldOfferForPurchase` and
+   import `test`/`expect` from the proposed Marketplace fixture. Keep the current
+   test filename and project. Rename the title to
+   `should buy an owned test field offer and verify transaction history` while
+   preserving `TC-MARKET-001`. Use existing
+   `marketplacePage.buyOfferByDescription(description)`. Its description filter
+   supplies the lookup; use a unique value that matches one card. Keep the
+   success notification assertion in the spec. Stop using `clickRandomBuyNow`
+   and `PurchasedOffer` in this case; do not delete unrelated methods yet.
+
+4. **Replace inference with exact assertions and remove both suppressions.**
+   Read buyer fields before purchase and assert that `fieldId` is absent.
+   After purchase, read them again and assert that exact ID and `fieldName`.
+   Keep transaction history visible checks for `Purchase: ${fieldName}` and
+   the exact negative `price`. The fresh buyer has no earlier purchases; assert
+   one expense/history entry before using the existing last-amount helper.
+   Also confirm the field no longer belongs to the seller. If needed, expose
+   the seller request context explicitly as `sellerApi` from the fixture for
+   that read; keep the ownership assertion in the spec. No generic
+   `getOwnedResources` function or type-based branch is needed.
+
+5. **Finish cleanup for every outcome.** Keep the seller context alive through
+   `use`, and cancel only this offer if still active. Determine field ownership
+   from fresh seller and buyer reads, not a flag set after a UI assertion: a
+   purchase can succeed before a later assertion fails. Delete the exact field
+   using its current owner's context. Missing fields during partial setup can
+   be handled explicitly; failed reads and deletion errors must remain visible.
+   Ensure context disposal runs in an outer `finally` even when cleanup fails.
+   Ensure the buyer API session remains available through fixture teardown by
+   declaring its `apiSession`/`request` dependencies. Avoid empty catches.
+
+   This is ordinary lifecycle branching in fixture teardown, not alternative
+   scenario paths in the spec. Once the focused case passes, temporarily fail
+   an assertion after purchase and inspect cleanup; repeat with a failure before
+   purchase. Revert each temporary failure and record the outcomes. This checks
+   resource behavior that a successful run alone cannot establish.
+
+6. **Verify and record the migration.** Run the focused case with one worker
+   and zero retries, then `isolated-user-tests` because the fixture import and
+   optional API helper parameter affect that project. Run Marketplace API tests
+   for the existing `createFieldOffer` consumers and `npm run check:ci`.
+   Update the existing catalog title, regenerate the README index, and validate
+   mappings; keep the same case ID. Record actual results, including any unrelated
+   failure, rather than declaring the whole suite reliable.
+
+```bash
+npx playwright test tests/auth/marketplace.isolated.spec.ts --project=isolated-user-tests --grep "should buy an owned test field offer and verify transaction history" --workers=1 --retries=0
+npx playwright test --project=isolated-user-tests --workers=1 --retries=0
+npx playwright test tests/api/marketplace.api.spec.ts --project=api-tests --workers=1 --retries=0
+npm run check:ci
+npm run coverage:readme
+npm run coverage:validate
+```
+
+These are future implementation checks, not commands executed for this plan.
+The catalog keeps its current title until the learner renames the actual test.
+No changes to `TC-MARKET-003`, project matching, or global ESLint rules belong
+in this exercise. Shared negative-purchase cases and the journey cleanup are
+later exercises. HTTP-envelope checks remain later work in Stage 1b.
+
 ### Intentionally deferred
 
-Successful Marketplace purchase is a later contract exercise. Before reusing
+Additional Marketplace purchase contracts are deferred beyond the selected UI exercise. Before reusing
 `activeFieldOffer`, inspect cleanup after ownership transfer: its field currently
 belongs to the seller's `createdField` fixture. This fixture was selected for
 cancellation and rejection scenarios; successful-purchase cleanup has not been

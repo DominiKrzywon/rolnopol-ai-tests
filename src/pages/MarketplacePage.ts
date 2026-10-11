@@ -1,5 +1,4 @@
-import { faker } from '@faker-js/faker';
-import { expect, Locator, Page } from '@playwright/test';
+import { Locator, Page } from '@playwright/test';
 import { PAGE_URLS } from 'src/constants/pageUrls';
 import { ItemType } from 'src/models/marketplace';
 import { BasePage } from 'src/pages/BasePage';
@@ -185,6 +184,7 @@ export class MarketplacePage extends BasePage {
 
   async createNewOffer(
     type: ItemType,
+    itemId: number,
     price: number,
     description?: string,
   ): Promise<{
@@ -194,24 +194,7 @@ export class MarketplacePage extends BasePage {
     await this.createOffer.click();
 
     await this.itemTypeSelect.selectOption(type);
-
-    await expect(this.specificItemSelect.locator('option')).not.toHaveCount(1);
-
-    const options = await this.specificItemSelect.locator('option').all();
-    const values = await Promise.all(
-      options.map((option) => option.getAttribute('value')),
-    );
-
-    const validOptions = values.filter(
-      (value) => value !== null && value !== '',
-    );
-
-    if (validOptions.length === 0) {
-      throw new Error(`No available ${type} items to create an offer`);
-    }
-
-    const randomValue = faker.helpers.arrayElement(validOptions);
-    await this.specificItemSelect.selectOption(randomValue);
+    await this.specificItemSelect.selectOption(String(itemId));
 
     await this.priceInput.fill(String(price));
     if (description) {

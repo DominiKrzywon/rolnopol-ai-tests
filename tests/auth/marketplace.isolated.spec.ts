@@ -1,6 +1,15 @@
 import { topUpAmount } from 'src/actions/user.actions';
-import { getAnimals, getFields } from 'src/api/farm.api';
+import {
+  createAnimal,
+  deleteAnimal,
+  getAnimals,
+  getFields,
+} from 'src/api/farm.api';
 import { addTransaction, getAccountBalance } from 'src/api/financial.api';
+import {
+  cancelAllMyOffers,
+  getMarketplaceOffers,
+} from 'src/api/marketplace.api';
 import { expect, test } from 'src/fixtures/data.fixture';
 import { PurchasedOffer } from 'src/pages/MarketplacePage';
 
@@ -99,40 +108,55 @@ test.describe('Marketplace e2e tests', () => {
       tag: ['@marketplace', '@offers', '@crud'],
     },
 
-    async ({ marketplacePage, createdAnimal }) => {
-      let createdOffer: {
-        price: number;
-        description?: string;
+    async ({ marketplacePage, request, freshUser: _ }) => {
+      const animalData = {
+        type: 'cow',
+        amount: 10,
       };
-      await marketplacePage.goto();
+      const price = 250;
+      const description = `Offer for ${animalData.type}`;
 
-      await test.step('create offer', async () => {
-        const expectedSuccessMessage = 'Offer created successfully!';
+      await getMarketplaceOffers(request);
+      const animalId = await createAnimal(request, animalData);
 
-        createdOffer = await marketplacePage.createNewOffer(
-          'animal',
-          250,
-          `Offer for ${createdAnimal.type}`,
-        );
+      try {
+        await marketplacePage.goto();
 
-        await expect(marketplacePage.notificationMessage).toHaveText(
-          expectedSuccessMessage,
-        );
-      });
+        await test.step('create offer', async () => {
+          const expectedSuccessMessage = 'Offer created successfully!';
 
-      await test.step('verify offer in My Offers page', async () => {
-        await marketplacePage.myOffers.click();
+          await marketplacePage.createNewOffer(
+            'animal',
+            animalId,
+            price,
+            description,
+          );
 
-        const firstOffer = marketplacePage.myOfferCardLast;
+          await expect(marketplacePage.notificationMessage).toHaveText(
+            expectedSuccessMessage,
+          );
+        });
 
-        await expect(firstOffer.locator('.offer-price')).toContainText(
-          String(createdOffer.price),
-        );
+        await test.step('verify offer in My Offers page', async () => {
+          await marketplacePage.myOffers.click();
 
-        await expect(firstOffer.locator('.offer-description')).toHaveText(
-          createdOffer.description!,
-        );
-      });
+          const offerCard = marketplacePage.myOfferCardLast;
+
+          await expect(offerCard.locator('.offer-price')).toContainText(
+            String(price),
+          );
+
+          await expect(offerCard.locator('.offer-description')).toHaveText(
+            description,
+          );
+        });
+      } finally {
+        try {
+          await cancelAllMyOffers(request);
+        } finally {
+          await deleteAnimal(request, animalId);
+        }
+      }
     },
   );
 });

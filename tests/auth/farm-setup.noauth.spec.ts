@@ -109,7 +109,7 @@ test.describe('E2E user journeys', () => {
       const testRunId = Date.now();
       const offerPrice = 250;
       const offerDescription = `E2E trade ${testRunId}`;
-      let soldField: { name: string; area: number };
+      let soldField: { id: number; name: string; area: number };
 
       try {
         await test.step('register and login seller & buyer in parallel', async () => {
@@ -138,6 +138,7 @@ test.describe('E2E user journeys', () => {
 
           await createMarketplaceOffer(sellerPage, {
             itemType: 'field',
+            itemId: soldField.id,
             price: offerPrice,
             description: offerDescription,
           });
