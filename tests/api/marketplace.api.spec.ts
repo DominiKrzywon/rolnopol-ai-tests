@@ -15,6 +15,7 @@ test.describe('marketplace API', () => {
     async ({ request, activeFieldOffer }) => {
       const { offerId, fieldId } = activeFieldOffer;
 
+      // Verify the offer is active before cancellation
       const beforeResponse = await request.get(
         `${BASE_API_URL}/marketplace/my-offers`,
       );
@@ -34,6 +35,7 @@ test.describe('marketplace API', () => {
         status: 'active',
       });
 
+      // Cancel the offer as its owner
       const deleteResponse = await request.delete(
         `${BASE_API_URL}/marketplace/offers/${offerId}`,
       );
@@ -41,6 +43,7 @@ test.describe('marketplace API', () => {
       expect(deleteResponse.status()).toBe(200);
       expect(deleteBody.success).toBe(true);
 
+      // Verify the offer is now cancelled
       const afterResponse = await request.get(
         `${BASE_API_URL}/marketplace/my-offers`,
       );
@@ -78,7 +81,7 @@ test.describe('marketplace API', () => {
         await registerVerifiedUser(otherUserApi, otherUser);
         await loginAs(otherUserApi, otherUser);
 
-        /// forbidden delete
+        // Attempt cancellation as another user
         const forbiddenResponse = await otherUserApi.delete(
           `${BASE_API_URL}/marketplace/offers/${offerId}`,
         );
@@ -88,7 +91,7 @@ test.describe('marketplace API', () => {
         expect(forbiddenBody.success).toBe(false);
         expect(forbiddenBody.error).toEqual(expectedErrorMessage);
 
-        /// owner check
+        // Verify the owner's offer is still active
         const ownerResponse = await request.get(
           `${BASE_API_URL}/marketplace/my-offers`,
         );
@@ -125,6 +128,7 @@ test.describe('marketplace API', () => {
 
       const balanceBefore = await getAccountBalance(request);
 
+      // Attempt to buy an offer as its owner
       const buyResponse = await request.post(
         `${BASE_API_URL}/marketplace/buy`,
         { data: { offerId } },
@@ -135,9 +139,11 @@ test.describe('marketplace API', () => {
       expect(buyBody.success).toBe(false);
       expect(buyBody.error).toBe(expectedErrorMessage);
 
+      // Verify the rejected purchase leaves the balance unchanged
       const balanceAfter = await getAccountBalance(request);
       expect(balanceBefore).toBe(balanceAfter);
 
+      // Verify the offer remains active
       const ownerResponse = await request.get(
         `${BASE_API_URL}/marketplace/my-offers`,
       );

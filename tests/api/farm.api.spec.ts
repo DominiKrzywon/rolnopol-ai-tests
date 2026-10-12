@@ -26,7 +26,7 @@ test.describe('Farm API', () => {
       tag: ['@api', '@auth', '@farm', '@authorization', '@negative'],
     },
     async ({ request }) => {
-      const expectedError = 'Access token required';
+      const expectedErrorMessage = 'Access token required';
 
       const response = await request.get(`${BASE_API_URL}/fields`);
       const body = await response.json();
@@ -34,7 +34,7 @@ test.describe('Farm API', () => {
       expect(response.status()).toBe(401);
       expect(body.success).toBe(false);
       expect(body.data).toBeUndefined();
-      expect(body.error).toBe(expectedError);
+      expect(body.error).toBe(expectedErrorMessage);
     },
   );
 
@@ -74,16 +74,19 @@ test.describe('Farm API', () => {
 
       const fieldId = await createField(request, fieldData);
 
+      // Assign a worker before deleting the field
       const assignmentId = await createAssignment(request, {
         fieldId,
         staffId,
       });
 
+      // Delete the field with an active assignment
       const response = await request.delete(
         `${BASE_API_URL}/fields/${fieldId}`,
       );
       const body = await response.json();
 
+      // Verify both the field and its assignment were removed
       const fieldsAfter = await getFields(request);
       const assignmentsAfter = await getAssignments(request);
 
@@ -107,6 +110,7 @@ test.describe('Farm API', () => {
       const updatedFieldName = `api-field-updated-${faker.string.uuid()}`;
       const fieldId = createdField.id;
 
+      // Update the field name and area
       const response = await request.put(`${BASE_API_URL}/fields/${fieldId}`, {
         data: {
           name: updatedFieldName,
@@ -115,6 +119,7 @@ test.describe('Farm API', () => {
       });
       const body = await response.json();
 
+      // Verify the changes are persisted
       const fields = await getFields(request);
 
       expect(response.status()).toBe(200);
@@ -145,11 +150,13 @@ test.describe('Farm API', () => {
       const fieldId = createdField.id;
       const staffId = createdStaff.id;
 
+      // Prepare an assigned worker
       const assignmentId = await createAssignment(request, {
         fieldId,
         staffId,
       });
 
+      // Remove the assignment
       const deleteResponse = await request.delete(
         `${BASE_API_URL}/fields/assign/${assignmentId}`,
       );
@@ -159,6 +166,7 @@ test.describe('Farm API', () => {
       expect(deletedBody.success).toBe(true);
       expect(deletedBody.message).toBe(expectedDeletedMessage);
 
+      // Verify the assignment no longer exists
       const assignmentsAfter = await getAssignments(request);
       expect(
         assignmentsAfter.some((assignment) => assignment.id === assignmentId),
@@ -176,6 +184,7 @@ test.describe('Farm API', () => {
       const staffId = createdStaff.id;
       const fieldId = createdField.id;
 
+      // Assign the worker to the field
       const response = await request.post(`${BASE_API_URL}/fields/assign`, {
         data: {
           fieldId,
@@ -194,6 +203,7 @@ test.describe('Farm API', () => {
 
       const assignmentId = body.data.id;
 
+      // Verify the new assignment is persisted
       const assignments = await getAssignments(request);
 
       const createdAssignment = assignments.find(
@@ -260,6 +270,7 @@ test.describe('Farm API', () => {
       const updatedStaffSurname = `staff-surname-updated-${faker.string.uuid()}`;
       const staffId = createdStaff.id;
 
+      // Update the worker details
       const response = await request.put(`${BASE_API_URL}/staff/${staffId}`, {
         data: {
           name: updatedStaffName,
@@ -269,6 +280,7 @@ test.describe('Farm API', () => {
       });
       const body = await response.json();
 
+      // Verify the saved worker details
       const responseAfterUpdate = await request.get(`${BASE_API_URL}/staff`);
 
       const bodyResponseAfter = (await responseAfterUpdate.json()) as {
@@ -302,6 +314,7 @@ test.describe('Farm API', () => {
       const updatedHerdType = getDifferentAnimalType(createdAnimal.type);
       const animalId = createdAnimal.id;
 
+      // Update the herd type and size
       const response = await request.put(
         `${BASE_API_URL}/animals/${animalId}`,
         {
@@ -313,6 +326,7 @@ test.describe('Farm API', () => {
       );
       const body = await response.json();
 
+      // Verify the saved herd details
       const findAnimal = await getAnimals(request);
       const animals = findAnimal.find(
         (animal) => animal.id === createdAnimal.id,
@@ -342,6 +356,7 @@ test.describe('Farm API', () => {
         age: 20,
       });
 
+      // Verify the worker exists before deletion
       const responseBeforeDeleted = await request.get(`${BASE_API_URL}/staff`);
       const bodyBeforeDeleted =
         (await responseBeforeDeleted.json()) as StaffListResponse;
@@ -351,11 +366,13 @@ test.describe('Farm API', () => {
         true,
       );
 
+      // Delete the prepared worker
       const deleteStaffResponse = await request.delete(
         `${BASE_API_URL}/staff/${staffId}`,
       );
       expect(deleteStaffResponse.status()).toBe(200);
 
+      // Verify the worker no longer exists
       const staffAfterDelete = await getStaff(request);
       expect(staffAfterDelete.some((item) => item.id === staffId)).toBe(false);
     },
@@ -374,10 +391,12 @@ test.describe('Farm API', () => {
         amount: 20,
       });
 
+      // Verify the herd exists before deletion
       const animal = await getAnimals(request);
 
       expect(animal.some((animal) => animal.id === herdId)).toBe(true);
 
+      // Delete the prepared herd
       const deleteAnimalResponse = await request.delete(
         `${BASE_API_URL}/animals/${herdId}`,
       );
@@ -387,6 +406,7 @@ test.describe('Farm API', () => {
       expect(deleteAnimalData.success).toBe(true);
       expect(deleteAnimalData.data.message).toBe(expectedMessage);
 
+      // Verify the herd no longer exists
       const animalAfterDeleted = await getAnimals(request);
       expect(animalAfterDeleted.some((animal) => animal.id === herdId)).toBe(
         false,
@@ -408,6 +428,8 @@ test.describe('Farm API', () => {
         age: 20,
       });
       const fieldId = createdField.id;
+
+      // Assign the worker to the field
       const assignmentId = await createAssignment(request, {
         fieldId,
         staffId,
@@ -419,6 +441,7 @@ test.describe('Farm API', () => {
         { id: assignmentId, fieldId, staffId },
       ]);
 
+      // Delete the worker with an active assignment
       const deletedStaffResponse = await request.delete(
         `${BASE_API_URL}/staff/${staffId}`,
       );
@@ -428,6 +451,7 @@ test.describe('Farm API', () => {
       expect(deletedStaffData.success).toBe(true);
       expect(deletedStaffData.data.message).toEqual(expectedMessage);
 
+      // Verify the worker and assignment are removed, and the field remains
       const assignmentsAfterDelete = await getAssignments(request);
       expect(
         assignmentsAfterDelete.some(
@@ -458,6 +482,8 @@ test.describe('Farm API', () => {
         'Invalid animal type. Allowed: chicken, chick, cow, pig, majesticHog, piglet, sheep, lamb, goat, duck, turkey, rabbit, fish, shrimp, oyster, squid, kraken, wyvern, moth, aiHarvester, aiDrone, aiAssistant, aiRobot, dinosaur, diplodocus, unicorn, ent, voidBeast, rat, goose, snail, bee, hedgehog, owl, lobster, yak, boar, ant, tardigrade, tortoise.';
       const animalsBefore = await getAnimals(request);
       expect(animalsBefore).toHaveLength(0);
+
+      // Attempt to create a herd with an unsupported type
       const response = await request.post(`${BASE_API_URL}/animals`, {
         data: {
           type: 'dragon',
@@ -466,6 +492,7 @@ test.describe('Farm API', () => {
       });
       const body = await response.json();
 
+      // Verify the rejected request did not create a herd
       const animalsAfter = await getAnimals(request);
       expect(animalsAfter).toEqual(animalsBefore);
       expect(response.status()).toBe(400);

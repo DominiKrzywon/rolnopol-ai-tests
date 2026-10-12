@@ -20,8 +20,9 @@ test(
     tag: ['@smoke', '@auth'],
   },
   async ({ loginPage }) => {
-    await loginPage.goto();
     const expectedSubtitle = 'User Login & Account Access';
+
+    await loginPage.goto();
 
     await expect(loginPage.loginSubtitle).toHaveText(expectedSubtitle);
   },
@@ -34,9 +35,10 @@ test(
     tag: ['@smoke', '@documentation'],
   },
   async ({ apiDocsPage }) => {
-    await apiDocsPage.goto();
     const expectedHeading =
       'API documentation for the Rolnopol service with versioning support';
+
+    await apiDocsPage.goto();
 
     await expect(apiDocsPage.iframe.getByText(expectedHeading)).toBeVisible();
   },
@@ -49,8 +51,9 @@ test(
     tag: ['@smoke', '@documentation'],
   },
   async ({ docsPage }) => {
-    await docsPage.goto();
     const expectedSubtitle = 'Rolnopol System Guide & API Reference';
+
+    await docsPage.goto();
 
     await expect(docsPage.docsHeaderSubtitle).toHaveText(expectedSubtitle);
   },
@@ -76,8 +79,9 @@ test(
     tag: ['@smoke', '@auth', '@registration'],
   },
   async ({ registerPage }) => {
-    await registerPage.goto();
     const expectedSubtitle = 'Create Your User Account';
+
+    await registerPage.goto();
 
     await expect(registerPage.registerSubtitle).toHaveText(expectedSubtitle);
   },

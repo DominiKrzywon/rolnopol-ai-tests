@@ -11,13 +11,15 @@ test.describe('Profile Page E2E', () => {
     },
     async ({ profilePage, page }) => {
       const user = getDemoUserData();
+      const expectedWelcomeMessage = `Welcome, ${user.displayName}`;
 
       await profilePage.goto();
       await expect(page).toHaveURL(profilePage.PAGE_URL);
 
+      // Verify the displayed account information
       await expect
         .soft(profilePage.welcomeMessage)
-        .toContainText(`Welcome, ${user.displayName}`);
+        .toContainText(expectedWelcomeMessage);
 
       await expect
         .soft(profilePage.displayedName)
@@ -27,6 +29,7 @@ test.describe('Profile Page E2E', () => {
       await expect.soft(profilePage.createdAt).not.toBeEmpty();
       await expect.soft(profilePage.lastLogin).not.toBeEmpty();
 
+      // Verify the profile editing controls are available
       await expect.soft(profilePage.displayNameInput).toBeVisible();
       await expect
         .soft(profilePage.displayNameInput)

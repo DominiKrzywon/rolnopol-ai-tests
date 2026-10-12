@@ -18,8 +18,6 @@ test.describe('Staff Assignment Management', () => {
   let fullName: string;
   let staffSurname: string;
 
-  const expectedMessage = 'Staff assigned successfully!';
-
   test.beforeEach(async ({ freshUser: _, request }) => {
     fieldName = faker.word.noun();
     staffName = faker.person.firstName();
@@ -50,10 +48,12 @@ test.describe('Staff Assignment Management', () => {
       tag: ['@crud', '@farm', '@assignment'],
     },
     async ({ assignPage }) => {
+      const expectedSuccessMessage = 'Staff assigned successfully!';
+
       await assignPage.goto();
       await assignPage.assignStaffToField(fieldName, fullName);
 
-      await expect(assignPage.notification).toHaveText(expectedMessage);
+      await expect(assignPage.notification).toHaveText(expectedSuccessMessage);
     },
   );
 
@@ -67,6 +67,7 @@ test.describe('Staff Assignment Management', () => {
       await assignPage.goto();
       await assignPage.assignStaffToField(fieldName, fullName);
 
+      // Verify the assigned worker cannot be selected again
       await assignPage.openAssignForm(fieldName);
 
       await expect(assignPage.staffSelectModal).not.toContainText(fullName);
@@ -87,9 +88,11 @@ test.describe('Staff Assignment Management', () => {
 
       await expect(assignPage.unassignedStaffCount).toHaveText('0');
 
+      // Unassign the worker from the field
       const assignmentGrid = assignPage.getAssignmentGridByField(fieldName);
       await assignmentGrid.getByTitle('Unassign').click();
 
+      // Verify the worker is available for assignment again
       await expect(page.getByText(expectedSuccessMessage)).toBeVisible();
       await expect(assignPage.unassignedStaffCount).toHaveText('1');
     },
@@ -124,11 +127,13 @@ test.describe('Staff Assignment Management', () => {
         await assignPage.goto();
         await assignPage.assignStaffToField(fieldName, `${fullName}`);
 
+        // Assign the second worker to the same field
         await assignPage.assignStaffToField(
           fieldName,
           `${staffName2} ${staffSurname2}`,
         );
 
+        // Verify both workers appear under the field in tree view
         await assignPage.assignTree.click();
         await assignPage.assignmentsNodeTree.waitFor({ state: 'visible' });
 

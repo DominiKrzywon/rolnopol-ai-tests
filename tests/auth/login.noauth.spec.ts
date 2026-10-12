@@ -35,15 +35,18 @@ test.describe('Login E2E', () => {
         registeredUser.displayName!,
       );
 
+      // Verify the session survives a page reload
       await page.reload();
       await expect(profilePage.displayedName).toHaveText(
         registeredUser.displayName!,
       );
 
+      // Log out and verify the public homepage
       await profilePage.logout();
       await expect(page).toHaveURL(homePage.PAGE_URL);
       await expect(homePage.header).toHaveText(expectedLoginHeaderText);
 
+      // Verify the profile requires login again
       await profilePage.goto();
       await expect(page).toHaveURL(loginPage.PAGE_URL);
       await expect(loginPage.loginSubmitBtn).toBeVisible();

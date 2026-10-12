@@ -26,18 +26,22 @@ test.describe('Staff & Fields Management', () => {
       await expect(managementPage.header).toBeVisible();
       await expect(managementPage.addFieldModal).toBeVisible();
 
+      // Submit an empty form to check required fields
       await managementPage.addFieldModal.click();
       await managementPage.addFieldModalButton.click();
 
       await expect(managementPage.fieldNameModalError).toBeVisible();
       await expect(managementPage.fieldAreaModalError).toBeVisible();
 
+      // Create the field with valid data
       await managementPage.closeButtons.addField.click();
       await managementPage.addField(fieldName, FIELD_AREA);
 
       await expect(managementPage.fieldAddedMessage).toBeVisible();
 
       await managementPage.goto();
+
+      // Verify the created field persists after navigation
       await managementPage.searchFields(fieldName);
       await expect(managementPage.getFieldByName(fieldName)).toBeVisible();
     },
@@ -60,6 +64,7 @@ test.describe('Staff & Fields Management', () => {
       await expect(managementPage.animalHeading).toBeVisible();
       await expect(managementPage.addAnimal).toBeVisible();
 
+      // Submit an empty herd form to check amount validation
       await managementPage.addAnimal.click();
       await managementPage.animalAddModalButton.click();
 
@@ -69,16 +74,21 @@ test.describe('Staff & Fields Management', () => {
 
       await managementPage.closeButtons.addAnimal.click();
 
+      // Prepare the field for the new herd
       await managementPage.addField(fieldName, FIELD_AREA);
       await expect(managementPage.fieldAddedMessage).toBeVisible();
 
       await managementPage.goto();
+
+      // Create the herd on the prepared field
       await managementPage.addAnimalGroup(
         getRandomAnimalType(),
         animalAmount,
         fieldName,
       );
       await managementPage.goto();
+
+      // Verify the field card shows the created herd size
       await managementPage.searchFields(fieldName);
 
       const createdFieldCard = managementPage.getFieldCardByName(fieldName);
@@ -100,6 +110,8 @@ test.describe('Staff & Fields Management', () => {
       const staffAge = faker.number.int({ min: 18, max: 65 });
 
       await managementPage.goto();
+
+      // Submit an empty worker form to check required fields
       await managementPage.addStaffModal.click();
       await managementPage.staffModalButton.click();
 
@@ -107,11 +119,14 @@ test.describe('Staff & Fields Management', () => {
       await expect(managementPage.staffSurnameModalError).toBeVisible();
       await expect(managementPage.staffAgeModalError).toBeVisible();
 
+      // Create the worker with valid data
       await managementPage.closeButtons.addStaff.click();
       await managementPage.addStaff(uniqueName, uniqueSurname, staffAge);
       await expect(managementPage.staffAddedMessage).toBeVisible();
 
       await managementPage.goto();
+
+      // Verify the worker persists after navigation
       await managementPage.searchStaff(uniqueName);
       await expect(managementPage.getFieldByName(uniqueName)).toBeVisible();
     },
@@ -135,10 +150,12 @@ test.describe('Staff & Fields Management - Delete Field', () => {
         .getCardActionButton(fieldName, managementPage.editButtons.editField)
         .click();
 
+      // Save a new name for the existing field
       await managementPage.editFieldNameModal.clear();
       await managementPage.editFieldNameModal.fill(newFieldName);
       await managementPage.editFieldSaveButton.click();
 
+      // Verify the field can be found by its new name
       await managementPage.searchFields(newFieldName);
       await expect(managementPage.getFieldByName(newFieldName)).toBeVisible();
     },
@@ -159,6 +176,8 @@ test.describe('Staff & Fields Management - Delete Field', () => {
       await managementPage
         .getCardActionButton(fieldName, managementPage.editButtons.deleteField)
         .click();
+
+      // Confirm deletion of the selected field
       await managementPage.confirmDeleteLocator.click();
 
       await expect(managementPage.getFieldByName(fieldName)).toBeHidden();
@@ -181,8 +200,11 @@ test.describe('Staff & Fields Management - Delete Staff', () => {
 
       await managementPage.goto();
       await managementPage.searchStaff(staffName);
+
+      // Update the existing worker details
       await managementPage.editStaff(newName, newSurname, STAFF_AGE);
 
+      // Verify the saved name, surname, and age
       await managementPage.searchStaff(newName);
       await expect(managementPage.getFieldByName(newName)).toBeVisible();
       await expect(managementPage.getFieldByName(newSurname)).toBeVisible();
@@ -204,6 +226,8 @@ test.describe('Staff & Fields Management - Delete Staff', () => {
       await managementPage
         .getCardActionButton(staffName, managementPage.editButtons.deleteStaff)
         .click();
+
+      // Confirm deletion and verify the worker is absent
       await managementPage.confirmDeleteLocator.click();
       await managementPage.searchStaff(`${staffName} ${staffSurname}`);
 
@@ -231,12 +255,14 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
       const newAnimalAmount = newAmount();
       await expect(card).toBeVisible();
 
+      // Save the new herd type and size
       await card.locator(managementPage.editButtons.editAnimal).click();
       await managementPage.editAnimalTypeModal.selectOption(newType);
       await managementPage.editAnimalAmountModal.clear();
       await managementPage.editAnimalAmountModal.fill(String(newAnimalAmount));
       await managementPage.editAnimalSaveButton.click();
 
+      // Verify the updated herd can be found
       await managementPage.searchAnimals(newType);
 
       await expect(
@@ -260,6 +286,8 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
           managementPage.editButtons.deleteAnimal,
         )
         .click();
+
+      // Confirm deletion and verify the herd is absent
       await managementPage.confirmDeleteLocator.click();
 
       await expect(
@@ -284,6 +312,7 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
       );
       const fieldIds: number[] = [];
 
+      // Create enough matching fields to span two pages
       for (const name of fieldNames) {
         const fieldId = await createField(request, {
           name,
@@ -295,10 +324,13 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
 
       try {
         await managementPage.goto();
+
+        // Verify the first page of filtered results
         await managementPage.searchFields(prefix);
         await expect(managementPage.fieldsPagination).toContainText('1/2');
         await expect(managementPage.nextFieldsPageButton).toBeEnabled();
 
+        // Move to the second page of filtered results
         await managementPage.nextFieldsPageButton.click();
         await expect(managementPage.fieldsPagination).toContainText('2/2');
         await expect(managementPage.previousFieldsPageButton).toBeEnabled();

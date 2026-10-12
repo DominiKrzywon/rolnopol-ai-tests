@@ -20,11 +20,11 @@ test.describe('Marketplace e2e tests', () => {
       tag: ['@marketplace', '@purchase', '@happy-path'],
     },
     async ({ request, marketplacePage, fieldOfferForPurchase }) => {
+      const expectedSuccessMessage = 'Purchase completed successfully!';
       const { fieldId, fieldName, offerId, price, description, sellerApi } =
         fieldOfferForPurchase;
 
       await test.step('verify prepared offer and buy it', async () => {
-        const expectedSuccessMessage = 'Purchase completed successfully!';
         const offers = await getMyOffers(sellerApi);
         const offer = offers.find((item) => item.id === offerId);
 
@@ -92,9 +92,13 @@ test.describe('Marketplace e2e tests', () => {
       tag: ['@marketplace', '@offers', '@crud'],
     },
     async ({ request, marketplacePage }) => {
+      const expectedErrorMessage =
+        'Insufficient funds to complete purchase (no overdraft allowed)';
       const balance = await getAccountBalance(request);
 
       await marketplacePage.goto();
+
+      // Empty the account before attempting a purchase
       await addTransaction(request, {
         type: 'expense',
         amount: balance,
@@ -102,9 +106,8 @@ test.describe('Marketplace e2e tests', () => {
         category: 'general',
       });
       expect(await getAccountBalance(request), 'balance must be 0').toBe(0);
-      const expectedErrorMessage =
-        'Insufficient funds to complete purchase (no overdraft allowed)';
 
+      // Attempt a purchase without sufficient funds
       await marketplacePage.attemptToBuyMostExpensiveOffer();
 
       await expect(marketplacePage.notificationMessage).toHaveText(
@@ -121,6 +124,7 @@ test.describe('Marketplace e2e tests', () => {
     },
 
     async ({ marketplacePage, request, freshUser: _ }) => {
+      const expectedSuccessMessage = 'Offer created successfully!';
       const animalData = {
         type: 'cow',
         amount: 10,
@@ -135,8 +139,6 @@ test.describe('Marketplace e2e tests', () => {
         await marketplacePage.goto();
 
         await test.step('create offer', async () => {
-          const expectedSuccessMessage = 'Offer created successfully!';
-
           await marketplacePage.createNewOffer(
             'animal',
             animalId,

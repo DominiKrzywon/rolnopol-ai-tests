@@ -19,6 +19,7 @@ test(
     };
     await registerPage.goto();
 
+    // Submit registration while capturing its API response
     const [registrationResponse] = await Promise.all([
       page.waitForResponse(
         (response) =>
@@ -104,6 +105,7 @@ test.describe('Registration Negative Tests', () => {
       await registerPage.emailInput.fill('valid@example.com');
       await registerPage.registerSubmitBtn.click();
 
+      // Verify native validation blocks the missing password
       const isPasswordMissing = await registerPage.passwordInput.evaluate(
         (input: HTMLInputElement) => input.validity.valueMissing,
       );
@@ -124,11 +126,13 @@ test.describe('Registration Negative Tests', () => {
       const user = prepareRandomUser();
       const expectedErrorMessage = 'User with this email already exists';
 
+      // Register the email before attempting to reuse it
       const setupResponse = await registerUser(request, user);
       expect(setupResponse.status()).toBe(201);
 
       await registerPage.goto();
 
+      // Attempt registration with the existing email
       const [duplicateResponse] = await Promise.all([
         page.waitForResponse(
           (response) =>

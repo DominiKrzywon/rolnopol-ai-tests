@@ -14,6 +14,7 @@ test(
     await homePage.goto();
     await expect(homePage.header).toBeVisible();
 
+    // Compare the homepage while masking dynamic content
     await expect(page).toHaveScreenshot('homepage.png', {
       animations: 'disabled',
       mask: [

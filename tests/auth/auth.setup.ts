@@ -17,6 +17,7 @@ setup(
     await loginPage.login(user);
     await expect(page).toHaveURL(profilePage.PAGE_URL);
 
+    // Save the authenticated session for dependent tests
     await page.context().storageState({ path: DEMO_USER_AUTH_FILE });
   },
 );

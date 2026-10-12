@@ -43,6 +43,7 @@ test.describe('Financial functionality tests', () => {
       const balanceBefore = await financialPage.getBalance();
       expect(balanceBefore).toEqual(amountAtStart);
 
+      // Record an expense and verify its balance impact
       await financialPage.addTransaction({
         type: 'expense',
         amount,
@@ -63,6 +64,7 @@ test.describe('Financial functionality tests', () => {
       await expect(financialPage.totalNetIncome).not.toBeEmpty();
       await expect(financialPage.transactionHistory).not.toBeEmpty();
 
+      // Find the new expense in transaction history
       const row = financialPage.transactionRows.filter({
         hasText: randomDescription,
       });
@@ -70,18 +72,21 @@ test.describe('Financial functionality tests', () => {
       await expect(row).toContainText('expense');
       await expect(row).toContainText('crops');
 
+      // Verify the expense matches its category filter
       await financialPage.filterBy({
         category: 'crops',
       });
 
       await expect(row).toBeVisible();
 
+      // Verify the income filter excludes the expense
       await financialPage.filterBy({
         type: 'income',
         category: '',
       });
       await expect(row).toHaveCount(0);
 
+      // Clear filters and verify the expense reappears
       await financialPage.filterBy({
         type: '',
         category: '',
@@ -98,19 +103,22 @@ test.describe('Financial functionality tests', () => {
       tag: ['@financial', '@transfer', '@business-logic'],
     },
     async ({ financialPage, page }) => {
+      const expectedSuccessMessage = 'Transfer completed successfully!';
       const toUserId = await createRecipientId();
       const amount = 10;
       const description = `E2E transfer ${Date.now()}`;
-      const expectedSuccessMessage = 'Transfer completed successfully!';
 
       await financialPage.goto();
       const balanceBefore = await financialPage.getBalance();
+
+      // Transfer funds to the prepared recipient
       await financialPage.transferFunds({ toUserId, amount, description });
       await expect(financialPage.transferSuccess).toHaveText(
         expectedSuccessMessage,
         { timeout: 15_000 },
       );
 
+      // Verify the debit and history entry after reloading
       await page.reload();
 
       const balanceAfter = await financialPage.getBalance();
@@ -137,6 +145,8 @@ test.describe('Financial functionality tests', () => {
       const toUserId = await createRecipientId();
 
       const balanceBeforeDrain = await getAccountBalance(request);
+
+      // Leave a small balance for the overdraft attempt
       await drainAccount(request, balanceBeforeDrain - leave);
 
       const balanceBeforeTransfer = await getAccountBalance(request);
@@ -147,11 +157,13 @@ test.describe('Financial functionality tests', () => {
 
       await financialPage.goto();
 
+      // Attempt to transfer more than the remaining balance
       await financialPage.transferFunds({ toUserId, amount, description });
       await expect(financialPage.notificationMessage).toHaveText(
         expectedErrorMessage,
       );
 
+      // Verify the rejected transfer leaves the balance unchanged
       const balanceAfterTransfer = await getAccountBalance(request);
       expect(balanceAfterTransfer).toBe(balanceBeforeTransfer);
     },

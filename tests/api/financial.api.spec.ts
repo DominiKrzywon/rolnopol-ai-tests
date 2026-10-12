@@ -74,6 +74,8 @@ test.describe('Financial API', () => {
       const expenseAmount = 10.25;
 
       const balanceBefore = await getAccountBalance(request);
+
+      // Record income and verify the balance increases
       const incomeResponse = await request.post(
         `${BASE_API_URL}/financial/transactions`,
         {
@@ -98,6 +100,7 @@ test.describe('Financial API', () => {
       const balanceAfter = await getAccountBalance(request);
       expect(balanceAfter).toBe(balanceBefore + incomeAmount);
 
+      // Record an expense and verify the balance decreases
       const transactionExpense = await request.post(
         `${BASE_API_URL}/financial/transactions`,
         {
@@ -136,6 +139,8 @@ test.describe('Financial API', () => {
       const recipientBalanceBefore = await getAccountBalance(
         transferRecipient.recipientApi,
       );
+
+      // Transfer the minimum allowed amount
       const transfer = await request.post(
         `${BASE_API_URL}/financial/transfer`,
         {
@@ -152,6 +157,7 @@ test.describe('Financial API', () => {
       expect(transfer.status()).toBe(200);
       expect(transferResponseBody.success).toBe(true);
 
+      // Verify the debit and credit on both accounts
       const balanceAfterTransfer = await getAccountBalance(request);
       expect(balanceAfterTransfer).toBe(balance - transferAmount);
 
@@ -187,6 +193,7 @@ test.describe('Financial API', () => {
       expect(senderAccountBalance).toBeGreaterThan(amount);
       expect(recipientAccountBalance).toBe(0);
 
+      // Transfer the maximum allowed amount
       const transfer = await request.post(
         `${BASE_API_URL}/financial/transfer`,
         {
@@ -203,6 +210,7 @@ test.describe('Financial API', () => {
       expect(transferBody.message).toEqual(expectedTransferMessage);
       expect(transferBody.success).toBe(true);
 
+      // Verify the debit and credit on both accounts
       const senderAccountAfter = await getAccountBalance(request);
       const recipientAccountAfter = await getAccountBalance(
         transferRecipient.recipientApi,
@@ -236,6 +244,7 @@ test.describe('Financial API', () => {
         transferRecipient.recipientApi,
       );
 
+      // Transfer the entire available balance
       const response = await request.post(
         `${BASE_API_URL}/financial/transfer`,
         {
@@ -251,6 +260,7 @@ test.describe('Financial API', () => {
       expect(body.message).toBe(expectedTransferMessage);
       expect(response.status()).toBe(200);
 
+      // Verify the debit and credit on both accounts
       const senderBalanceAfter = await getAccountBalance(request);
       const recipientBalanceAfter = await getAccountBalance(
         transferRecipient.recipientApi,
@@ -286,6 +296,7 @@ test.describe('Financial API', () => {
       expect(senderBalanceBefore).toEqual(amount);
       expect(recipientBalanceBefore).toEqual(0);
 
+      // Attempt to transfer more than the available balance
       const response = await request.post(
         `${BASE_API_URL}/financial/transfer`,
         {
@@ -302,6 +313,7 @@ test.describe('Financial API', () => {
       expect(body.success).toBe(false);
       expect(body.error).toBe(expectedErrorMessage);
 
+      // Verify both balances remain unchanged
       const senderBalanceAfter = await getAccountBalance(request);
       const recipientBalanceAfter = await getAccountBalance(
         transferRecipient.recipientApi,
@@ -337,6 +349,7 @@ test.describe('Financial API', () => {
       expect(senderBalanceBefore).toEqual(amount);
       expect(recipientBalanceBefore).toEqual(0);
 
+      // Attempt to transfer above the per-transfer limit
       const response = await request.post(
         `${BASE_API_URL}/financial/transfer`,
         {
@@ -349,6 +362,7 @@ test.describe('Financial API', () => {
       );
       const body = await response.json();
 
+      // Verify both balances remain unchanged
       const senderBalanceAfter = await getAccountBalance(request);
       const recipientBalanceAfter = await getAccountBalance(
         transferRecipient.recipientApi,
@@ -378,6 +392,7 @@ test.describe('Financial API', () => {
       await topUpAmount(request, 10);
       const senderBalanceBefore = await getAccountBalance(request);
 
+      // Attempt a transfer to a nonexistent recipient
       const response = await request.post(
         `${BASE_API_URL}/financial/transfer`,
         {
@@ -389,6 +404,8 @@ test.describe('Financial API', () => {
         },
       );
       const body = await response.json();
+
+      // Verify the rejected transfer leaves the balance unchanged
       const senderBalanceAfter = await getAccountBalance(request);
 
       expect(response.status()).toBe(400);
@@ -416,6 +433,7 @@ test.describe('Financial API', () => {
       const transaction2 = await topUpAmount(request, amount2);
       const transaction3 = await topUpAmount(request, amount3);
 
+      // Read the first page of transaction history
       const firstPage = await request.get(
         `${BASE_API_URL}/financial/transactions?limit=2&offset=0`,
       );
@@ -428,6 +446,7 @@ test.describe('Financial API', () => {
       expect(bodyFirstPage.data.offset).toBe(0);
       expect(bodyFirstPage.data.hasMore).toBe(true);
 
+      // Read the remaining transaction on the second page
       const secondPage = await request.get(
         `${BASE_API_URL}/financial/transactions?limit=2&offset=2`,
       );
@@ -443,6 +462,7 @@ test.describe('Financial API', () => {
       expect(bodyFirstPage.data.transactions).toHaveLength(2);
       expect(bodySecondPage.data.transactions).toHaveLength(1);
 
+      // Verify pagination returns all prepared transactions
       const expectedIds = [
         transaction1.id,
         transaction2.id,
@@ -476,6 +496,8 @@ test.describe('Financial API', () => {
         description: 'Test api',
         category: 'General',
       });
+
+      // Filter history to include income and exclude expenses
       const response = await request.get(
         `${BASE_API_URL}/financial/transactions?type=income`,
       );
@@ -510,6 +532,7 @@ test.describe('Financial API', () => {
         category: 'salary',
       });
 
+      // Filter history to include only the salary category
       const response = await request.get(
         `${BASE_API_URL}/financial/transactions?category=salary`,
       );
@@ -544,6 +567,7 @@ test.describe('Financial API', () => {
       const startDate = date(transactionTime - day);
       const endDate = date(transactionTime + day);
 
+      // Query a date range containing the transaction
       const matchingRange = await getTransactions(
         request,
         new URLSearchParams({ startDate, endDate }).toString(),
@@ -553,6 +577,7 @@ test.describe('Financial API', () => {
       expect(matchingRange.transactions).toHaveLength(1);
       expect(matchingRange.transactions[0].id).toBe(transaction.id);
 
+      // Query a date range before the transaction
       const beforeRange = await getTransactions(
         request,
         new URLSearchParams({
@@ -564,6 +589,7 @@ test.describe('Financial API', () => {
       expect(beforeRange.total).toBe(0);
       expect(beforeRange.transactions).toEqual([]);
 
+      // Query a date range after the transaction
       const afterRange = await getTransactions(
         request,
         new URLSearchParams({

@@ -6,7 +6,8 @@
 
 - **Remove obvious comments**: Don't state what the code clearly shows
 - **Keep meaningful documentation**: Add JSDoc for architectural intent, context, or non-obvious design decisions
-- **Focus on "why", not "what"**: Explain reasoning, not mechanics
+- **Explain intent**: Explain reasoning and the purpose of important test actions
+- **Keep test comments short**: Use brief English comments at important scenario transitions so the reader can see what should happen next
 
 ### Guidelines
 
@@ -15,6 +16,8 @@
 - Add JSDoc for classes/modules explaining architectural purpose
 - Document complex business logic or non-obvious behavior
 - Explain workarounds or technical constraints
+- Label important test actions and follow-up checks, such as `// Attempt cancellation as another user` or `// Verify the owner's offer is still active`
+- Use comments selectively in tests with multiple actions, actors, or state checks; existing descriptive `test.step()` names can serve the same purpose
 
 **❌ DON'T:**
 
@@ -58,8 +61,34 @@ All tests should follow the **Arrange-Act-Assert (AAA)** pattern:
 ### Guidelines
 
 - Structure code to clearly show the three phases through blank lines and logical grouping
-- No AAA comment markers needed - the structure should be self-evident
+- AAA comment markers are optional; use short scenario comments where they clarify important actions or checks
 - Keep each section focused and clear
+- Declare expected error and success messages in Arrange, near the top of the test, before actions. Use `expectedErrorMessage` and `expectedSuccessMessage`, or a more specific name when the test checks multiple messages
+- Pass those variables to assertions instead of writing message text inline. Keep expectations local to the scenario, including when assertions are inside `test.step()`
+- This message convention does not require extracting status codes, counts, URLs, enum values, or assertion diagnostic text into variables
+
+### Scenario comments and expected messages
+
+Use `TC-MARKET-005` in `tests/api/marketplace.api.spec.ts` as the reference:
+
+```typescript
+const expectedErrorMessage = 'Not authorized to cancel this offer';
+const { offerId } = activeFieldOffer;
+
+// Attempt cancellation as another user
+const response = await otherUserApi.delete(
+  `${BASE_API_URL}/marketplace/offers/${offerId}`,
+);
+const body = await response.json();
+
+expect(response.status()).toBe(403);
+expect(body.error).toEqual(expectedErrorMessage);
+
+// Verify the owner's offer is still active
+const ownerResponse = await request.get(
+  `${BASE_API_URL}/marketplace/my-offers`,
+);
+```
 
 ### Example
 

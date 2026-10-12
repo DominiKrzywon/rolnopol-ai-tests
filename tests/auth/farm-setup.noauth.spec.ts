@@ -25,6 +25,7 @@ test.describe('E2E user journeys', () => {
       tag: ['@e2e', '@farm-setup', '@user-journey'],
     },
     async ({ page, managementPage, assignPage }) => {
+      const expectedSuccessMessage = 'Staff assigned successfully!';
       let field: { name: string; area: number };
       let staff: { name: string; surname: string; fullName: string };
       let animal: { type: string; amount: number };
@@ -36,7 +37,7 @@ test.describe('E2E user journeys', () => {
       });
 
       await test.step('add resources', async () => {
-        //add field
+        // Create the field for assignments and the herd
 
         await managementPage.goto();
         field = await createField(page);
@@ -45,7 +46,7 @@ test.describe('E2E user journeys', () => {
         await managementPage.goto();
         await expect(managementPage.getFieldByName(field.name)).toBeVisible();
 
-        //add staff
+        // Create the worker to assign to the field
         staff = await createStaff(page);
         await expect(managementPage.staffAddedMessage).toBeVisible();
 
@@ -56,7 +57,7 @@ test.describe('E2E user journeys', () => {
           managementPage.getFieldCardByName(staff.name),
         ).toContainText(staff.surname);
 
-        //add animal
+        // Create a herd on the prepared field
         animal = await createAnimalGroup(page, { fieldName: field.name });
 
         await managementPage.goto();
@@ -69,8 +70,6 @@ test.describe('E2E user journeys', () => {
       });
 
       await test.step('assign staff to field', async () => {
-        const expectedSuccessMessage = 'Staff assigned successfully!';
-
         await assignPage.goto();
         await expect(assignPage.unassignedStaffCount).toHaveText('1');
 
@@ -98,6 +97,9 @@ test.describe('E2E user journeys', () => {
     async ({ browser }) => {
       test.setTimeout(90_000);
 
+      const expectedOfferMessage = 'Offer created successfully!';
+      const expectedPurchaseMessage = 'Purchase completed successfully!';
+
       const sellerContext = await browser.newContext();
       const buyerContext = await browser.newContext();
       const sellerPage = await sellerContext.newPage();
@@ -124,7 +126,6 @@ test.describe('E2E user journeys', () => {
         await test.step('seller: add resource and create offer', async () => {
           const managementPage = new ManagementPage(sellerPage);
           const marketplaceSeller = new MarketplacePage(sellerPage);
-          const expectedSuccessMessage = 'Offer created successfully!';
 
           await managementPage.goto();
 
@@ -144,13 +145,12 @@ test.describe('E2E user journeys', () => {
           });
 
           await expect(marketplaceSeller.notificationMessage).toHaveText(
-            expectedSuccessMessage,
+            expectedOfferMessage,
           );
         });
 
         await test.step('buyer: add funds and buy seller offer', async () => {
           const marketplaceBuyer = new MarketplacePage(buyerPage);
-          const expectedPurchaseMessage = 'Purchase completed successfully!';
 
           await topUpAmount(buyerPage.request, offerPrice * 4);
 

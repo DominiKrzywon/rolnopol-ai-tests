@@ -3,7 +3,6 @@
 > Application inventory: September 5, 2026, Rolnopol v1.79.0.
 > September 7, 2026 update: code review, test collection, `check:ci`,
 > and anonymous access checks at `http://localhost:3000`.
-> Neither the full regression suite nor the complete API inventory was rerun.
 
 ## 1. Repository purpose
 
