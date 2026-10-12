@@ -1,4 +1,4 @@
-import { APIRequestContext } from '@playwright/test';
+import { APIRequestContext, APIResponse } from '@playwright/test';
 import { deleteJson, getJson, postJson } from 'src/api/httpClient';
 import { BASE_API_URL } from 'src/config/env.config';
 import { MarketplaceOffer } from 'src/models/marketplace';
@@ -30,6 +30,19 @@ export async function getMyOffers(
   );
 
   return offers;
+}
+
+export async function getMyOffersResponse(
+  request: APIRequestContext,
+): Promise<APIResponse> {
+  return request.get(`${BASE_API_URL}/marketplace/my-offers`);
+}
+
+export async function cancelOfferResponse(
+  request: APIRequestContext,
+  offerId: number,
+): Promise<APIResponse> {
+  return request.delete(`${BASE_API_URL}/marketplace/offers/${offerId}`);
 }
 
 export async function cancelAllMyOffers(

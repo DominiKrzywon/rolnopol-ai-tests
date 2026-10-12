@@ -1,9 +1,17 @@
 ﻿import { request as playwrightRequest } from '@playwright/test';
 import { loginAs, registerVerifiedUser } from 'src/api/auth.api';
 import { getAccountBalance } from 'src/api/financial.api';
+import {
+  cancelOfferResponse,
+  getMyOffersResponse,
+} from 'src/api/marketplace.api';
+import { expectApiSuccess } from 'src/assertions/api.assertions';
 import { BASE_API_URL } from 'src/config/env.config';
 import { prepareRandomUser } from 'src/factories/user.factory';
 import { expect, test } from 'src/fixtures/data.fixture';
+import { MarketplaceOffer } from 'src/models/marketplace';
+
+type MyOffersData = { offers: MarketplaceOffer[] };
 
 test.describe('marketplace API', () => {
   test(
@@ -16,52 +24,38 @@ test.describe('marketplace API', () => {
       const { offerId, fieldId } = activeFieldOffer;
 
       // Verify the offer is active before cancellation
-      const beforeResponse = await request.get(
-        `${BASE_API_URL}/marketplace/my-offers`,
+      const beforeResponse = await getMyOffersResponse(request);
+      const beforeBody = await expectApiSuccess<MyOffersData>(
+        beforeResponse,
+        200,
       );
-      const beforeBody = await beforeResponse.json();
-
-      expect(beforeResponse.status()).toBe(200);
-      expect(beforeBody.success).toBe(true);
-
-      const activeOffer = beforeBody.data.offers.find(
-        (offer: { id: number }) => offer.id === offerId,
+      expect(beforeBody.data?.offers).toContainEqual(
+        expect.objectContaining({
+          id: offerId,
+          itemType: 'field',
+          itemId: fieldId,
+          status: 'active',
+        }),
       );
-
-      expect(activeOffer).toMatchObject({
-        id: offerId,
-        itemType: 'field',
-        itemId: fieldId,
-        status: 'active',
-      });
 
       // Cancel the offer as its owner
-      const deleteResponse = await request.delete(
-        `${BASE_API_URL}/marketplace/offers/${offerId}`,
-      );
-      const deleteBody = await deleteResponse.json();
-      expect(deleteResponse.status()).toBe(200);
-      expect(deleteBody.success).toBe(true);
+      const cancellationResponse = await cancelOfferResponse(request, offerId);
+      await expectApiSuccess(cancellationResponse, 200);
 
       // Verify the offer is now cancelled
-      const afterResponse = await request.get(
-        `${BASE_API_URL}/marketplace/my-offers`,
+      const afterResponse = await getMyOffersResponse(request);
+      const afterBody = await expectApiSuccess<MyOffersData>(
+        afterResponse,
+        200,
       );
-      const afterBody = await afterResponse.json();
-
-      expect(afterResponse.status()).toBe(200);
-      expect(afterBody.success).toBe(true);
-
-      const cancelledOffer = afterBody.data.offers.find(
-        (offer: { id: number }) => offer.id === offerId,
+      expect(afterBody.data?.offers).toContainEqual(
+        expect.objectContaining({
+          id: offerId,
+          itemType: 'field',
+          itemId: fieldId,
+          status: 'cancelled',
+        }),
       );
-
-      expect(cancelledOffer).toMatchObject({
-        id: offerId,
-        itemType: 'field',
-        itemId: fieldId,
-        status: 'cancelled',
-      });
     },
   );
 
