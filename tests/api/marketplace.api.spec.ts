@@ -2,11 +2,11 @@
 import { loginAs, registerVerifiedUser } from 'src/api/auth.api';
 import { getAccountBalance } from 'src/api/financial.api';
 import {
+  buyOfferResponse,
   cancelOfferResponse,
   getMyOffersResponse,
 } from 'src/api/marketplace.api';
 import { expectApiSuccess } from 'src/assertions/api.assertions';
-import { BASE_API_URL } from 'src/config/env.config';
 import { prepareRandomUser } from 'src/factories/user.factory';
 import { expect, test } from 'src/fixtures/data.fixture';
 import { MarketplaceOffer } from 'src/models/marketplace';
@@ -76,8 +76,9 @@ test.describe('marketplace API', () => {
         await loginAs(otherUserApi, otherUser);
 
         // Attempt cancellation as another user
-        const forbiddenResponse = await otherUserApi.delete(
-          `${BASE_API_URL}/marketplace/offers/${offerId}`,
+        const forbiddenResponse = await cancelOfferResponse(
+          otherUserApi,
+          offerId,
         );
         const forbiddenBody = await forbiddenResponse.json();
 
@@ -86,24 +87,20 @@ test.describe('marketplace API', () => {
         expect(forbiddenBody.error).toEqual(expectedErrorMessage);
 
         // Verify the owner's offer is still active
-        const ownerResponse = await request.get(
-          `${BASE_API_URL}/marketplace/my-offers`,
-        );
-        const ownerBody = await ownerResponse.json();
-
-        expect(ownerResponse.status()).toBe(200);
-        expect(ownerBody.success).toBe(true);
-
-        const ownedOffer = ownerBody.data.offers.find(
-          (offer: { id: number }) => offer.id === offerId,
+        const ownerResponse = await getMyOffersResponse(request);
+        const ownerBody = await expectApiSuccess<MyOffersData>(
+          ownerResponse,
+          200,
         );
 
-        expect(ownedOffer).toMatchObject({
-          id: offerId,
-          itemType: 'field',
-          itemId: fieldId,
-          status: 'active',
-        });
+        expect(ownerBody.data?.offers).toContainEqual(
+          expect.objectContaining({
+            id: offerId,
+            itemType: 'field',
+            itemId: fieldId,
+            status: 'active',
+          }),
+        );
       } finally {
         await otherUserApi.dispose();
       }
@@ -123,10 +120,7 @@ test.describe('marketplace API', () => {
       const balanceBefore = await getAccountBalance(request);
 
       // Attempt to buy an offer as its owner
-      const buyResponse = await request.post(
-        `${BASE_API_URL}/marketplace/buy`,
-        { data: { offerId } },
-      );
+      const buyResponse = await buyOfferResponse(request, offerId);
       const buyBody = await buyResponse.json();
 
       expect(buyResponse.status()).toBe(400);
@@ -138,16 +132,14 @@ test.describe('marketplace API', () => {
       expect(balanceBefore).toBe(balanceAfter);
 
       // Verify the offer remains active
-      const ownerResponse = await request.get(
-        `${BASE_API_URL}/marketplace/my-offers`,
+      const ownerResponse = await getMyOffersResponse(request);
+      const ownerBody = await expectApiSuccess<MyOffersData>(
+        ownerResponse,
+        200,
       );
-      const ownerBody = await ownerResponse.json();
 
-      expect(ownerResponse.status()).toBe(200);
-      expect(ownerBody.success).toBe(true);
-
-      const ownedOffer = ownerBody.data.offers.find(
-        (offer: { id: number }) => offer.id === offerId,
+      const ownedOffer = ownerBody.data?.offers.find(
+        (offer) => offer.id === offerId,
       );
 
       expect(ownedOffer).toMatchObject({

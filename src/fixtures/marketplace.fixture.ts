@@ -4,8 +4,8 @@ import {
 } from '@playwright/test';
 import { randomUUID } from 'crypto';
 import { loginAs, registerVerifiedUser } from 'src/api/auth.api';
-import { createField } from 'src/api/farm.api';
-import { createFieldOffer } from 'src/api/marketplace.api';
+import { createField, deleteField, getFields } from 'src/api/farm.api';
+import { cancelOfferIfActive, createFieldOffer } from 'src/api/marketplace.api';
 import { ENV } from 'src/config/env.config';
 import { prepareRandomUser } from 'src/factories/user.factory';
 import { expect, test as baseTest } from 'src/fixtures/data.fixture';
@@ -23,10 +23,13 @@ type MarketplaceFixtures = {
 };
 
 export const test = baseTest.extend<MarketplaceFixtures>({
-  fieldOfferForPurchase: async ({ apiSession: _ }, use) => {
+  fieldOfferForPurchase: async ({ apiSession: _, request }, use) => {
     const sellerApi = await playwrightRequest.newContext({
       baseURL: ENV.BASE_URL,
     });
+    let fieldId: number | undefined;
+    let offerId: number | undefined;
+
     try {
       const seller = prepareRandomUser();
       await registerVerifiedUser(sellerApi, seller);
@@ -35,11 +38,11 @@ export const test = baseTest.extend<MarketplaceFixtures>({
       const fieldName = `field_name${randomUUID()}`;
       const description = `Offer for ${fieldName}`;
       const price = 250;
-      const fieldId = await createField(sellerApi, {
+      fieldId = await createField(sellerApi, {
         name: fieldName,
         area: FIELD_AREA,
       });
-      const offerId = await createFieldOffer(sellerApi, {
+      offerId = await createFieldOffer(sellerApi, {
         fieldId,
         price,
         description,
@@ -53,7 +56,23 @@ export const test = baseTest.extend<MarketplaceFixtures>({
         description,
       });
     } finally {
-      await sellerApi.dispose();
+      try {
+        if (offerId !== undefined) {
+          await cancelOfferIfActive(sellerApi, offerId);
+        }
+        if (fieldId !== undefined) {
+          const sellerFields = await getFields(sellerApi);
+          const buyerFields = await getFields(request);
+
+          if (sellerFields.some((field) => field.if === fieldId)) {
+            await deleteField(sellerApi, fieldId);
+          } else if (buyerFields.some((field) => field.id === fieldId)) {
+            await deleteField(request, fieldId);
+          }
+        }
+      } finally {
+        await sellerApi.dispose();
+      }
     }
   },
 });

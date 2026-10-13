@@ -45,6 +45,15 @@ export async function cancelOfferResponse(
   return request.delete(`${BASE_API_URL}/marketplace/offers/${offerId}`);
 }
 
+export async function buyOfferResponse(
+  request: APIRequestContext,
+  offerId: number,
+): Promise<APIResponse> {
+  return request.post(`${BASE_API_URL}/marketplace/buy`, {
+    data: { offerId },
+  });
+}
+
 export async function cancelAllMyOffers(
   request: APIRequestContext,
 ): Promise<void> {
