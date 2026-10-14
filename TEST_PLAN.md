@@ -31,136 +31,8 @@ Core development principles:
 
 ## 2. Repository evidence and environment
 
-### Historical code and collection evidence: September 13, 2026
-
-Playwright collection before adding IDs returned **59 entries in 13 files**:
-58 scenario tests and one demo-session setup, across seven projects. Collection
-is not evidence that those tests pass. Generated inventory is the current source
-for counts; do not maintain a second live test counter here.
-
-- Anonymous redirects now cover Profile, Marketplace, and Financial only.
-- Short-password and invalid-email inputs are separate collected test cases.
-- Staff management and assignment suites already use the isolated-user project.
-- Login tests use a registered user and reopen the profile after logout.
-- Financial transfer recipients are created independently without shared login.
-- The positive registration test still asserts a transient success message.
-- The overdraft test still hardcodes its drain amount and checks a balance read
-  before the rejected action; its ID does not establish assertion quality.
-- CI remains manually triggered through `workflow_dispatch`.
-- `trace: 'on'` remains an existing debugging setting.
-
-### API source review: September 27, 2026
-
-`tests/api/farm.api.spec.ts` declares `TC-AUTH-012`, `TC-FARM-010`, and
-`TC-FARM-012`. The authorization and create-and-read
-contracts have source assertions; a targeted run of `TC-AUTH-012` and
-`TC-FARM-010` passed on September 27, 2026.
-
-`TC-FARM-013` is in the isolated UI suite. The user reported that its current
-run passes; record its command and outcome with the next comparable baseline.
-
-### API-project execution: September 30, 2026
-
-`npx playwright test --project=api-tests --workers=1 --retries=0` passed
-**28/28 collected entries**, including the health-check dependency. A targeted
-`TC-FARM-014` run passed **2/2 entries**, including health-check. These commands
-do not create a current scenario coverage report; the `coverage:run` baseline
-remains to be recorded separately.
-
-### Farm API progress: October 5, 2026
-
-`TC-FARM-017` through `TC-FARM-020` are implemented in
-`tests/api/farm.api.spec.ts`. The user reported that all tests pass after the
-animal deletion response assertion was corrected. The command, collected entry
-count, and report for that run were not provided, so this is not a recorded
-suite baseline. Earlier on October 5, a focused `TC-FARM-020` run with one
-worker and zero retries passed **2/2 entries**, including health-check, before
-the final deletion-message assertion was added.
-
-### Source review and next exercises: October 6, 2026
-
-This update comes from source inspection; no tests were executed for it.
-
-- `TC-FARM-020` checks that the herd exists before deletion, the DELETE status
-  and success envelope, `data.message`, and absence of the herd ID afterwards.
-  The user again reported that the test passes; its implementation is complete.
-- `TC-FARM-013` already lives in `staff-management.isolated.spec.ts`, creates six
-  uniquely named fields, searches by their shared prefix, checks `1/2` then `2/2`,
-  and deletes its fields in `finally`. The old implementation task is complete.
-- `TC-FIN-003` obtains the starting balance through API and reads it again after
-  the rejected transfer. The historical hardcoded-balance and stale-read tasks
-  are complete in source; this review does not establish a new passing run.
-- `TC-REG-001` already checks status `201`, the login header, and `/login.html`.
-  Its remaining correction is to remove the transient success-message assertion.
-- `TC-FIN-014` already uses `getTransactions`, whose `getJson` reader rejects
-  unsuccessful responses. Do not repeat the old reader-replacement exercise.
-
-The next small exercises are detailed in section 10. Unresolved validation and
-resource-deletion contracts need agreement before adding new scenario IDs.
-
-### Full-run observation: September 13, 2026
-
-The first `npm run coverage:run` verification (one worker, zero retries)
-recorded **57 passed and 2 failed out of 59 entries**, including one passed setup.
-The scenario-only result was 56 passed and 2 failed out of 58 implemented cases.
-The visual failure reported a missing baseline in the visual project's current
-snapshot path. The demo profile test navigated to login; shared-session
-invalidation is a hypothesis consistent with the known environment constraint,
-not a separately reproduced diagnosis. Neither failure was fixed in this task.
-The reporting runner now disables automatic snapshot creation so a missing
-baseline cannot change the source fingerprint during measurement.
-
-### Historical quality evidence
-
-`npm run check:ci` passed on September 7, 2026. This is a dated observation,
-not a claim about subsequent changes. Current command results belong in the
-run report or the implementation report.
-
-### Historical check results from September 5, 2026
-
-- `setup-demo-user`: **1/1 passed**.
-- `tests/api/auth.api.spec.ts`: **11/11 passed** with `--workers=1`.
-- Before the project reorganization at that time, `smoke-tests` achieved
-  **14/18** with `--workers=1`; after moving tests, it collects 7 cases
-  and needs a newly recorded baseline.
-- The full suite is not yet a trustworthy baseline. Known test defects
-  and shared-session conflicts need to be resolved first.
-
-### Causes of the four historical smoke failures
-
-1. The homepage snapshot comes from application v1.0.120, while the inspected
-   application is v1.79.0. The header, icons, and footer differ. Icons also
-   depend on the external Font Awesome CDN, making the result network-dependent.
-2. Two successful-registration tests exercise the same journey.
-   `RegisterPage.register()` waits for navigation to `/login.html`, after which
-   the test tries to find a success message from the old registration page.
-3. The duplicate-registration test calls the same `RegisterPage` again after
-   navigation to the login page. It therefore does not correctly reproduce
-   the duplicate-registration scenario.
-
-September 7 code review update: one positive registration test remains,
-`RegisterPage.register()` only fills and submits the form, and the duplicate
-case prepares the account through API. The points above describe historical
-causes. The disappearing success-message assertion in the positive test and
-the short-password loop within a single case still remain. Current registration
-test results have not been confirmed by rerunning them.
-
-### Application explored on localhost
-
-Public screens: Home, Login, Register, Documentation, API Explorer, Alerts,
-and Contact.
-
-After login, the application also provides:
-
-- profile editing and account deletion;
-- fields, staff, and animals with search and pagination;
-- assignments in Grid, List, Cards, Table, Timeline, Tree, and Chart views;
-- Bar, Pie, and Doughnut charts;
-- a marketplace with filtering, pagination, owned offers, and history;
-- finances with income, expenses, transfers, and date filters.
-
-OpenAPI v1.79.0 describes **71 operations across 57 paths**. Current API tests
-cover almost exclusively authentication.
+Dated observations and completed exercises are archived in [Notes](NOTES.md).
+Use the generated report for current collection and execution evidence.
 
 ### Scope decision: anonymous access to Staff & Fields
 
@@ -597,32 +469,8 @@ passing test as evidence; known weaknesses remain visible in the Notes column.
 
 ## 6. Conventions for new tests
 
-### Names and files
-
-- `*.api.spec.ts` — HTTP contracts without a browser.
-- `*.isolated.spec.ts` — UI with a user created for the test.
-- `*.journey.spec.ts` — a few scenarios spanning multiple domains.
-- Test names describe behavior and outcome, for example
-  `should reject transfer above available balance`.
-
-### Arrange–Act–Assert
-
-- Prefer preparing data through API.
-- Perform one main user action through UI.
-- UI assertions check messages/behavior; API assertions check business state.
-- Page Objects contain no `expect()` and do not force the happy path
-  when a method is also used in negative tests.
-
-### Stability
-
-- Prefer `getByRole`, `getByLabel`, and `getByTestId`.
-- Do not use `waitForTimeout()` in actual tests.
-- Do not swallow errors with an empty `.catch(() => {})` without documenting
-  why cleanup can safely fail.
-- Do not share accounts modified by parallel tests.
-- Retries remain `0` until the cause of flakiness is known.
-- For each flakiness fix, reproduce the issue first, then run the test
-  at least five times.
+See [Coding Standards](CODING_STANDARDS.md#test-file-conventions-and-stability) for
+file naming, Arrange-Act-Assert, locators, and stability rules.
 
 ## 7. Useful verification commands
 
@@ -656,11 +504,12 @@ and preserves a failing exit code. Pass Playwright filters after `--`.
 
 Generated outputs live in ignored `coverage-report/`: inventory, raw Playwright
 results, normalized coverage JSON, and a standalone HTML document. The HTML
-renders README and this plan alongside the metrics and filtered scenario table.
+renders README, this plan, and Coding Standards as collapsed chapters alongside
+the metrics and a collapsed, paginated scenario table. Historical notes are not embedded.
 CI retains both Playwright HTML and coverage artifacts, including failed runs.
 
 The source fingerprint includes test and helper code, report tooling, config,
-package files and the two documents. A Git revision alone cannot identify local
+package files and the three embedded documents. A Git revision alone cannot identify local
 uncommitted edits. Application version is optional run metadata supplied with
 `COVERAGE_APP_VERSION`; unknown is reported honestly. No historical trend or
 release threshold is inferred from one run.
@@ -689,8 +538,8 @@ The earlier `getStaff` exercise is implemented, including its use in
 rejection (`TC-FARM-022`) are present. Marketplace owner cancellation,
 other-user cancellation rejection, and own-purchase rejection have API tests.
 The catalog and Marketplace stage entries now reflect these additions.
-Source inspection confirms steps 1 and 2 below are implemented; their execution
-results have not been independently verified in this update.
+Completed exercises and their verification evidence are recorded in
+[Notes](NOTES.md#completed-exercises).
 See [REFACTOR.md](REFACTOR.md) for source observations and fixture design.
 
 ### Agreed scope: owned-offer cancellation
@@ -702,100 +551,6 @@ Local application source excludes the current user's own offers from
 `/marketplace/offers`; the mentor's earlier presence assertion was incorrect.
 The listing assertions are already absent from the current test. Buyer-visible
 listing disappearance is deferred, not a requirement for this exercise.
-
-### Next small steps
-
-1. **Completed in source: remove unrelated Marketplace reads.** The learner
-   removed the three unused `getMarketplaceOffers(request)` calls and their
-   import from `tests/api/marketplace.api.spec.ts`. Current offer-state, response,
-   and balance assertions remain.
-
-2. **Completed in source: extract one typed reader.** The learner implemented
-   `getMyOffers(request): Promise<MarketplaceOffer[]>` and migrated both
-   cancellation helpers. Selection, filtering, and cancellation remain in their
-   callers. Specs retain raw responses for exact-status assertions.
-
-3. **Completed: reconcile scenario metadata and catalog.** The planned UI
-   cancellation keeps `TC-MARKET-006`; own-purchase rejection now uses
-   `TC-MARKET-007`. Catalog entries for `TC-FARM-021` and `TC-FARM-022` were
-   added. Marketplace rejection titles and tags now describe negative cases.
-   The README index is generated from this catalog. Execution evidence remains
-   separate from source implementation. `coverage:readme` and
-   `coverage:validate` passed on 2026-10-10; collection found 89 entries, including
-   one setup entry. Collection did not execute scenarios.
-
-4. **Completed in source: registration correction.** `TC-REG-001` no longer
-   asserts the transient success message. The pre-submission response wait,
-   HTTP 201, login header, and final URL checks remain. On 2026-10-10 the learner
-   reported everything working; no command, entry count, or report was supplied.
-   This is a user-reported result, not an independently recorded baseline.
-
-Verification commands for the first two exercises:
-
-```bash
-npx playwright test tests/api/marketplace.api.spec.ts --project=api-tests --workers=1 --retries=0
-npx playwright test --project=api-tests --workers=1 --retries=0
-npm run check:ci
-```
-
-Focused registration verification:
-
-```bash
-npx playwright test tests/auth/registration.noauth.spec.ts --project=no-auth-tests --grep "should register new user successfully" --workers=1 --retries=0
-```
-
-Use actual test titles for `--grep`; case-ID annotations are not title filters.
-Record results separately from implementation checkboxes. For scenario changes,
-run the focused case, then its project and `check:ci`. For new IDs, synchronize
-both the catalog and generated README index.
-
-### Historical refactoring proposals: October 10, 2026
-
-Steps 5 and 6 below are implemented in commit `8596fda`; step 7 is implemented
-in the current working tree. These paragraphs preserve the original proposals,
-not current implementation instructions. The active next steps follow them.
-
-5. **Make the HTTP envelope explicit in two small changes ? Stage 1b.**
-   First use the existing `ApiEnvelope<T>` for the parsed response in
-   `src/api/httpClient.ts`, replacing its inline type. Preserve current request,
-   JSON parsing, status handling, and return behavior. This is a type-only
-   refactor: it does not validate runtime JSON. Then separately decide and
-   implement rejection when `success !== true`; currently only explicit
-   `false` is rejected, so a missing success field is accepted. That second
-   change tightens the reader contract and must not be presented as behavior
-   preservation. Exercise the existing client with stubbed responses for a
-   valid envelope, explicit failure, missing success, malformed JSON, and HTTP
-   failure. Preserve support for successful delete responses without data.
-   Do not add a schema library, 204 support, new HTTP verbs, or change raw
-   negative-request helpers. Run focused client checks, dependent API tests,
-   and `check:ci` for this shared change.
-
-6. **Separate API session setup from browser setup ? Stage 1.**
-   `freshUser` currently depends on a browser context and copies cookies even
-   for API-only consumers. Separately, `TC-FIN-011` logs in that user again to
-   obtain its session ID. Compare keeping the fixture, adding a proposed
-   `apiSession` fixture returning the user plus session, and making `freshUser`
-   a UI adapter over that session. Prefer the last option only when selected
-   for implementation: migrate `TC-FIN-011` first to consume the session
-   without another login. Preserve cookie setup for UI consumers, distinct
-   accounts, and raw authentication scenarios. Do not migrate all tests at once.
-   Verify the focused account case, then API and isolated UI consumers because
-   authentication fixture changes cross both layers. No speed gain is claimed
-   without measurement.
-
-7. **Select the resource explicitly in UI offer creation ? Stage 1b.**
-   `MarketplacePage.createNewOffer` randomly chooses an item although
-   `TC-MARKET-003` already has `createdAnimal.id`. Compare keeping the existing
-   method, adding an optional item-ID branch, and requiring an explicit item ID.
-   Prefer the explicit input when undertaking this exercise; adapt both actual
-   callers (the Marketplace spec and the farm-setup journey through
-   `createMarketplaceOffer`). Inspect how the journey obtains seller resource
-   IDs before implementation. Keep waiting for the requested option to load;
-   do not simply remove the current readiness assertion. Select the option by
-   ID and preserve UI success checks in specs. Resource/offer cleanup is a
-   separate lifecycle concern, not implicitly solved by selection. Run both
-   affected scenarios and their projects. Do not combine this with rebuilding
-   purchase tests or shared Marketplace test data.
 
 ### Agreed decision: leave TC-MARKET-003 as implemented
 
@@ -920,15 +675,6 @@ later exercises. HTTP-envelope checks remain later work in Stage 1b.
 
 ### Intentionally deferred
 
-Additional Marketplace purchase contracts are deferred beyond the selected UI exercise. Before reusing
-`activeFieldOffer`, inspect cleanup after ownership transfer: its field currently
-belongs to the seller's `createdField` fixture. This fixture was selected for
-cancellation and rejection scenarios; successful-purchase cleanup has not been
-verified. Do not expand it speculatively now.
-
-On October 6, the learner deferred coverage-run diagnosis. Reporting is not a
-prerequisite for these exercises. When useful again, record an API baseline with
-`npm run coverage:run -- --project=api-tests --workers=1 --retries=0`.
-Archive results before comparing runs because each run replaces the current one.
-Visual baselines, session/project organization, smoke baseline, and broader HTTP
-client changes remain in their existing stages.
+See [Coding debt notes](NOTES_CODING_DEBT.md#intentionally-deferred) for purchase
+cleanup concerns and deferred reporting diagnosis. Active work remains in the
+roadmap above; the notes explain decisions without introducing a second backlog.

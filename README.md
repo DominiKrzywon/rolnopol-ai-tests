@@ -20,152 +20,47 @@ that account. State-changing scenarios should create their own users.
 
 ## Scenario Coverage Report
 
-The report combines **parsed README**, **parsed TEST_PLAN**, a collected test
-inventory, and Playwright JSON results. It runs without AI. Open
-`coverage-report/index.html` directly in a browser; no report server or internet
-connection is required. Search and filter by ID, area, priority, risk, and result.
+Open `coverage-report/index.html` directly in a browser. The standalone report
+shows summary metrics first; priority, risk, and area breakdowns expand on demand.
+Expand **Scenarios** to search and filter the full
+catalog by ID, area, priority, risk, or result. Results use pages of 20 rows;
+**Details** opens execution evidence for one scenario. Failure links open the
+correct page automatically.
+
+Filters and the current page are stored in the URL and restored after refresh.
+Copy the address to return to the same view of this report. Failure counts stay
+visible while the list expands on demand. The summary explains why confirmation
+is unavailable for missing, unknown, stale, or globally failed run evidence and
+how to obtain new evidence with `coverage:run`.
+
+README, TEST_PLAN, and CODING_STANDARDS are collapsed by default, with expandable
+chapters. Document links reveal the referenced chapter. Historical notes and
+coding-debt notes are not embedded. The generated README index is omitted from
+the HTML view because the report already provides the scenario table.
 
 ```bash
-# Validate all test IDs and the generated README index; no server or login needed
 npm run coverage:validate
-
-# Generate a catalog-only report without running any tests
 npm run coverage:collect
 npm run coverage:report -- --no-results
-
-# Run one project and generate a report, including when tests fail
 npm run coverage:run -- --project=api-tests
-
-# Run the full suite and generate the report
-npm run coverage:run
-
-# Validate a saved coverage.json without opening HTML
-npm run coverage:verify
-
-# Rebuild HTML/normalized JSON from saved collection and current run results
 npm run coverage:report
-
-# Import a specific Playwright JSON file
-npm run coverage:report -- --results path/to/results.json
-
-# Regenerate this document's scenario index after editing TEST_PLAN
-npm run coverage:readme
-
-# Verify the reporting mechanism with deterministic local tests
-npm run coverage:test
+npm run coverage:verify
 ```
 
-`coverage:run` defaults to one worker and zero retries. Additional Playwright
-filters and repetition options follow `--`. Missing image baselines are never
-created automatically (`--update-snapshots=none`). Review and update visual
-baselines separately with Playwright. It preserves the test process exit
-code after generating the report. It uses the repository configuration and does
-not accept reporter/config/snapshot-update overrides, list mode, or interactive UI mode.
-Collection is always complete even when the execution is filtered.
+`coverage:run` defaults to one worker and zero retries and preserves a failing
+exit code after generating the report. `coverage:report` rebuilds from saved
+results without executing tests. Outputs are replaced on the next run; copy the
+output folder before running again if you need history.
 
-| Artifact                                  | Purpose                                                                 |
-| ----------------------------------------- | ----------------------------------------------------------------------- |
-| `coverage-report/inventory.json`          | Full collection, stable IDs, projects, source locations and fingerprint |
-| `coverage-report/playwright-results.json` | Raw Playwright output from the latest run                               |
-| `coverage-report/coverage.json`           | Joined scenarios, metrics, attempts, metadata and source documents      |
-| `coverage-report/index.html`              | Standalone report with parsed README and TEST_PLAN                      |
-| `playwright-report/index.html`            | Standard Playwright diagnostics, including available attachments        |
+**Implemented** measures collected cases against included catalog scenarios.
+**Confirmed** requires passing results matching the current source fingerprint.
+Old or unknown results are not current confirmation. These metrics measure the
+scenario catalog, not application code coverage or assertion quality.
 
-Outputs are ignored by Git and replaced on the next run. Copy the output folder
-before another run if you need history. Raw Playwright diagnostics may contain
-application data; the coverage HTML/normalized JSON omit logs and attachments.
-
-### Reading the numbers
-
-- **Implemented**: included catalog IDs with a collected test / all included IDs.
-- **Selected to run**: unique included IDs present in the selected Playwright
-  results, including skipped or blocked cases; setup and repeated attempts do not
-  add scenarios. No run is shown as N/A.
-- **Confirmed**: included IDs passing in every collected project / all included
-  IDs, provided results match the current source fingerprint and have no global errors.
-- **Planned**: a catalog scenario without a collected implementation.
-- **Not-run/partial**: no execution or incomplete project execution; never a pass.
-- **Skipped, failed, flaky, interrupted, expected-failure**: separate observed states.
-- **Excluded**: a documented scope decision, outside the denominator.
-
-Risk is a provisional estimate of the effect of a regression in this learning
-application. It is recorded per case in TEST_PLAN and is independent of the
-P0/P1/P2 execution priority. Risk breakdowns use only included catalog rows.
-
-These are percentages of the explicit scenario catalog, **not code coverage or
-application completeness**. The initial catalog covers existing tests and selected
-upcoming exercises; broader roadmap topics still need decomposition. Setup,
-retries, repetitions, and additional browsers do not create new unique scenarios.
-An ID and a green run do not prove that the assertions are sufficient.
-
-The report shows the run date, command, projects, retries, attempts, revision,
-and a content fingerprint that also detects uncommitted source changes.
-Results with a different fingerprint are stale; plain Playwright JSON without
-coverage metadata has unknown freshness. Neither counts as current confirmation.
-An outdated inventory is rejected: rerun `coverage:collect` after editing sources.
-Set optional `COVERAGE_APP_VERSION` before `coverage:run` to record the tested
-application version; otherwise it is reported as unknown.
-
-### Maintaining IDs
-
-[TEST_PLAN.md](TEST_PLAN.md#5-scenario-catalog-and-coverage-contract) owns the
-manual catalog. Every scenario test declares exactly one annotation:
-
-```ts
-annotation: { type: 'case-id', description: 'TC-AUTH-001' }
-```
-
-Keep the ID when renaming a test or moving its file. Never reuse retired IDs.
-Each parameterized input has an explicit ID in its data. Tags describe categories;
-they do not replace IDs. Multiple projects may execute the same test definition.
-The setup project is explicitly marked as infrastructure and has no scenario ID.
-
-After changing the catalog, run `coverage:readme` and `coverage:validate`.
-Unknown IDs, duplicate definitions, missing annotations, excluded collected cases,
-and an outdated generated index fail validation. Planned rows without tests are
-valid gaps. The catalog parser requires its exact headers and markers.
-
-The HTML renderer supports headings, paragraphs, lists, blockquotes, tables,
-fenced code, inline code, bold text, and safe HTTP/HTTPS or embedded-document links.
-Raw HTML is displayed as text. Other repository links are shown as labels so the
-export does not depend on the repository filesystem.
-
-### Failure details and Playwright links
-
-The scenario table uses `ID | Area | Scenario | Priority | Status | Failure | Details`.
-Click a failing status or **Details** to expand project executions, retries,
-duration, failure step, expected/received values and the reported source location.
-The failure summary lists failed or interrupted scenarios from the selected run;
-stale results are labelled as a saved run. Flaky attempts remain visible under
-their scenario's details. Global errors are reported separately as a count.
-
-Failure text is deliberately restricted to the reviewed public messages and step
-names in `scripts/coverage/failures.mjs`. Unknown values and locations outside
-collected test files display as unavailable. Raw errors, stacks, source snippets,
-stdout/stderr and attachments are never copied into failure summaries. Adding a
-new public message requires reviewing that allowlist; arbitrary runtime strings
-are not made safe by HTML escaping.
-
-**Open in Playwright report** links directly to the matching test using
-`../playwright-report/index.html#?testId=...`. Keep both output folders side by
-side, including when extracting CI artifacts. The generator checks the HTML
-report's run timestamp, duration and available provenance, then resolves the ID
-by case ID and project. Missing, mismatched or unsupported reports disable links.
-The embedded HTML index reader supports the installed Playwright 1.58 format.
-The Playwright report retains its own full diagnostics and is not sanitized by
-the coverage exporter. Regenerate coverage after replacing either report.
-
-Normalized `coverage.json` uses **schemaVersion 5**. Each case has a `scenario`
-object (`title`, `area`, `priority`, `risk`, `layer`) and an `execution` object (`status`,
-`durationMs`, `runs`). Each run represents one project execution/repetition, with
-its own status, duration, `playwrightTestId`, failure summary and `attempts`.
-Each attempt retains its retry number, status, duration and failure. Durations
-sum attempts; a run's failure is its last failed attempt, even if a retry passed.
-Missing failure fields are `null`, never guessed from the test declaration.
-The JSON also records the selected scenario count and validated priority,
-risk, and area breakdowns with implemented and confirmed counts. Confirmed values are `null` without current run evidence.
-`coverage:report` validates JSON before writing it; `coverage:verify` checks a
-saved file independently of HTML.
+See [metric definitions](TEST_PLAN.md#metric-definitions),
+[scenario ID conventions](CODING_STANDARDS.md#scenario-ids-and-catalog-maintenance),
+and [reporting reference](NOTES.md#reporting-reference) for details, commands,
+artifact formats, and Playwright links.
 
 ## Application Code Coverage
 
@@ -231,6 +126,8 @@ artifacts after both successful and failed runs. It is not currently a PR gate.
 - [TEST_PLAN.md](TEST_PLAN.md): strategy, scope exclusions, scenario catalog and
   the single active learning backlog.
 - [CODING_STANDARDS.md](CODING_STANDARDS.md): AAA, Page Objects and locator rules.
+- [NOTES.md](NOTES.md): historical evidence, completed exercises, reporting reference.
+- [NOTES_CODING_DEBT.md](NOTES_CODING_DEBT.md): refactoring history and deferred concerns.
 - [.agents/skills/CONTEXT.md](.agents/skills/CONTEXT.md): shared agent workflow.
 
 ## Scenario Index

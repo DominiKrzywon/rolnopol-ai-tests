@@ -89,6 +89,7 @@ async function expectedReadme() {
 async function generate(resultPath) {
   const plan = read('TEST_PLAN.md');
   const readme = read('README.md');
+  const standards = read('CODING_STANDARDS.md');
   const inventory = readJson(inventoryFile);
   const run = resultPath ? readJson(resultPath) : null;
   const report = buildReport(
@@ -101,12 +102,12 @@ async function generate(resultPath) {
       run,
     ),
   );
-  report.documents = { readme, testPlan: plan };
+  report.documents = { readme, testPlan: plan, codingStandards: standards };
   validateCoverageReport(report);
   writeJson(path.join(output, 'coverage.json'), report);
   writeFileSync(
     path.join(output, 'index.html'),
-    renderReport(report, readme, plan),
+    renderReport(report, readme, plan, standards),
   );
   process.stdout.write(
     `Report: ${path.join(output, 'index.html')}\nImplemented: ${report.metrics.implemented}/${report.metrics.denominator}; result freshness: ${report.freshness}\n`,

@@ -19,6 +19,8 @@ that materially changes the scope or expected behavior.
 - [TEST_PLAN.md](../../TEST_PLAN.md): learning goals, scope, exclusions, upcoming
   exercises, and the single active test backlog.
 - [CODING_STANDARDS.md](../../CODING_STANDARDS.md): AAA, Page Objects, and locators.
+- [NOTES.md](../../NOTES.md): historical evidence, completed exercises, and reporting reference; not current run evidence.
+- [NOTES_CODING_DEBT.md](../../NOTES_CODING_DEBT.md): historical proposals and deferred concerns; TEST_PLAN remains the single active backlog.
 - [playwright.config.ts](../../playwright.config.ts): actual projects, filename
   patterns, dependencies, parallelism, and reporting.
 - [package.json](../../package.json), [tsconfig.json](../../tsconfig.json),
@@ -73,7 +75,8 @@ dotenv loading, without requiring account credentials or running fixtures.
   `npm run coverage:validate`. TEST_PLAN owns manually edited rows; README
   contains the generated index. Neither stores live pass counts.
 - Coverage tooling: `npm run coverage:test`, `npm run coverage:validate`, and
-  `npm run check:ci`; inspect generated HTML, including both parsed documents.
+  `npm run check:ci`; inspect generated HTML, including all three embedded documents,
+  chapter links, scenario pagination, filters, and failure links.
 - Test code: the targeted test, then its project, plus `npm run check:ci`.
 - Filename or project changes: also run `npx playwright test --list`.
 - Flakiness fixes: reproduce the issue and repeat runs as specified in the plan;

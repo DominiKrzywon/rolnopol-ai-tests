@@ -350,6 +350,44 @@ test('global run errors prevent confirmation even if a case passed', () => {
   assert.equal(report.run.globalErrorCount, 1);
 });
 
+test('freshness help explains missing, unknown, stale, current and failed-run evidence', () => {
+  const globalError = run();
+  globalError.errors.push({ message: 'global teardown failed' });
+  for (const [input, explanation] of [
+    [null, 'No test results were supplied'],
+    [run([], null), 'Saved results do not contain the information needed'],
+    [run([], 'old'), 'Saved results belong to a different version'],
+    [run(), 'The saved results match the current code and report inputs'],
+    [globalError, 'the run recorded global errors'],
+  ]) {
+    const html = renderReport(
+      buildReport(catalog, inventory(), input, snapshot),
+      '',
+      '',
+    );
+    assert.ok(html.includes(explanation));
+  }
+});
+
+test('failure count remains visible while the failure list starts collapsed', () => {
+  const html = renderReport(
+    buildReport(catalog, inventory(), run([result('failed')]), snapshot),
+    '',
+    '',
+  );
+  assert.match(html, /1 failed or interrupted scenarios in the selected run/);
+  assert.match(
+    html,
+    /<details id="failure-list"><summary>Show failed or interrupted scenarios \(1\)<\/summary><ul>/,
+  );
+  const clean = renderReport(
+    buildReport(catalog, inventory(), run(), snapshot),
+    '',
+    '',
+  );
+  assert.doesNotMatch(clean, /id="failure-list"/);
+});
+
 test('unknown result mappings and invalid JSON structures fail loudly', () => {
   assert.throws(
     () => buildReport(catalog, inventory(), {}, snapshot),
@@ -394,6 +432,43 @@ test('Markdown renders content without accepting scripts, HTML or dangerous URLs
   assert.doesNotMatch(html, /<script>|href="javascript:/);
   assert.match(html, /href="https:\/\/example.com"/);
   assert.match(html, /const x =/);
+});
+
+test('collapsible Markdown preserves anchors, nesting and code fences', () => {
+  const html = renderMarkdown(
+    '# Guide\n\n## Parent\n\n### Child\n\n```md\n## Not a section\n```\n\n## Next\n\n[Rules](CODING_STANDARDS.md#rules)',
+    'readme',
+    { collapsible: true },
+  );
+  assert.match(
+    html,
+    /<details class="document-section" id="readme-parent"><summary>Parent<\/summary>/,
+  );
+  assert.match(
+    html,
+    /<pre><code>## Not a section<\/code><\/pre>\n<\/details>\n<\/details>\n<details class="document-section" id="readme-next">/,
+  );
+  assert.match(html, /href="#coding_standards-rules"/);
+  assert.doesNotMatch(html, /<details[^>]* open/);
+  assert.equal(
+    (html.match(/<details\b/g) || []).length,
+    (html.match(/<\/details>/g) || []).length,
+  );
+});
+
+test('report omits the duplicate README index and collapses documentation and scenarios', () => {
+  const report = buildReport(catalog, inventory(), null, snapshot);
+  const html = renderReport(
+    report,
+    '# README\n\n<!-- coverage-index:start -->\nUNIQUE_DUPLICATE_INDEX\n<!-- coverage-index:end -->',
+    '# Plan\n\n## Scope\n\nKeep scope visible on demand.',
+    '# Standards\n\n## Rules\n\nUnique coding rule.',
+  );
+  assert.doesNotMatch(html, /UNIQUE_DUPLICATE_INDEX/);
+  assert.match(html, /Unique coding rule/);
+  for (const id of ['readme', 'test_plan', 'coding_standards', 'scenarios']) {
+    assert.ok(html.includes(`<details id="${id}">`));
+  }
 });
 
 test('HTML embeds both documents, escapes scenario text and excludes raw logs', () => {

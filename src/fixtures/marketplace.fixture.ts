@@ -64,7 +64,7 @@ export const test = baseTest.extend<MarketplaceFixtures>({
           const sellerFields = await getFields(sellerApi);
           const buyerFields = await getFields(request);
 
-          if (sellerFields.some((field) => field.if === fieldId)) {
+          if (sellerFields.some((field) => field.id === fieldId)) {
             await deleteField(sellerApi, fieldId);
           } else if (buyerFields.some((field) => field.id === fieldId)) {
             await deleteField(request, fieldId);

@@ -242,3 +242,51 @@ test('should register new user', async ({ page }) => {
   await expect(registerPage.successMessage).toBeVisible();
 });
 ```
+
+## Test file conventions and stability
+
+### Names and files
+
+- `*.api.spec.ts` — HTTP contracts without a browser.
+- `*.isolated.spec.ts` — UI with a user created for the test.
+- `*.journey.spec.ts` — a few scenarios spanning multiple domains.
+- Test names describe behavior and outcome, for example
+  `should reject transfer above available balance`.
+
+### Arrange–Act–Assert
+
+- Prefer preparing data through API.
+- Perform one main user action through UI.
+- UI assertions check messages/behavior; API assertions check business state.
+- Page Objects contain no `expect()` and do not force the happy path
+  when a method is also used in negative tests.
+
+### Stability
+
+- Prefer `getByRole`, `getByLabel`, and `getByTestId`.
+- Do not use `waitForTimeout()` in actual tests.
+- Do not swallow errors with an empty `.catch(() => {})` without documenting
+  why cleanup can safely fail.
+- Do not share accounts modified by parallel tests.
+- Retries remain `0` until the cause of flakiness is known.
+- For each flakiness fix, reproduce the issue first, then run the test
+  at least five times.
+
+## Scenario IDs and catalog maintenance
+
+[TEST_PLAN.md](TEST_PLAN.md#5-scenario-catalog-and-coverage-contract) owns the
+manual catalog. Every scenario test declares exactly one annotation:
+
+```ts
+annotation: { type: 'case-id', description: 'TC-AUTH-001' }
+```
+
+Keep the ID when renaming a test or moving its file. Never reuse retired IDs.
+Each parameterized input has an explicit ID in its data. Tags describe categories;
+they do not replace IDs. Multiple projects may execute the same test definition.
+The setup project is explicitly marked as infrastructure and has no scenario ID.
+
+After changing the catalog, run `coverage:readme` and `coverage:validate`.
+Unknown IDs, duplicate definitions, missing annotations, excluded collected cases,
+and an outdated generated index fail validation. Planned rows without tests are
+valid gaps. The catalog parser requires its exact headers and markers.
