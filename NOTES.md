@@ -139,6 +139,29 @@ cover almost exclusively authentication.
 
 ## Completed exercises
 
+### Financial and UI refactoring batch: October 15, 2026
+
+Source inspection confirms the implemented Financial GET and POST migrations,
+external `AccountData` type, and Financial recipient fixture. `TC-FIN-005`
+checks both transaction responses and fresh balances. Purchase-fixture cleanup
+now attempts field cleanup even after cancellation failure and disposes the
+seller context in an outer `finally`. Simultaneous cleanup failures can still
+mask earlier errors; failure-path verification was not supplied.
+
+`TC-MARKET-002` now uses its fixture's exact offer, captures the UI purchase
+POST and checks 400, then verifies the message and fresh balance, offer status,
+and both users' field ownership. The learner said the work was going well;
+no exact Marketplace command, report, or count was provided.
+
+`TC-REG-003` now checks missing required email and password values, email
+focus, and the registration URL. After receiving the focused verification
+instructions, the learner reported that it passed. The executed command and
+entry count were not supplied, and this does not confirm the full registration
+file or `check:ci`. No application tests were run by the mentor for this update.
+
+Completed implementation is tracked in TEST_PLAN section 10; remaining
+verification and future exercises live only there.
+
 1. **Completed in source: remove unrelated Marketplace reads.** The learner
    removed the three unused `getMarketplaceOffers(request)` calls and their
    import from `tests/api/marketplace.api.spec.ts`. Current offer-state, response,

@@ -7,6 +7,11 @@ export interface TransactionPayload {
   category: string;
 }
 
+export type CreateTransactionPayload = TransactionPayload & {
+  cardNumber?: string;
+  cvv?: string;
+};
+
 export interface Transaction {
   id: number;
   type: 'income' | 'expense';

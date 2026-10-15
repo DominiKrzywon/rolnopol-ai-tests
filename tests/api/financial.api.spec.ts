@@ -1,42 +1,19 @@
-import {
-  type APIRequestContext,
-  request as playwrightRequest,
-} from '@playwright/test';
 import { topUpAmount } from 'src/actions/user.actions';
-import { loginAs, registerVerifiedUser } from 'src/api/auth.api';
 import {
   addTransaction,
+  createTransactionResponse,
   getAccountBalance,
+  getAccountResponse,
   getTransactions,
 } from 'src/api/financial.api';
+import { expectApiSuccess } from 'src/assertions/api.assertions';
 import { BASE_API_URL } from 'src/config/env.config';
-import { prepareRandomUser } from 'src/factories/user.factory';
-import { expect, test as baseTest } from 'src/fixtures/auth.fixture';
-
-async function createLoggedInRecipient(
-  recipientApi: APIRequestContext,
-): Promise<number> {
-  const recipient = prepareRandomUser();
-  await registerVerifiedUser(recipientApi, recipient);
-
-  const session = await loginAs(recipientApi, recipient);
-  return session.id;
-}
-
-const test = baseTest.extend<{
-  transferRecipient: { recipientApi: APIRequestContext; recipientId: number };
-}>({
-  transferRecipient: async ({ request: _request }, use) => {
-    const recipientApi = await playwrightRequest.newContext();
-
-    try {
-      const recipientId = await createLoggedInRecipient(recipientApi);
-      await use({ recipientApi, recipientId });
-    } finally {
-      await recipientApi.dispose();
-    }
-  },
-});
+import { expect, test } from 'src/fixtures/financial.fixture';
+import {
+  CreateTransactionPayload,
+  TransactionResponse,
+} from 'src/models/financial';
+import { AccountData } from 'src/types/accountData';
 
 test.describe('Financial API', () => {
   test(
@@ -46,12 +23,10 @@ test.describe('Financial API', () => {
       tag: ['@api', '@financial', '@balance'],
     },
     async ({ apiSession, request }) => {
-      const response = await request.get(`${BASE_API_URL}/financial/account`);
-      const body = await response.json();
+      const response = await getAccountResponse(request);
+      const body = await expectApiSuccess<AccountData>(response, 200);
 
-      expect(response.status()).toBe(200);
-      expect(body.success).toBe(true);
-      expect(body.data.account).toMatchObject({
+      expect(body.data?.account).toMatchObject({
         id: expect.any(Number),
         balance: 0,
         userId: apiSession.session.id,
@@ -70,52 +45,57 @@ test.describe('Financial API', () => {
       tag: ['@api', '@financial', '@income', '@expense'],
     },
     async ({ apiSession: _, request }) => {
-      const incomeAmount = 25.5;
-      const expenseAmount = 10.25;
+      const income: CreateTransactionPayload = {
+        type: 'income',
+        amount: 25.5,
+        description: 'Test income',
+        category: 'salary',
+        cardNumber: '4111111111111111',
+        cvv: '123',
+      };
+
+      const expense: CreateTransactionPayload = {
+        type: 'expense',
+        amount: 10.25,
+        description: 'Test expense',
+        category: 'food',
+      };
 
       const balanceBefore = await getAccountBalance(request);
 
       // Record income and verify the balance increases
-      const incomeResponse = await request.post(
-        `${BASE_API_URL}/financial/transactions`,
-        {
-          data: {
-            type: 'income',
-            amount: incomeAmount,
-            description: 'Test income',
-            category: 'salary',
-            cardNumber: '4111111111111111',
-            cvv: '123',
-          },
-        },
+      const incomeResponse = await createTransactionResponse(request, income);
+      const incomeBody = await expectApiSuccess<TransactionResponse>(
+        incomeResponse,
+        201,
       );
 
-      const data = await incomeResponse.json();
-      expect(incomeResponse.status()).toBe(201);
-      expect(data.success).toBe(true);
-      expect(data.data.transaction.amount).toBe(incomeAmount);
-      expect(data.data.transaction.type).toBe('income');
-      expect(data.data.transaction.description).toBe('Test income');
+      expect(incomeBody.data?.transaction).toMatchObject({
+        type: income.type,
+        amount: income.amount,
+        description: income.description,
+        category: income.category,
+      });
 
       const balanceAfter = await getAccountBalance(request);
-      expect(balanceAfter).toBe(balanceBefore + incomeAmount);
+      expect(balanceAfter).toBe(balanceBefore + income.amount);
 
       // Record an expense and verify the balance decreases
-      const transactionExpense = await request.post(
-        `${BASE_API_URL}/financial/transactions`,
-        {
-          data: {
-            type: 'expense',
-            amount: expenseAmount,
-            description: 'Test expense',
-            category: 'food',
-          },
-        },
+      const expenseResponse = await createTransactionResponse(request, expense);
+      const expenseBody = await expectApiSuccess<TransactionResponse>(
+        expenseResponse,
+        201,
       );
-      expect(transactionExpense.status()).toBe(201);
+
+      expect(expenseBody.data?.transaction).toMatchObject({
+        type: expense.type,
+        amount: expense.amount,
+        description: expense.description,
+        category: expense.category,
+      });
 
       const balanceAfterExpense = await getAccountBalance(request);
-      expect(balanceAfterExpense).toBe(balanceAfter - expenseAmount);
+      expect(balanceAfterExpense).toBe(balanceAfter - expense.amount);
     },
   );
 

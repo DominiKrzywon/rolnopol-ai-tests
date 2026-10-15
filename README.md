@@ -205,7 +205,7 @@ Implementation and execution states are computed in the report, not edited here.
 | TC-JOURNEY-003 | Journeys    | verify blocked transaction                                             | E2E    | P0       | critical | included |
 | TC-LOGIN-001   | Auth        | should display correct user data after login                           | UI     | P0       | medium   | included |
 | TC-LOGIN-002   | Auth        | session management should work correctly                               | UI     | P0       | high     | included |
-| TC-MARKET-001  | Marketplace | should buy random offer and verify transaction history                 | UI     | P1       | high     | included |
+| TC-MARKET-001  | Marketplace | should buy an owned test field offer and verify transaction history    | UI     | P1       | high     | included |
 | TC-MARKET-002  | Marketplace | should return error when offer is to expensive                         | UI     | P1       | high     | included |
 | TC-MARKET-003  | Marketplace | create offer and verify in My Offers page                              | UI     | P1       | medium   | included |
 | TC-MARKET-004  | Marketplace | An owner can cancel an offer through API                               | API    | P1       | high     | included |

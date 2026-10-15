@@ -392,13 +392,13 @@ retain a risk estimate, but remain outside coverage denominators.
 | TC-FIN-002     | Finance     | verify funds transfer between users                                    | UI     | P1       | critical | included | -                                                                                                                                                               |
 | TC-FIN-003     | Finance     | verify prevent overdraft                                               | UI     | P1       | critical | included | Source reviewed 2026-10-06: initial API balance and a new read after rejection; no new run recorded.                                                            |
 | TC-FIN-004     | Finance     | Transaction history respects limit and offset and exposes hasMore      | API    | P1       | medium   | included | -                                                                                                                                                               |
-| TC-FIN-005     | Finance     | Income and expense update the API account balance                      | API    | P1       | critical | included | -                                                                                                                                                               |
+| TC-FIN-005     | Finance     | Income and expense update the API account balance                      | API    | P1       | critical | included | Source reviewed 2026-10-15: raw POSTs, exact 201/success, income and expense data, fresh balance reads; no new execution result recorded.                       |
 | TC-FIN-006     | Finance     | Transfer accepts the minimum amount 0.01                               | API    | P1       | high     | included | -                                                                                                                                                               |
 | TC-FIN-007     | Finance     | Transfer accepts the maximum amount 999.99                             | API    | P1       | high     | included | -                                                                                                                                                               |
 | TC-FIN-008     | Finance     | Transfer of the full available balance leaves zero                     | API    | P1       | high     | included | -                                                                                                                                                               |
 | TC-FIN-009     | Finance     | Transfer above available balance leaves both accounts unchanged        | API    | P1       | critical | included | -                                                                                                                                                               |
 | TC-FIN-010     | Finance     | Transfer to a nonexistent recipient is rejected                        | API    | P1       | high     | included | -                                                                                                                                                               |
-| TC-FIN-011     | Finance     | A fresh user can read their financial account and balance              | API    | P1       | high     | included | Compares account `userId` with the fresh user's ID; API-project run passed 2026-09-30.                                                                          |
+| TC-FIN-011     | Finance     | A fresh user can read their financial account and balance              | API    | P1       | high     | included | Source reviewed 2026-10-15: raw account GET and typed success assertion; account userId matches the session. Historical API-project pass: 2026-09-30.           |
 | TC-FIN-012     | Finance     | Transaction history filters by type                                    | API    | P1       | medium   | included | Creates income and expense, then checks that the income filter returns only the expected transaction.                                                           |
 | TC-FIN-013     | Finance     | Transaction history filters by category                                | API    | P1       | medium   | included | Creates two income categories, then checks that the salary filter returns only the expected transaction.                                                        |
 | TC-FIN-014     | Finance     | Transaction history filters by date range                              | API    | P1       | medium   | included | Checks matching and empty ranges; API-project run passed 2026-09-30.                                                                                            |
@@ -414,8 +414,8 @@ retain a risk estimate, but remain outside coverage denominators.
 | TC-JOURNEY-003 | Journeys    | verify blocked transaction                                             | E2E    | P0       | critical | included | -                                                                                                                                                               |
 | TC-LOGIN-001   | Auth        | should display correct user data after login                           | UI     | P0       | medium   | included | -                                                                                                                                                               |
 | TC-LOGIN-002   | Auth        | session management should work correctly                               | UI     | P0       | high     | included | -                                                                                                                                                               |
-| TC-MARKET-001  | Marketplace | should buy random offer and verify transaction history                 | UI     | P1       | high     | included | -                                                                                                                                                               |
-| TC-MARKET-002  | Marketplace | should return error when offer is to expensive                         | UI     | P1       | high     | included | -                                                                                                                                                               |
+| TC-MARKET-001  | Marketplace | should buy an owned test field offer and verify transaction history    | UI     | P1       | high     | included | -                                                                                                                                                               |
+| TC-MARKET-002  | Marketplace | should return error when offer is to expensive                         | UI     | P1       | high     | included | Source reviewed 2026-10-15: test-owned offer, POST 400, notification, and fresh balance, offer-status, and ownership checks; no exact run recorded.             |
 | TC-MARKET-003  | Marketplace | create offer and verify in My Offers page                              | UI     | P1       | medium   | included | -                                                                                                                                                               |
 | TC-MARKET-004  | Marketplace | An owner can cancel an offer through API                               | API    | P1       | high     | included | Source reviewed 2026-10-10: active owned offer, DELETE response, and cancelled state in a fresh my-offers read; no new run recorded.                            |
 | TC-MARKET-005  | Marketplace | A different user cannot cancel another owner offer                     | API    | P1       | critical | included | Source reviewed 2026-10-10: another user receives 403 and the owner offer remains active; no new run recorded.                                                  |
@@ -429,7 +429,7 @@ retain a risk estimate, but remain outside coverage denominators.
 | TC-PUBLIC-003  | Public      | Contact accepts a valid submission                                     | UI     | P2       | medium   | included | Planned contract; review expected behavior before implementation.                                                                                               |
 | TC-REG-001     | Auth        | should register new user successfully                                  | UI     | P0       | high     | included | Review needed: assertion still depends on a transient success message.                                                                                          |
 | TC-REG-002     | Auth        | should display validation errors for invalid email and short password  | UI     | P0       | medium   | included | -                                                                                                                                                               |
-| TC-REG-003     | Auth        | should prevent registration with empty required fields                 | UI     | P0       | medium   | included | Review needed: hidden success alone does not prove required-field validation.                                                                                   |
+| TC-REG-003     | Auth        | should prevent registration with empty required fields                 | UI     | P0       | medium   | included | Source reviewed 2026-10-15: native missing-value checks, email focus, and URL. Learner reported a pass; exact command and broader results not supplied.         |
 | TC-REG-004     | Auth        | should reject password with 1 characters                               | UI     | P0       | high     | included | -                                                                                                                                                               |
 | TC-REG-005     | Auth        | should reject password with 2 characters                               | UI     | P0       | high     | included | -                                                                                                                                                               |
 | TC-REG-006     | Auth        | should reject registration for empty password                          | UI     | P0       | high     | included | -                                                                                                                                                               |
@@ -526,12 +526,12 @@ release threshold is inferred from one run.
 
 ## 10. Upcoming exercises with the mentor
 
-This sequence was refreshed from source inspection on October 11, 2026.
+The current queue below was refreshed from source inspection on October 15, 2026.
 The learner implements code changes; the mentor explains, reviews, and may
 update Markdown records. Keep each implementation small and separately reviewable.
-No application tests were executed for this update. `npm run check:ci` passed
-on the inspected working tree before documentation edits; implementation is not
-a passing application baseline.
+No application tests were executed by the mentor for this update. Earlier
+quality-check results predate this batch. Learner-reported results are identified
+explicitly below; implementation is not a passing application baseline.
 
 The earlier `getStaff` exercise is implemented, including its use in
 `TC-FARM-019`. Assigned-staff deletion (`TC-FARM-021`) and unsupported-animal-type
@@ -568,110 +568,91 @@ failure requires investigation. This learning-scope decision supersedes the
 previous steps 8 and 9 and the earlier REFACTOR recommendation. It does not
 establish that the fixture itself is broken or that the listing read is required.
 
-### Active exercise: isolate and simplify TC-MARKET-001
+### Current learning queue: October 15, 2026
 
-The learner selected the former purchase-isolation step (step 10; item 3 in the
-review summary). Implementation remains the learner's task. Preserve the case
-ID, UI purchase, notification, transaction history, and ownership verification.
-The planned scenario uses one test-owned field; it intentionally replaces random
-field/animal coverage with a deterministic field purchase. An animal purchase
-can be a separately selected exercise later.
+The implementation exercises from this queue are now present in source.
+Do not propose repeating the migrations below. This update records inspected
+code and learner-reported execution separately; no application tests were
+executed by the mentor for this documentation update.
 
-The two `playwright/no-conditional-in-test` suppressions in
-`tests/auth/marketplace.isolated.spec.ts` guard ternaries selecting fields versus
-animals. With a known field, remove the ternaries and both suppressions. Do not
-move those same branches into a helper solely to silence ESLint.
+#### Implemented exercises
 
-1. **Define the data contract and ownership boundary.** Reuse the buyer from
-   the existing `freshUser` hook and its `request`; preserve the current top-up.
-   Propose `fieldOfferForPurchase` in a new
-   `src/fixtures/marketplace.fixture.ts`, extending `src/fixtures/data.fixture.ts`.
-   It should expose `fieldId`, `fieldName`, `offerId`, `price`, and `description`.
-   The fixture owns a separate seller request context, registration, login,
-   resource setup, cleanup, and disposal. It does not buy the offer or assert
-   the scenario. Review this contract before writing the full fixture.
+- [x] Marketplace response migration: `TC-MARKET-004`, `005`, and `007`
+      use raw domain response functions and explicit success assertions.
+      Negative 400/403 checks remain in specs.
+- [x] Financial account migration: `TC-FIN-011` calls `getAccountResponse`
+      and `expectApiSuccess<AccountData>(..., 200)`. The account identity,
+      currency, and initial balance assertions remain. `AccountData` lives in
+      `src/types/accountData.ts`; `getAccountBalance` keeps its existing contract.
+- [x] Financial recipient lifecycle: `transferRecipient` moved into
+      `src/fixtures/financial.fixture.ts`, extending the Auth fixture. It owns
+      a separate recipient context, registration, login, and disposal.
+      The former local `createLoggedInRecipient` function is no longer needed.
+- [x] Financial POST migration: `TC-FIN-005` calls `createTransactionResponse`
+      for income and expense. `CreateTransactionPayload` keeps card inputs
+      explicit and optional; the raw function forwards the supplied payload.
+      Both responses require 201 and success, check transaction data, and are
+      followed by fresh balance reads. Existing `addTransaction` remains a
+      setup convenience helper with its previous behavior.
+- [x] Purchase-fixture cleanup: nested `try/finally` ensures the field cleanup
+      is attempted after cancellation failure and seller-context disposal is
+      attempted after cleanup failure. Exact current-owner lookup is preserved.
+      Multiple cleanup failures can still mask earlier errors; fault-injection
+      verification and preserving all errors remain separate follow-up work.
+- [x] Isolated insufficient-funds UI: `TC-MARKET-002` uses
+      `fieldOfferForPurchase` and its unique description. A response wait starts
+      before the UI action and matches the purchase POST; status 400 and the
+      notification are asserted. Fresh API reads verify zero buyer balance,
+      the exact active offer, seller ownership, and absence from buyer fields.
+- [x] Required-field validation: `TC-REG-003` checks native
+      `validity.valueMissing` for email and password, focus on email, and the
+      registration URL. The learner reported that the test passed. The exact
+      command, entry count, full registration-file run, and quality-check result
+      were not supplied. This is not evidence of a passing whole project.
 
-   Existing patterns: `apiSession` in `auth.fixture.ts`, separate
-   `playwrightRequest.newContext()` in `tests/api/marketplace.api.spec.ts`,
-   and the lifecycle in `activeFieldOffer`. Do not reuse `activeFieldOffer`
-   unchanged: it creates the resource for the buyer and deletes with its owner's
-   original context, which does not model this two-user purchase.
+`TC-MARKET-001` already buys a known seller-owned field and checks exact
+ownership on both sides plus one transaction-history expense. Its history
+assertion expects a field ID in the purchase text. Preserve the scope decisions
+above, including leaving `TC-MARKET-003` as implemented.
 
-2. **Prepare a seller and one identifiable field offer through API.** Use
-   `prepareRandomUser`, `registerVerifiedUser`, `loginAs`, and farm API
-   `createField`. Explicitly configure the new context with `baseURL: ENV.BASE_URL`
-   and no buyer storage state. Start its `try/finally` immediately after context
-   creation. Choose a unique field name and description, and an affordable price
-   such as 250. Extend existing `createFieldOffer` with optional `description`
-   and forward it in the payload, preserving the existing offer fixture's three scenario consumers.
-   Inspect the creation response/actual endpoint to confirm description storage.
-   Retain IDs as soon as creation succeeds so partial setup can be cleaned up.
-   Do not create another API client or log in the buyer again.
+#### Remaining verification and next small steps
 
-   Small target: the fixture yields an active offer for the expected field and
-   seller. Verify the setup first with `getMyOffers` in the focused scenario;
-   never print the returned credentials or session. Run TypeScript and ESLint
-   before proceeding to UI changes.
+1. **Close the current batch with focused execution evidence.** Record the
+   actual commands and results for the Financial API file, Marketplace API file,
+   Marketplace UI file, registration file, and `check:ci`. Run only missing
+   checks; do not repeat a check whose result is already available without a
+   code change or unresolved concern. The learner's positive Marketplace comment
+   did not specify a command or result count, so it is not a recorded file baseline.
+2. **Verify purchase-fixture failure paths.** On test-owned data, temporarily
+   fail before and after purchase and simulate cancellation failure. Verify
+   that field cleanup is attempted and the seller context is disposed; revert
+   temporary failures. A normal passing run does not establish these paths.
+   Because a shared fixture changed, include `isolated-user-tests` when closing
+   its verification scope. If multiple failures need clearer diagnosis, make
+   error preservation a separate small implementation exercise.
+3. **Consider the previously discussed HTTP-client duplication exercise.**
+   After the current verification is complete, inspect separating HTTP sending
+   from response parsing in `httpClient.ts`. The aim is to let convenience
+   helpers reuse raw domain functions without repeating endpoint URLs.
+   Preserve existing convenience return values and success behavior; keep
+   `expectApiSuccess` explicit in specs and 4xx responses accessible.
+   This is a proposed next exercise, not an implemented change or a reason to
+   migrate every endpoint at once.
 
-3. **Replace the random UI purchase.** Request `fieldOfferForPurchase` and
-   import `test`/`expect` from the proposed Marketplace fixture. Keep the current
-   test filename and project. Rename the title to
-   `should buy an owned test field offer and verify transaction history` while
-   preserving `TC-MARKET-001`. Use existing
-   `marketplacePage.buyOfferByDescription(description)`. Its description filter
-   supplies the lookup; use a unique value that matches one card. Keep the
-   success notification assertion in the spec. Stop using `clickRandomBuyNow`
-   and `PurchasedOffer` in this case; do not delete unrelated methods yet.
-
-4. **Replace inference with exact assertions and remove both suppressions.**
-   Read buyer fields before purchase and assert that `fieldId` is absent.
-   After purchase, read them again and assert that exact ID and `fieldName`.
-   Keep transaction history visible checks for `Purchase: ${fieldName}` and
-   the exact negative `price`. The fresh buyer has no earlier purchases; assert
-   one expense/history entry before using the existing last-amount helper.
-   Also confirm the field no longer belongs to the seller. If needed, expose
-   the seller request context explicitly as `sellerApi` from the fixture for
-   that read; keep the ownership assertion in the spec. No generic
-   `getOwnedResources` function or type-based branch is needed.
-
-5. **Finish cleanup for every outcome.** Keep the seller context alive through
-   `use`, and cancel only this offer if still active. Determine field ownership
-   from fresh seller and buyer reads, not a flag set after a UI assertion: a
-   purchase can succeed before a later assertion fails. Delete the exact field
-   using its current owner's context. Missing fields during partial setup can
-   be handled explicitly; failed reads and deletion errors must remain visible.
-   Ensure context disposal runs in an outer `finally` even when cleanup fails.
-   Ensure the buyer API session remains available through fixture teardown by
-   declaring its `apiSession`/`request` dependencies. Avoid empty catches.
-
-   This is ordinary lifecycle branching in fixture teardown, not alternative
-   scenario paths in the spec. Once the focused case passes, temporarily fail
-   an assertion after purchase and inspect cleanup; repeat with a failure before
-   purchase. Revert each temporary failure and record the outcomes. This checks
-   resource behavior that a successful run alone cannot establish.
-
-6. **Verify and record the migration.** Run the focused case with one worker
-   and zero retries, then `isolated-user-tests` because the fixture import and
-   optional API helper parameter affect that project. Run Marketplace API tests
-   for the existing `createFieldOffer` consumers and `npm run check:ci`.
-   Update the existing catalog title, regenerate the README index, and validate
-   mappings; keep the same case ID. Record actual results, including any unrelated
-   failure, rather than declaring the whole suite reliable.
+Verification commands below are suggestions, not recorded results. Each test
+command also runs the configured health-check dependency.
 
 ```bash
-npx playwright test tests/auth/marketplace.isolated.spec.ts --project=isolated-user-tests --grep "should buy an owned test field offer and verify transaction history" --workers=1 --retries=0
-npx playwright test --project=isolated-user-tests --workers=1 --retries=0
+npx playwright test tests/api/financial.api.spec.ts --project=api-tests --workers=1 --retries=0
 npx playwright test tests/api/marketplace.api.spec.ts --project=api-tests --workers=1 --retries=0
+npx playwright test tests/auth/marketplace.isolated.spec.ts --project=isolated-user-tests --workers=1 --retries=0
+npx playwright test tests/auth/registration.noauth.spec.ts --project=no-auth-tests --workers=1 --retries=0
 npm run check:ci
-npm run coverage:readme
-npm run coverage:validate
 ```
 
-These are future implementation checks, not commands executed for this plan.
-The catalog keeps its current title until the learner renames the actual test.
-No changes to `TC-MARKET-003`, project matching, or global ESLint rules belong
-in this exercise. Shared negative-purchase cases and the journey cleanup are
-later exercises. HTTP-envelope checks remain later work in Stage 1b.
+Use titles with `--grep`; case IDs are annotations, not title/tag filters.
+Preserve case IDs. If a title or catalog row changes, run `coverage:readme`
+and `coverage:validate`. Keep actual execution evidence in NOTES.
 
 ### Intentionally deferred
 

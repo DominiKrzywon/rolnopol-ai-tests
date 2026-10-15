@@ -6,6 +6,7 @@ import {
   getMarketplaceOffers,
   getMyOffers,
 } from 'src/api/marketplace.api';
+import { BASE_API_URL } from 'src/config/env.config';
 import { expect, test } from 'src/fixtures/marketplace.fixture';
 
 test.describe('Marketplace e2e tests', () => {
@@ -91,7 +92,9 @@ test.describe('Marketplace e2e tests', () => {
       annotation: { type: 'case-id', description: 'TC-MARKET-002' },
       tag: ['@marketplace', '@offers', '@crud'],
     },
-    async ({ request, marketplacePage }) => {
+    async ({ page, request, marketplacePage, fieldOfferForPurchase }) => {
+      const { description, fieldId, offerId, sellerApi } =
+        fieldOfferForPurchase;
       const expectedErrorMessage =
         'Insufficient funds to complete purchase (no overdraft allowed)';
       const balance = await getAccountBalance(request);
@@ -108,11 +111,38 @@ test.describe('Marketplace e2e tests', () => {
       expect(await getAccountBalance(request), 'balance must be 0').toBe(0);
 
       // Attempt a purchase without sufficient funds
-      await marketplacePage.attemptToBuyMostExpensiveOffer();
+      const [buyResponse] = await Promise.all([
+        page.waitForResponse(
+          (response) =>
+            response.url() === `${BASE_API_URL}/marketplace/buy` &&
+            response.request().method() === 'POST',
+        ),
+        marketplacePage.buyOfferByDescription(description),
+      ]);
 
+      expect(buyResponse.status()).toBe(400);
       await expect(marketplacePage.notificationMessage).toHaveText(
         expectedErrorMessage,
       );
+
+      const balanceAfter = await getAccountBalance(request);
+      expect(balanceAfter).toBe(0);
+
+      const offersAfter = await getMyOffers(sellerApi);
+      const offerAfter = offersAfter.find((offer) => offer.id === offerId);
+
+      expect(offerAfter).toMatchObject({
+        id: offerId,
+        itemType: 'field',
+        itemId: fieldId,
+        status: 'active',
+      });
+
+      const buyerFields = await getFields(request);
+      expect(buyerFields.map((field) => field.id)).not.toContain(fieldId);
+
+      const sellerFields = await getFields(sellerApi);
+      expect(sellerFields.map((field) => field.id)).toContain(fieldId);
     },
   );
 

@@ -67,8 +67,17 @@ test.describe('Registration Negative Tests', () => {
       await registerPage.goto();
       await registerPage.registerSubmitBtn.click();
 
-      await expect(registerPage.successMessage).toBeHidden();
-      await expect(page).toHaveURL(/register\.html$/);
+      const isEmailMissing = await registerPage.emailInput.evaluate(
+        (input: HTMLInputElement) => input.validity.valueMissing,
+      );
+      const isPasswordMissing = await registerPage.passwordInput.evaluate(
+        (input: HTMLInputElement) => input.validity.valueMissing,
+      );
+
+      expect(isEmailMissing).toBe(true);
+      expect(isPasswordMissing).toBe(true);
+      await expect(registerPage.emailInput).toBeFocused();
+      await expect(page).toHaveURL('/register.html');
     },
   );
 

@@ -1,7 +1,8 @@
-import { APIRequestContext } from '@playwright/test';
+import { APIRequestContext, APIResponse } from '@playwright/test';
 import { getJson, postJson } from 'src/api/httpClient';
 import { BASE_API_URL } from 'src/config/env.config';
 import {
+  CreateTransactionPayload,
   TransactionHistory,
   TransactionPayload,
   TransactionResponse,
@@ -39,6 +40,12 @@ export async function getAccountBalance(
   return account.balance;
 }
 
+export async function getAccountResponse(
+  request: APIRequestContext,
+): Promise<APIResponse> {
+  return request.get(`${BASE_API_URL}/financial/account`);
+}
+
 export async function transferFunds(
   request: APIRequestContext,
   data: {
@@ -61,4 +68,13 @@ export async function getTransactions(
     request,
     `${BASE_API_URL}/financial/transactions${params ? '?' + params : ''}`,
   );
+}
+
+export async function createTransactionResponse(
+  request: APIRequestContext,
+  payload: CreateTransactionPayload,
+): Promise<APIResponse> {
+  return request.post(`${BASE_API_URL}/financial/transactions`, {
+    data: payload,
+  });
 }

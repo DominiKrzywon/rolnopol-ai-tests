@@ -57,17 +57,20 @@ export const test = baseTest.extend<MarketplaceFixtures>({
       });
     } finally {
       try {
-        if (offerId !== undefined) {
-          await cancelOfferIfActive(sellerApi, offerId);
-        }
-        if (fieldId !== undefined) {
-          const sellerFields = await getFields(sellerApi);
-          const buyerFields = await getFields(request);
+        try {
+          if (offerId !== undefined) {
+            await cancelOfferIfActive(sellerApi, offerId);
+          }
+        } finally {
+          if (fieldId !== undefined) {
+            const sellerFields = await getFields(sellerApi);
+            const buyerFields = await getFields(request);
 
-          if (sellerFields.some((field) => field.id === fieldId)) {
-            await deleteField(sellerApi, fieldId);
-          } else if (buyerFields.some((field) => field.id === fieldId)) {
-            await deleteField(request, fieldId);
+            if (sellerFields.some((field) => field.id === fieldId)) {
+              await deleteField(sellerApi, fieldId);
+            } else if (buyerFields.some((field) => field.id === fieldId)) {
+              await deleteField(request, fieldId);
+            }
           }
         }
       } finally {
