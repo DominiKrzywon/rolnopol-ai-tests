@@ -1,4 +1,4 @@
-import { APIRequestContext } from '@playwright/test';
+import { APIRequestContext, APIResponse } from '@playwright/test';
 import { ApiEnvelope } from 'src/models/ApiResponse';
 
 export class ApiError extends Error {
@@ -23,6 +23,14 @@ async function send<T>(
     data,
   });
 
+  return readResponseData<T>(response, method, url);
+}
+
+export async function readResponseData<T>(
+  response: APIResponse,
+  method: 'GET' | 'POST' | 'DELETE',
+  url: string,
+): Promise<T> {
   const body = await response.text();
 
   if (!response.ok()) {

@@ -10,7 +10,7 @@ For each significant item, record:
 | Correction   | The smallest change and its risks                        |
 | Learning     | The concept explained by the exercise                    |
 | Verification | A specific test or check and the expected evidence       |
-| Roadmap      | An existing TEST_PLAN.md item or a proposed addition     |
+| Roadmap      | An existing NOTES.md learning item or proposed addition  |
 
 Describe size qualitatively and explain it: a local assertion change, a fixture
 change affecting several callers, or configuration affecting multiple projects.

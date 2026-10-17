@@ -1,15 +1,20 @@
 # Coding debt notes
 
 Context for deferred work and historical proposals. The single active backlog
-remains [TEST_PLAN.md](TEST_PLAN.md#4-roadmap). Historical proposals below are
+is in [NOTES.md](NOTES.md#current-learning-queue-october-17-2026). Historical proposals below are
 not new implementation instructions. This document is not embedded in the report.
+
+The learner chose to keep the Marketplace purchase cleanup unchanged. See the
+[agreed cleanup scope](NOTES.md#agreed-decision-keep-marketplace-purchase-cleanup).
+Earlier cleanup refactoring and fault-injection proposals below are superseded;
+do not add them back to the active learning queue.
 
 ### Historical refactoring proposals: October 10, 2026
 
 Steps 5 and 6 below are implemented in commit `8596fda`; step 7 is implemented
 in the current working tree. These paragraphs preserve the original proposals,
 not current implementation instructions. The active next steps are in
-[TEST_PLAN](TEST_PLAN.md#10-upcoming-exercises-with-the-mentor).
+[NOTES](NOTES.md#current-learning-queue-october-17-2026).
 
 5. **Make the HTTP envelope explicit in two small changes ? Stage 1b.**
    First use the existing `ApiEnvelope<T>` for the parsed response in

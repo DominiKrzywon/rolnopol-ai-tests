@@ -10,7 +10,8 @@ Apply the [shared context](../CONTEXT.md).
 ## Workflow
 
 1. Establish the scope and the user's problem. When asked for the next exercise,
-   start with the upcoming steps in TEST_PLAN.md.
+   start with the current learning queue in NOTES.md; use TEST_PLAN.md for scope
+   and scenario metadata.
 2. Compare the backlog with code, configuration, and available results.
    Do not suggest moving files again when they already have the correct suffix.
 3. Look for concrete costs: misleading assertions, shared sessions, hidden cleanup
@@ -22,7 +23,8 @@ Apply the [shared context](../CONTEXT.md).
 5. Choose the next small step, its dependencies, and its verification.
    Separate a correction required for the current exercise from an intentional deferral.
 6. Present the result in the conversation. When the task includes updating the roadmap,
-   edit the relevant TEST_PLAN.md item instead of creating a second backlog.
+   edit the relevant NOTES.md item instead of creating a second backlog.
+   Keep TEST_PLAN.md focused on strategy, scope and catalog metadata.
 
 ## Assessment boundaries
 

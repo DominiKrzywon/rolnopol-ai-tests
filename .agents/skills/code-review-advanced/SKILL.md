@@ -29,7 +29,7 @@ Reserve broader analysis for changes that cannot be assessed within one file.
    Select checks using the shared context. Inspection can expose an ineffective
    assertion; it does not prove that the application is defective or the test is flaky.
 6. Finish with the main findings and a sequence of small changes. When a backlog
-   is needed, connect improvements beyond the review scope to TEST_PLAN.md through
+   is needed, connect improvements beyond the review scope to the NOTES.md queue through
    [tech-debt-analysis](../tech-debt-analysis/SKILL.md).
 
 ## Priority and outcome

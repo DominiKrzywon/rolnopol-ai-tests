@@ -16,11 +16,13 @@ that materially changes the scope or expected behavior.
 
 ## Sources and freshness
 
-- [TEST_PLAN.md](../../TEST_PLAN.md): learning goals, scope, exclusions, upcoming
-  exercises, and the single active test backlog.
+- [TEST_PLAN.md](../../TEST_PLAN.md): test strategy, scope, exclusions, scenario
+  catalog and reporting contract; no mentor queue or progress notes.
 - [CODING_STANDARDS.md](../../CODING_STANDARDS.md): AAA, Page Objects, and locators.
-- [NOTES.md](../../NOTES.md): historical evidence, completed exercises, and reporting reference; not current run evidence.
-- [NOTES_CODING_DEBT.md](../../NOTES_CODING_DEBT.md): historical proposals and deferred concerns; TEST_PLAN remains the single active backlog.
+- [NOTES.md](../../NOTES.md): the single active learning queue, reference roadmap,
+  historical evidence, completed exercises and reporting reference; dated records
+  are not current run evidence.
+- [NOTES_CODING_DEBT.md](../../NOTES_CODING_DEBT.md): historical proposals and deferred concerns; NOTES owns the active learning queue.
 - [playwright.config.ts](../../playwright.config.ts): actual projects, filename
   patterns, dependencies, parallelism, and reporting.
 - [package.json](../../package.json), [tsconfig.json](../../tsconfig.json),

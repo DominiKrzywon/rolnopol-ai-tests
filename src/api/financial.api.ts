@@ -1,5 +1,5 @@
 import { APIRequestContext, APIResponse } from '@playwright/test';
-import { getJson, postJson } from 'src/api/httpClient';
+import { getJson, postJson, readResponseData } from 'src/api/httpClient';
 import { BASE_API_URL } from 'src/config/env.config';
 import {
   CreateTransactionPayload,
@@ -7,6 +7,7 @@ import {
   TransactionPayload,
   TransactionResponse,
 } from 'src/models/financial';
+import { AccountData } from 'src/types/accountData';
 
 export async function addTransaction(
   request: APIRequestContext,
@@ -32,9 +33,12 @@ export async function addTransaction(
 export async function getAccountBalance(
   request: APIRequestContext,
 ): Promise<number> {
-  const { account } = await getJson<{ account: { balance: number } }>(
-    request,
-    `${BASE_API_URL}/financial/account`,
+  const response = await getAccountResponse(request);
+
+  const { account } = await readResponseData<AccountData>(
+    response,
+    'GET',
+    response.url(),
   );
 
   return account.balance;

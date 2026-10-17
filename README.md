@@ -124,9 +124,10 @@ artifacts after both successful and failed runs. It is not currently a PR gate.
 ## Documentation
 
 - [TEST_PLAN.md](TEST_PLAN.md): strategy, scope exclusions, scenario catalog and
-  the single active learning backlog.
+  the reporting contract. Learning exercises live in NOTES.
 - [CODING_STANDARDS.md](CODING_STANDARDS.md): AAA, Page Objects and locator rules.
-- [NOTES.md](NOTES.md): historical evidence, completed exercises, reporting reference.
+- [NOTES.md](NOTES.md): current learning queue, reference roadmap, historical
+  evidence, completed exercises and reporting reference.
 - [NOTES_CODING_DEBT.md](NOTES_CODING_DEBT.md): refactoring history and deferred concerns.
 - [.agents/skills/CONTEXT.md](.agents/skills/CONTEXT.md): shared agent workflow.
 
@@ -244,7 +245,8 @@ Implementation and execution states are computed in the report, not edited here.
 
 All project skills are maintained in [.agents/skills](.agents/skills).
 The [shared context](.agents/skills/CONTEXT.md) defines mentoring mode,
-repository sources, and verification scope. TEST_PLAN.md remains the single test roadmap.
+repository sources, and verification scope. NOTES.md owns the learning queue;
+TEST_PLAN.md owns strategy, scope and the scenario catalog.
 
 | Skill                                                                                      | Purpose                                                                      |
 | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |

@@ -561,8 +561,8 @@ test.describe('Financial API', () => {
       const beforeRange = await getTransactions(
         request,
         new URLSearchParams({
-          startDate: date(transactionTime - 2 * day),
-          endDate: date(transactionTime - 3 * day),
+          startDate: date(transactionTime - 3 * day),
+          endDate: date(transactionTime - 2 * day),
         }).toString(),
       );
 
