@@ -7,7 +7,7 @@ test.describe('marketplace isolated tests', () => {
     'should cancel offer',
     {
       annotation: { type: 'case-id', description: 'TC-MARKET-006' },
-      tag: ['@marketplace', '@purchase', '@happy-path'],
+      tag: ['@marketplace', '@cancellation', '@happy-path'],
     },
     async ({ freshUser: _, request, activeFieldOffer, marketplacePage }) => {
       const expectedSuccessMessage = 'Offer cancelled successfully!';

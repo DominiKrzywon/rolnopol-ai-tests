@@ -1,7 +1,7 @@
 # Coding debt notes
 
 Context for deferred work and historical proposals. The single active backlog
-is in [NOTES.md](NOTES.md#current-learning-queue-october-17-2026). Historical proposals below are
+is in [NOTES.md](NOTES.md#current-learning-queue-october-18-2026). Historical proposals below are
 not new implementation instructions. This document is not embedded in the report.
 
 The learner chose to keep the Marketplace purchase cleanup unchanged. See the
@@ -14,7 +14,7 @@ do not add them back to the active learning queue.
 Steps 5 and 6 below are implemented in commit `8596fda`; step 7 is implemented
 in the current working tree. These paragraphs preserve the original proposals,
 not current implementation instructions. The active next steps are in
-[NOTES](NOTES.md#current-learning-queue-october-17-2026).
+[NOTES](NOTES.md#current-learning-queue-october-18-2026).
 
 5. **Make the HTTP envelope explicit in two small changes ? Stage 1b.**
    First use the existing `ApiEnvelope<T>` for the parsed response in

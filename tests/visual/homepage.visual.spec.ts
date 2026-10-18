@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { HomePage } from '../../../src/pages/HomePage';
+import { HomePage } from '../../src/pages/HomePage';
 
 test(
   'should match homepage visual snapshot',

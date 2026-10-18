@@ -16,8 +16,6 @@ test.describe('profile isolated tests', () => {
       const userEmail = freshUser.email;
 
       await profilePage.goto();
-      const updateUserDisplayName =
-        await profilePage.updateUserInfo(expectedUpdatedName);
 
       const [updateResponse] = await Promise.all([
         page.waitForResponse(
@@ -25,7 +23,7 @@ test.describe('profile isolated tests', () => {
             response.url() === `${BASE_API_URL}/users/profile` &&
             response.request().method() === 'PUT',
         ),
-        updateUserDisplayName,
+        profilePage.updateUserInfo(expectedUpdatedName),
       ]);
 
       const body = await updateResponse.json();
