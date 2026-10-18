@@ -14,6 +14,10 @@ export class ProfilePage extends BasePage {
   readonly updateProfileHeading: Locator;
   readonly dangerZoneHeading: Locator;
   readonly logoutBtn: Locator;
+  readonly editProfileInfoButton: Locator;
+  readonly updateUserName: Locator;
+  readonly saveUpdatedUserInfo: Locator;
+  readonly notificationMessage: Locator;
 
   readonly welcomeMessage: Locator;
   readonly displayedName: Locator;
@@ -44,6 +48,11 @@ export class ProfilePage extends BasePage {
       .getByTestId('header-component')
       .getByTestId('logout-btn');
 
+    this.editProfileInfoButton = page.locator('#editProfileInfoBtn');
+    this.updateUserName = page.getByPlaceholder('Enter display name');
+    this.saveUpdatedUserInfo = page.locator('#editProfileSave');
+    this.notificationMessage = page.locator('.notification-message');
+
     this.welcomeMessage = page.getByTestId('nav-profile');
     this.displayedName = page.getByTestId('displayed-name');
     this.emailValue = page.getByTestId('email-value');
@@ -61,5 +70,11 @@ export class ProfilePage extends BasePage {
 
   async logout(): Promise<void> {
     await this.logoutBtn.click();
+  }
+
+  async updateUserInfo(updatedName: string): Promise<void> {
+    await this.editProfileInfoButton.click();
+    await this.updateUserName.fill(updatedName);
+    await this.saveUpdatedUserInfo.click();
   }
 }

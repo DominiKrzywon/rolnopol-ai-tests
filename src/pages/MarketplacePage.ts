@@ -88,6 +88,14 @@ export class MarketplacePage extends BasePage {
     await this.itemsPerPageSelect.selectOption('36 per page');
   }
 
+  async cancelOffer(offerId: number): Promise<void> {
+    await this.page
+      .locator(`button.btn-cancel[data-offer-id="${offerId}"]`)
+      .click();
+
+    await this.confirmBuyButton.click();
+  }
+
   async getBalance(): Promise<number> {
     const balanceText = await this.userBalance.innerText();
     const balanceValue = balanceText.replace(/[^0-9.]/g, '');

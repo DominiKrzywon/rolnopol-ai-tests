@@ -95,7 +95,7 @@ the API to reject zero area or report this difference as a defect. The temporary
 
 ## 4. Learning notes
 
-The [current learning queue](NOTES.md#current-learning-queue-october-17-2026),
+The [current learning queue](NOTES.md#current-learning-queue-october-18-2026),
 [reference roadmap](NOTES.md#reference-roadmap), completed exercises and dated
 verification records live in NOTES. Keep mentor plans and progress notes there;
 they are not embedded in the coverage report. This document owns test strategy,
@@ -217,7 +217,7 @@ retain a risk estimate, but remain outside coverage denominators.
 | TC-PUBLIC-001  | Public      | Alerts page opens and displays its main controls                       | UI     | P2       | low      | included | Planned contract; review expected behavior before implementation.                                                                                               |
 | TC-PUBLIC-002  | Public      | Contact rejects missing required fields                                | UI     | P2       | medium   | included | Planned contract; review expected behavior before implementation.                                                                                               |
 | TC-PUBLIC-003  | Public      | Contact accepts a valid submission                                     | UI     | P2       | medium   | included | Planned contract; review expected behavior before implementation.                                                                                               |
-| TC-REG-001     | Auth        | should register new user successfully                                  | UI     | P0       | high     | included | Review needed: assertion still depends on a transient success message.                                                                                          |
+| TC-REG-001     | Auth        | should register new user successfully                                  | UI     | P0       | high     | included | Source reviewed 2026-10-18: POST 201, login heading and final login URL; no transient success-message assertion. No new application run.                        |
 | TC-REG-002     | Auth        | should display validation errors for invalid email and short password  | UI     | P0       | medium   | included | -                                                                                                                                                               |
 | TC-REG-003     | Auth        | should prevent registration with empty required fields                 | UI     | P0       | medium   | included | Source reviewed 2026-10-15: native missing-value checks, email focus, and URL. Learner reported a pass; exact command and broader results not supplied.         |
 | TC-REG-004     | Auth        | should reject password with 1 characters                               | UI     | P0       | high     | included | -                                                                                                                                                               |

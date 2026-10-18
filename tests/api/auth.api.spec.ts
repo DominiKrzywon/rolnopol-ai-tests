@@ -232,6 +232,7 @@ test.describe('Authentication API', () => {
       async ({ request }) => {
         // Arrange
         const invalidToken = 'invalid_token_xyz';
+        const expectedErrorMessage = 'Invalid or expired token';
 
         // Act
         const response = await validateAuthorizationGet(request, invalidToken);
@@ -240,12 +241,13 @@ test.describe('Authentication API', () => {
         // Assert
         expect(
           response.status(),
-          'Invalid token should return 401 Unauthorized',
+          'Invalid token should return 403 Forbidden',
         ).toBe(403);
         expect(
           body.success,
           'Response success flag should be false for invalid token',
         ).toBe(false);
+        expect(body.error).toBe(expectedErrorMessage);
       },
     );
 
