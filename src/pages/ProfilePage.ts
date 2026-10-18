@@ -32,6 +32,9 @@ export class ProfilePage extends BasePage {
   readonly saveChangesBtn: Locator;
 
   readonly deleteAccountBtn: Locator;
+  readonly confirmDeleteAccountBtn: Locator;
+  readonly deleteModalTitle: Locator;
+  readonly deleteConfirmationInput: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -66,6 +69,13 @@ export class ProfilePage extends BasePage {
     this.saveChangesBtn = page.getByTestId('update-profile-submit-btn');
 
     this.deleteAccountBtn = page.getByTestId('delete-account-btn');
+    this.confirmDeleteAccountBtn = page.getByTestId('confirm-delete-btn');
+    this.deleteModalTitle = page.getByRole('heading', {
+      name: 'Confirm Account Deletion',
+    });
+    this.deleteConfirmationInput = page.getByPlaceholder(
+      'Type DELETE to confirm',
+    );
   }
 
   async logout(): Promise<void> {
@@ -76,5 +86,14 @@ export class ProfilePage extends BasePage {
     await this.editProfileInfoButton.click();
     await this.updateUserName.fill(updatedName);
     await this.saveUpdatedUserInfo.click();
+  }
+
+  async openDeleteAccountModal(): Promise<void> {
+    await this.deleteAccountBtn.click();
+  }
+
+  async confirmAccountDeletion(): Promise<void> {
+    await this.deleteConfirmationInput.fill('DELETE');
+    await this.confirmDeleteAccountBtn.click();
   }
 }

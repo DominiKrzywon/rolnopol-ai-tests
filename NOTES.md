@@ -23,7 +23,15 @@ Keep the active baseline. Linux CI baseline verification remains separate.
 
 ### 2. Delete a fresh user's own account: TC-PROFILE-003
 
-This is the proposed next catalog exercise.
+Implemented in source and reviewed on October 18, 2026: modal visibility,
+disabled/enabled confirmation, DELETE response status and JSON, success
+notification, home URL/content, and rejected login (401, `error`, false success).
+The learner reports the final version working; no command or counts were supplied.
+The mentor's earlier focused run passed 2 tests (deletion and health dependency),
+and `npm run check:ci` passed, before the final response/navigation/login assertions
+were added. Final project-level and catalog checks remain pending.
+The home URL currently hardcodes localhost; derive it from configured BASE_URL
+before using this test against another environment.
 
 - **Files:** add the case to `tests/auth/profile.isolated.spec.ts`; extend
   `src/pages/ProfilePage.ts` only for the required modal locators/actions.
@@ -56,10 +64,19 @@ project-level completion check; report actual counts and dependency results.
 
 ### 3. Later catalog choices
 
-After the profile exercise, choose one small P2 case: native required-field
+After the profile exercise, choose one small P2 case: required-field
 validation on Contact (`TC-PUBLIC-002`), Alerts page controls
 (`TC-PUBLIC-001`) or chart-type switching without JavaScript errors
 (`TC-CHART-001`). These are choices, not an agreed implementation order.
+
+Proposed next exercise: Contact required-field validation. Source inspection on
+October 18 found `novalidate` and custom FormComponent validators, so do not copy
+the registration test's native-validation expectations. The form is gated by
+`contactFormEnabled`; confirm it is enabled in the target environment first.
+Use `tests/auth/contact.noauth.spec.ts`, a `ContactPage` and the base Page Object
+fixture. First assert the name/email errors after empty submission; then add
+subject/message errors and confirm that the user stays on the contact page.
+Do not submit a valid message as part of this negative scenario.
 
 ## Agreed learning scope
 
