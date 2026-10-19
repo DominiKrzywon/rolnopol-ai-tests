@@ -7,10 +7,12 @@ older notes. This file is not embedded in the coverage report.
 
 ## Current learning queue: October 18, 2026
 
-The profile response waiter is now registered before the update action;
-Marketplace cancellation uses the correct tag. The visual spec is now at
-`tests/visual/homepage.visual.spec.ts` with a corrected import. Do not repeat
-these implementation tasks. The current batch passed its project-level check; verification is recorded below.
+Reviewed again on October 19, 2026 against the four October 18 commits
+(`e1877bf` through `4f01a1b`) and the learner's subsequent Contact changes.
+Contact validation, successful submission and account deletion are implemented;
+do not assign their implementation again.
+The profile waiter, Marketplace cancellation tag and visual spec path are
+also corrected. Historical project results below apply to their recorded source.
 
 ### 1. Finish visual housekeeping
 
@@ -21,62 +23,75 @@ An older, different PNG remains inside the nested
 The learner can remove that obsolete nested directory after checking its contents.
 Keep the active baseline. Linux CI baseline verification remains separate.
 
-### 2. Delete a fresh user's own account: TC-PROFILE-003
+### 2. Account deletion: implementation and focused verification complete
 
 Implemented in source and reviewed on October 18, 2026: modal visibility,
 disabled/enabled confirmation, DELETE response status and JSON, success
 notification, home URL/content, and rejected login (401, `error`, false success).
-The learner reports the final version working; no command or counts were supplied.
-The mentor's earlier focused run passed 2 tests (deletion and health dependency),
-and `npm run check:ci` passed, before the final response/navigation/login assertions
-were added. Final project-level and catalog checks remain pending.
-The home URL currently hardcodes localhost; derive it from configured BASE_URL
-before using this test against another environment.
+The October 19 focused profile-file run passed both profile cases and the health
+dependency, including the final response/navigation/rejected-login assertions.
+The final source has not been rerun across the entire isolated-user project;
+the October 18 project result below remains historical evidence.
+October 19 source review confirms the home URL now uses `ENV.BASE_URL`.
+The previous hardcoded-localhost exercise is complete.
 
-- **Files:** add the case to `tests/auth/profile.isolated.spec.ts`; extend
-  `src/pages/ProfilePage.ts` only for the required modal locators/actions.
-  Reuse `freshUser` from `src/fixtures/auth.fixture.ts` and the existing
-  `deleteAccountBtn`. Never use the demo account for deletion.
-- **First small step:** open the deletion modal, assert that confirmation is
-  disabled, fill `DELETE`, and assert that confirmation becomes enabled.
-  Existing test IDs are `delete-confirmation-input` and `confirm-delete-btn`.
-- **Complete target:** start a waiter before confirmation for
-  `DELETE /api/v1/users/profile`, assert the agreed status and success response,
-  then the user-visible result and home-page redirect. Confirm that login with
-  the deleted user's credentials is rejected using the raw `loginUser` helper;
-  a redirect alone does not prove account deletion. Inspect the actual response
-  contract before selecting exact expected statuses/messages.
-- **Discovery evidence:** local application source
-  `../rolnopol/public/js/pages/profile.js`, `_setupDeleteAccountHandlers` and
-  `_handleDeleteAccount`, requires `DELETE`, calls that endpoint and redirects
-  to `/`. This is source inspection, not live validation of the deletion flow.
-- **Verify:** run only the new case first, then quality and catalog checks.
-  Keep the reserved ID; no duplicate catalog row is needed.
+The test uses its own `freshUser`, ProfilePage modal locators, a response waiter
+registered before confirmation, and the raw `loginUser` helper after deletion.
+Keep these checks. Any remaining project-level completion check concerns
+verification scope, not writing the scenario again.
 
-```bash
-npx playwright test tests/auth/profile.isolated.spec.ts --project=isolated-user-tests --grep "@deletion" --workers=1 --retries=0
-npm run check:ci
-npm run coverage:validate
-```
+### 3. Contact validation and successful submission: implemented
 
-Use `@deletion` on the new test for this filter. After review, perform the
-project-level completion check; report actual counts and dependency results.
+October 19 source review confirms both Contact exercises in
+`tests/auth/contact.noauth.spec.ts`, using the base Page Object fixture.
 
-### 3. Later catalog choices
+- `TC-PUBLIC-002`: empty submission produces all four custom validation messages
+  and keeps the contact URL. A `Request[]` records browser requests from before
+  clicking through the validation assertions; filtering by POST and the exact
+  configured contact endpoint confirms no matching request in that interval.
+  The listener is removed in `finally` using the same function reference.
+  The earlier string-array type, listener-name typo and incorrect endpoint
+  filter are corrected. No fixed timeout was added.
+- `TC-PUBLIC-003`: fills all four fields with generated data, registers the POST
+  response waiter before submission, and checks HTTP 200, `success: true`,
+  `Message received`, and the visible `Thanks! Message received.` notification.
+  Four `expect.soft(...).toHaveValue('')` assertions check the form reset;
+  failures still fail the test while allowing the remaining fields to be checked.
+- `ContactPage` now provides subject/message and notification locators plus
+  `sendTheMessage`; behavioral assertions remain in the spec.
 
-After the profile exercise, choose one small P2 case: required-field
-validation on Contact (`TC-PUBLIC-002`), Alerts page controls
-(`TC-PUBLIC-001`) or chart-type switching without JavaScript errors
-(`TC-CHART-001`). These are choices, not an agreed implementation order.
+The form uses custom validators with `novalidate` and depends on
+`contactFormEnabled`. The UI describes a test form without a real inbox; backend
+source saves contact records. No feature flags or cleanup endpoints were changed.
+A form-scoped alert locator remains an optional simplification, not an active task.
 
-Proposed next exercise: Contact required-field validation. Source inspection on
-October 18 found `novalidate` and custom FormComponent validators, so do not copy
-the registration test's native-validation expectations. The form is gated by
-`contactFormEnabled`; confirm it is enabled in the target environment first.
-Use `tests/auth/contact.noauth.spec.ts`, a `ContactPage` and the base Page Object
-fixture. First assert the name/email errors after empty submission; then add
-subject/message errors and confirm that the user stays on the contact page.
-Do not submit a valid message as part of this negative scenario.
+### 4. Next learning choices
+
+Contact implementation is complete; do not assign these two scenarios again.
+After focused verification, the entire `no-auth-tests` project remains a separate
+completion check; no full-project or full-suite result is implied.
+
+Small remaining quality step: `check:ci` succeeds with one ESLint warning at
+`tests/auth/contact.noauth.spec.ts:18` for the missing explicit return type of
+`trackRequests`. The learner can make the listener return `void` explicitly and
+use a block body for `requests.push(request)`; the current expression returns
+the array's new length. This is a typing/style warning, not a failed assertion.
+It does block commits: `.husky/pre-commit` runs lint-staged, whose TypeScript
+ESLint command uses `--max-warnings=0`. Reproduced with
+`npx eslint tests/auth/contact.noauth.spec.ts --max-warnings=0` (exit 1), while
+`npm run check:ci` exits 0 with the same warning. Fix the listener before
+committing; do not bypass the hook.
+
+Suggested next small case: Alerts page controls (`TC-PUBLIC-001`). First inspect
+`../rolnopol/public/alerts.html` and agree which main controls the scenario covers.
+Then add a no-auth spec and a minimal Alerts Page Object using the base fixture,
+asserting the heading and those controls. Verify the new file first, then run
+`npm run check:ci` and `npm run coverage:validate`; retain the reserved case ID.
+This is a proposed choice, not an agreed implementation request.
+
+Chart switching without JavaScript errors (`TC-CHART-001`) and visual housekeeping
+above remain alternatives. Keep any new exercise small and let the learner
+implement test, source and configuration changes.
 
 ## Agreed learning scope
 
@@ -111,6 +126,38 @@ Other application exclusions remain in
 
 ## Completed exercises
 
+October 19 Contact completion (after adding request tracking and the valid case):
+
+- `npx playwright test tests/auth/contact.noauth.spec.ts --project=no-auth-tests --workers=1 --retries=0`:
+  3 passed (both Contact scenarios and the health dependency), zero failed.
+  This run includes the no-POST assertion and all four soft reset assertions.
+- `npm run check:ci`: exit 0; formatting and TypeScript passed. ESLint reported
+  zero errors and one explicit-function-return-type warning for `trackRequests`.
+- After updating the catalog, `npm run coverage:readme` left the generated
+  README index unchanged; `npm run coverage:validate` passed with 94 collected
+  entries including 1 setup entry. The edited Markdown was formatted with Prettier.
+- Browser execution used the previously approved route outside the sandbox's
+  worker-spawn restriction. The mentor changed Markdown only; test and Page
+  Object implementation belongs to the learner.
+
+Earlier October 19 review of the October 18 changes (before Contact extensions):
+
+- `npx playwright test tests/auth/contact.noauth.spec.ts --project=no-auth-tests --workers=1 --retries=0`:
+  2 passed (Contact validation and the health dependency).
+- `npx playwright test tests/auth/profile.isolated.spec.ts --project=isolated-user-tests --workers=1 --retries=0`:
+  3 passed (display-name update, account deletion and the health dependency).
+- `npm run check:ci`: passed formatting, ESLint and TypeScript checks before
+  the documentation edits. No test, source or configuration files were changed.
+- After the documentation edits, `npm run coverage:readme` regenerated the
+  unchanged README scenario index; `npm run coverage:validate` passed and
+  collected 93 entries including 1 setup entry. Prettier checks
+  for NOTES, TEST_PLAN and README and `git diff --check` also passed.
+
+The first Contact attempt failed before test execution with sandbox `spawn EPERM`;
+the successful browser runs used approved execution outside that restriction.
+These are focused results, not a current full-project or full-suite baseline.
+The auth API error-message change was reviewed in source only; it was not rerun.
+
 The October 15–17 batch is closed in source: Financial raw-response helpers and
 recipient fixture; Marketplace API helpers and typed offer reader; isolated
 purchase/rejection flows; registration response/navigation and native required
@@ -138,8 +185,8 @@ No test, source or configuration changes were made by the mentor.
 
 ## Reference roadmap
 
-Finish the small queue above before broader authorization, account-deletion or
-public-page exercises. `TC-AUTH-012` already covers anonymous fields access in
+Use the small queue above for next choices; account deletion and both Contact
+scenarios are already implemented. `TC-AUTH-012` covers anonymous fields access in
 `tests/api/farm.api.spec.ts`. Do not reopen completed Financial, registration or
 Marketplace purchase work or automatically migrate every HTTP endpoint.
 
