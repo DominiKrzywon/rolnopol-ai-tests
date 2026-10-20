@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { Locator, Page } from '@playwright/test';
 
 /**
  * Base class for Page Object pattern implementation.
@@ -6,10 +6,12 @@ import { Page } from '@playwright/test';
  */
 export abstract class BasePage {
   readonly page: Page;
+  readonly notificationMessage: Locator;
   abstract readonly PAGE_URL: string;
 
   constructor(page: Page) {
     this.page = page;
+    this.notificationMessage = page.locator('.notification-message');
   }
 
   async goto(): Promise<void> {

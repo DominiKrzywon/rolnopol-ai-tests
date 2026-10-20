@@ -1,68 +1,91 @@
-import { Locator, Page } from '@playwright/test';
+import { Locator } from '@playwright/test';
 import { PAGE_URLS } from 'src/constants/pageUrls';
 import { BasePage } from 'src/pages/BasePage';
 
 export class ManagementPage extends BasePage {
   readonly PAGE_URL = PAGE_URLS.MANAGEMENT;
-  readonly header: Locator;
-  readonly totalFields: Locator;
-  readonly totalStaff: Locator;
-  readonly totalAnimals: Locator;
-  readonly totalArea: Locator;
+  readonly header = this.page.getByRole('heading', {
+    name: 'Staff & Fields Management',
+  });
+  readonly totalFields = this.page.locator('.totalFields');
+  readonly totalStaff = this.page.locator('.totalStaff');
+  readonly totalAnimals = this.page.locator('.totalAnimals');
+  readonly totalArea = this.page.locator('.totalArea');
 
-  readonly addFieldModal: Locator;
-  readonly fieldHeading: Locator;
-  readonly fieldNameModal: Locator;
-  readonly fieldDistrictModal: Locator;
-  readonly fieldAreaModal: Locator;
-  readonly addFieldModalButton: Locator;
-  readonly fieldNameModalError: Locator;
-  readonly fieldAreaModalError: Locator;
-  readonly fieldAddedMessage: Locator;
-  readonly searchFieldInput: Locator;
+  readonly addFieldModal = this.page.locator('#openAddFieldModal');
+  readonly fieldHeading = this.page.getByRole('heading', { name: ' Fields' });
+  readonly fieldNameModal = this.page.getByPlaceholder('Enter field name');
+  readonly fieldDistrictModal = this.page.locator('#fieldDistrict');
+  readonly fieldAreaModal = this.page.locator('#fieldArea');
+  readonly addFieldModalButton = this.page.locator(
+    "#addFieldModal button[type='submit']",
+  );
+  readonly fieldNameModalError = this.page.locator('#fieldNameError');
+  readonly fieldAreaModalError = this.page.locator('#fieldAreaError');
+  readonly fieldAddedMessage = this.page.getByText('Field added!');
+  readonly searchFieldInput = this.page.getByPlaceholder('Search fields...');
 
-  readonly fieldsList: Locator;
-  readonly fieldCards: Locator;
-  readonly fieldsPagination: Locator;
-  readonly fieldsPaginationInfo: Locator;
-  readonly nextFieldsPageButton: Locator;
-  readonly previousFieldsPageButton: Locator;
+  readonly fieldsList = this.page.locator('#fieldsList');
+  readonly fieldCards = this.fieldsList.locator('li');
+  readonly fieldsPagination = this.page.locator('#fieldsPagination');
+  readonly fieldsPaginationInfo =
+    this.fieldsPagination.locator('.pagination-info');
+  readonly nextFieldsPageButton = this.fieldsPagination.locator(
+    'button[data-page="next"]',
+  );
+  readonly previousFieldsPageButton = this.fieldsPagination.locator(
+    'button[data-page="prev"]',
+  );
 
-  readonly addStaffModal: Locator;
-  readonly staffHeading: Locator;
-  readonly staffNameModal: Locator;
-  readonly staffSurnameModal: Locator;
-  readonly staffAgeModal: Locator;
-  readonly staffModalButton: Locator;
-  readonly staffNameModalError: Locator;
-  readonly staffSurnameModalError: Locator;
-  readonly staffAgeModalError: Locator;
-  readonly staffAddedMessage: Locator;
-  readonly searchStaffInput: Locator;
+  readonly addStaffModal = this.page.locator('#openAddStaffModal');
+  readonly staffHeading = this.page.getByRole('heading', { name: ' Staff' });
+  readonly staffNameModal = this.page.getByPlaceholder('Enter name');
+  readonly staffSurnameModal = this.page.getByPlaceholder('Enter surname');
+  readonly staffAgeModal = this.page.getByPlaceholder('e.g. 30');
+  readonly staffModalButton = this.page
+    .getByRole('button', { name: ' Add Staff' })
+    .last();
+  readonly staffNameModalError = this.page.locator('#staffNameError');
+  readonly staffSurnameModalError = this.page.locator('#staffSurnameError');
+  readonly staffAgeModalError = this.page.locator('#staffAgeError');
+  readonly staffAddedMessage = this.page.getByText('Staff added!');
+  readonly searchStaffInput = this.page.getByPlaceholder('Search staff...');
 
-  readonly addAnimal: Locator;
-  readonly animalHeading;
-  readonly animalTypeModal: Locator;
-  readonly animalAmountModal: Locator;
-  readonly animalFieldModal: Locator;
-  readonly animalAddModalButton: Locator;
-  readonly animalAmountModalError: Locator;
-  readonly searchAnimalInput: Locator;
+  readonly addAnimal = this.page.locator('#openAddAnimalModal');
+  readonly animalHeading = this.page.getByRole('heading', {
+    name: ' Animals (groups)',
+  });
+  readonly animalTypeModal = this.page.locator('#animalType');
+  readonly animalAmountModal = this.page.locator('#animalAmount');
+  readonly animalFieldModal = this.page.locator('#animalField');
+  readonly animalAddModalButton = this.page
+    .getByRole('button', {
+      name: ' Add Animal',
+    })
+    .last();
+  readonly animalAmountModalError = this.page.locator('#animalAmountError');
+  readonly searchAnimalInput = this.page.locator('#animalsSearch');
 
-  readonly editFieldNameModal: Locator;
-  readonly editFieldAreaModal: Locator;
-  readonly editFieldSaveButton: Locator;
+  readonly editFieldNameModal = this.page.locator('#editFieldName');
+  readonly editFieldAreaModal = this.page.locator('#editFieldArea');
+  readonly editFieldSaveButton = this.page.locator(
+    '#editFieldForm button[type="submit"]',
+  );
 
-  readonly editStaffNameModal: Locator;
-  readonly editStaffSurnameModal: Locator;
-  readonly editStaffAgeModal: Locator;
-  readonly editStaffSaveButton: Locator;
+  readonly editStaffNameModal = this.page.locator('#editStaffName');
+  readonly editStaffSurnameModal = this.page.locator('#editStaffSurname');
+  readonly editStaffAgeModal = this.page.locator('#editStaffAge');
+  readonly editStaffSaveButton = this.page.locator(
+    '#editStaffForm button[type="submit"]',
+  );
 
-  readonly editAnimalTypeModal: Locator;
-  readonly editAnimalAmountModal: Locator;
-  readonly editAnimalSaveButton: Locator;
+  readonly editAnimalTypeModal = this.page.locator('#editAnimalType');
+  readonly editAnimalAmountModal = this.page.locator('#editAnimalAmount');
+  readonly editAnimalSaveButton = this.page.locator(
+    '#editAnimalForm button[type="submit"]',
+  );
 
-  readonly confirmDeleteLocator: Locator;
+  readonly confirmDeleteLocator = this.page.locator('#confirmConfirmModal');
 
   readonly closeButtons = {
     addField: this.page.locator('#closeAddFieldModal'),
@@ -80,92 +103,6 @@ export class ManagementPage extends BasePage {
     deleteStaff: this.page.locator('button[title="Delete Staff"]'),
     deleteAnimal: this.page.locator('button[title="Delete Animal"]'),
   };
-
-  constructor(page: Page) {
-    super(page);
-    this.header = page.getByRole('heading', {
-      name: 'Staff & Fields Management',
-    });
-    this.totalFields = page.locator('.totalFields');
-    this.totalStaff = page.locator('.totalStaff');
-    this.totalAnimals = page.locator('.totalAnimals');
-    this.totalArea = page.locator('.totalArea');
-
-    this.addFieldModal = page.locator('#openAddFieldModal');
-    this.fieldHeading = page.getByRole('heading', { name: ' Fields' });
-    this.fieldNameModal = page.getByPlaceholder('Enter field name');
-    this.fieldDistrictModal = page.locator('#fieldDistrict');
-    this.fieldAreaModal = page.locator('#fieldArea');
-    this.addFieldModalButton = page.locator(
-      "#addFieldModal button[type='submit']",
-    );
-    this.fieldNameModalError = page.locator('#fieldNameError');
-    this.fieldAreaModalError = page.locator('#fieldAreaError');
-    this.fieldAddedMessage = page.getByText('Field added!');
-    this.searchFieldInput = page.getByPlaceholder('Search fields...');
-
-    this.fieldsList = page.locator('#fieldsList');
-    this.fieldCards = this.fieldsList.locator('li');
-    this.fieldsPagination = page.locator('#fieldsPagination');
-    this.fieldsPaginationInfo =
-      this.fieldsPagination.locator('.pagination-info');
-    this.nextFieldsPageButton = this.fieldsPagination.locator(
-      'button[data-page="next"]',
-    );
-    this.previousFieldsPageButton = this.fieldsPagination.locator(
-      'button[data-page="prev"]',
-    );
-
-    this.addStaffModal = page.locator('#openAddStaffModal');
-    this.staffHeading = page.getByRole('heading', { name: ' Staff' });
-    this.staffNameModal = page.getByPlaceholder('Enter name');
-    this.staffSurnameModal = page.getByPlaceholder('Enter surname');
-    this.staffAgeModal = page.getByPlaceholder('e.g. 30');
-    this.staffModalButton = page
-      .getByRole('button', { name: ' Add Staff' })
-      .last();
-    this.staffNameModalError = page.locator('#staffNameError');
-    this.staffSurnameModalError = page.locator('#staffSurnameError');
-    this.staffAgeModalError = page.locator('#staffAgeError');
-    this.staffAddedMessage = page.getByText('Staff added!');
-    this.searchStaffInput = page.getByPlaceholder('Search staff...');
-
-    this.addAnimal = page.locator('#openAddAnimalModal');
-    this.animalHeading = page.getByRole('heading', {
-      name: ' Animals (groups)',
-    });
-    this.animalTypeModal = page.locator('#animalType');
-    this.animalAmountModal = page.locator('#animalAmount');
-    this.animalFieldModal = page.locator('#animalField');
-    this.animalAddModalButton = page
-      .getByRole('button', {
-        name: ' Add Animal',
-      })
-      .last();
-    this.animalAmountModalError = page.locator('#animalAmountError');
-    this.searchAnimalInput = page.locator('#animalsSearch');
-
-    this.editFieldNameModal = page.locator('#editFieldName');
-    this.editFieldAreaModal = page.locator('#editFieldArea');
-    this.editFieldSaveButton = page.locator(
-      '#editFieldForm button[type="submit"]',
-    );
-
-    this.editStaffNameModal = page.locator('#editStaffName');
-    this.editStaffSurnameModal = page.locator('#editStaffSurname');
-    this.editStaffAgeModal = page.locator('#editStaffAge');
-    this.editStaffSaveButton = page.locator(
-      '#editStaffForm button[type="submit"]',
-    );
-
-    this.editAnimalTypeModal = page.locator('#editAnimalType');
-    this.editAnimalAmountModal = page.locator('#editAnimalAmount');
-    this.editAnimalSaveButton = page.locator(
-      '#editAnimalForm button[type="submit"]',
-    );
-
-    this.confirmDeleteLocator = page.locator('#confirmConfirmModal');
-  }
 
   async openAddFieldModal(): Promise<void> {
     await this.addFieldModal.click();

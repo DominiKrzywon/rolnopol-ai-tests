@@ -1,61 +1,34 @@
-import { Locator, Page } from '@playwright/test';
+import { Locator } from '@playwright/test';
 import { PAGE_URLS } from 'src/constants/pageUrls';
 import { BasePage } from 'src/pages/BasePage';
 
 export class AssignPage extends BasePage {
   readonly PAGE_URL = PAGE_URLS.ASSIGN;
-  readonly header: Locator;
-  readonly notification: Locator;
-  readonly unassignedStaffCount: Locator;
-  readonly totalStaffCount: Locator;
-  readonly newAssignButton: Locator;
+  readonly header = this.page.getByRole('heading', {
+    name: 'Staff Assignment Management',
+  });
+  readonly unassignedStaffCount = this.page.locator('#unassignedStaffCount');
+  readonly totalStaffCount = this.page.locator('.totalStaffCount');
+  readonly newAssignButton = this.page.locator('#openAssignModal');
 
-  readonly assignmentLocator: Locator;
-  readonly gridTitleLocator: Locator;
-  readonly gridSubtitleLocator: Locator;
-  readonly gridCancelButton: Locator;
+  readonly assignmentLocator = this.page.locator('.assignmentsGrid');
+  readonly gridTitleLocator = this.page.locator('.grid-title');
+  readonly gridSubtitleLocator = this.page.locator('.grid-subtitle');
+  readonly gridCancelButton = this.page.getByTitle('Unassign');
 
-  readonly fieldSelectModal: Locator;
-  readonly staffSelectModal: Locator;
-  readonly assignSubmitButton: Locator;
-  readonly cancelAssignButton: Locator;
-  readonly closeAssignButton: Locator;
+  readonly fieldSelectModal = this.page.locator('#assignField');
+  readonly staffSelectModal = this.page.locator('#assignStaff');
+  readonly assignSubmitButton = this.page.locator(
+    '#assignStaffForm button[type="submit"]',
+  );
+  readonly cancelAssignButton = this.page.locator('#cancelAssignModal');
+  readonly closeAssignButton = this.page.locator('#closeAssignModal');
 
-  readonly assignTree;
-  readonly assignmentsNodeTree: Locator;
-  readonly treeFieldName: Locator;
-  readonly staffForFieldTree: Locator;
-  readonly nameStaffOnFieldTree: Locator;
-
-  constructor(page: Page) {
-    super(page);
-    this.header = page.getByRole('heading', {
-      name: 'Staff Assignment Management',
-    });
-    this.notification = page.locator('.notification-message');
-    this.unassignedStaffCount = page.locator('#unassignedStaffCount');
-    this.totalStaffCount = page.locator('.totalStaffCount');
-    this.newAssignButton = page.locator('#openAssignModal');
-
-    this.assignmentLocator = page.locator('.assignmentsGrid');
-    this.gridTitleLocator = page.locator('.grid-title');
-    this.gridSubtitleLocator = page.locator('.grid-subtitle');
-    this.gridCancelButton = page.getByTitle('Unassign');
-
-    this.fieldSelectModal = page.locator('#assignField');
-    this.staffSelectModal = page.locator('#assignStaff');
-    this.assignSubmitButton = page.locator(
-      '#assignStaffForm button[type="submit"]',
-    );
-    this.cancelAssignButton = page.locator('#cancelAssignModal');
-    this.closeAssignButton = page.locator('#closeAssignModal');
-
-    this.assignTree = page.getByRole('button', { name: 'Tree' });
-    this.assignmentsNodeTree = page.locator('#assignmentsTree');
-    this.treeFieldName = page.locator('.tree-node-title');
-    this.staffForFieldTree = page.locator('.tree-node-staff-count');
-    this.nameStaffOnFieldTree = page.locator('.tree-child-name');
-  }
+  readonly assignTree = this.page.getByRole('button', { name: 'Tree' });
+  readonly assignmentsNodeTree = this.page.locator('#assignmentsTree');
+  readonly treeFieldName = this.page.locator('.tree-node-title');
+  readonly staffForFieldTree = this.page.locator('.tree-node-staff-count');
+  readonly nameStaffOnFieldTree = this.page.locator('.tree-child-name');
 
   async openNewAssignmentModal(): Promise<void> {
     await this.newAssignButton.click();
@@ -65,20 +38,13 @@ export class AssignPage extends BasePage {
     fieldLabel: string,
     staffLabel: string,
   ): Promise<void> {
-    await this.openNewAssignmentModal();
-
-    const fieldOption = this.fieldSelectModal.locator('option', {
-      hasText: fieldLabel,
-    });
-    await fieldOption.waitFor({ state: 'attached' });
-
-    const fieldValue = await fieldOption.getAttribute('value');
-    await this.fieldSelectModal.selectOption({ value: fieldValue! });
+    await this.openAssignForm(fieldLabel);
 
     const staffOption = this.staffSelectModal.locator('option', {
       hasText: staffLabel,
     });
     await staffOption.waitFor({ state: 'attached' });
+
     const staffValue = await staffOption.getAttribute('value');
     await this.staffSelectModal.selectOption({ value: staffValue! });
 

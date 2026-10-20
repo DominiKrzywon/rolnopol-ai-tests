@@ -1,4 +1,3 @@
-import { Locator, Page } from '@playwright/test';
 import { PAGE_URLS } from 'src/constants/pageUrls';
 import { BasePage } from 'src/pages/BasePage';
 
@@ -25,88 +24,52 @@ export type TransferFundsOptions = {
 
 export class FinancialPage extends BasePage {
   readonly PAGE_URL = PAGE_URLS.FINANCIAL;
-  readonly header: Locator;
-  readonly currentBalance: Locator;
-  readonly transactionHistory: Locator;
-  readonly notificationMessage: Locator;
+  readonly header = this.page.locator('.main-title');
+  readonly currentBalance = this.page.locator('#current-balance');
+  readonly transactionHistory = this.page.locator('#transactions-container');
 
-  readonly totalIncome: Locator;
-  readonly totalExpenses: Locator;
-  readonly totalTransaction: Locator;
-  readonly totalNetIncome: Locator;
+  readonly totalIncome = this.page.locator('#total-income');
+  readonly totalExpenses = this.page.locator('#total-expenses');
+  readonly totalTransaction = this.page.locator('#transaction-count');
+  readonly totalNetIncome = this.page.locator('#net-income');
 
-  readonly transferFundsHeader: Locator;
-  readonly transferFormContent: Locator;
-  readonly transferToUserId: Locator;
-  readonly transferAmount: Locator;
-  readonly transferDescription: Locator;
-  readonly transferSubmit: Locator;
-  readonly transferSuccess: Locator;
-  readonly transferAmountError: Locator;
-  readonly transferFormError: Locator;
-  readonly startDateInput: Locator;
-  readonly endDateInput: Locator;
+  readonly transferFundsHeader = this.page.locator('#transfer-form-header');
+  readonly transferFormContent = this.page.locator('#transfer-form-content');
+  readonly transferToUserId = this.page.locator('#transfer-toUserId');
+  readonly transferAmount = this.page.locator('#transfer-amount');
+  readonly transferDescription = this.page.locator('#transfer-description');
+  readonly transferSubmit = this.page.locator('#submit-transfer');
+  readonly transferSuccess = this.page.locator('#transfer-form-success');
+  readonly transferAmountError = this.page.locator('#transfer-amount-error');
+  readonly transferFormError = this.page.locator('#transfer-form-errors');
+  readonly startDateInput = this.page.getByLabel('Start Date');
+  readonly endDateInput = this.page.getByLabel('End Date');
 
-  readonly transactionFormHeader: Locator;
-  readonly transactionContent: Locator;
-  readonly transactionTypeIncome: Locator;
-  readonly transactionTypeExpense: Locator;
-  readonly transactionAmount: Locator;
-  readonly transactionCategory: Locator;
-  readonly transactionIncomeCardNumber: Locator;
-  readonly transactionCvv: Locator;
-  readonly transactionDescription: Locator;
-  readonly transactionSubmit: Locator;
-  readonly transactionRows: Locator;
+  readonly transactionFormHeader = this.page.locator(
+    '#transaction-form-header',
+  );
+  readonly transactionContent = this.page.locator('#transaction-form-content');
+  readonly transactionTypeIncome = this.page.locator('[data-type="income"]');
+  readonly transactionTypeExpense = this.page.locator('[data-type="expense"]');
+  readonly transactionAmount = this.page.locator('#transaction-amount');
+  readonly transactionCategory = this.page.locator('#transaction-category');
+  readonly transactionIncomeCardNumber = this.page.locator(
+    '#transaction-card-number',
+  );
+  readonly transactionCvv = this.page.locator('#transaction-cvv');
+  readonly transactionDescription = this.page.locator(
+    '#transaction-description',
+  );
+  readonly transactionSubmit = this.page.locator('#submit-transaction');
+  readonly transactionRows = this.page.locator(
+    '#transactions-container tbody tr',
+  );
 
-  readonly transactionTable: Locator;
-  readonly filterType: Locator;
-  readonly filterCategory: Locator;
-  readonly prevTransactionPage: Locator;
-  readonly nextTransactionPage: Locator;
-
-  constructor(page: Page) {
-    super(page);
-    this.header = page.locator('.main-title');
-    this.currentBalance = page.locator('#current-balance');
-    this.transactionHistory = page.locator('#transactions-container');
-    this.notificationMessage = page.locator('.notification-message');
-
-    this.totalIncome = page.locator('#total-income');
-    this.totalExpenses = page.locator('#total-expenses');
-    this.totalTransaction = page.locator('#transaction-count');
-    this.totalNetIncome = page.locator('#net-income');
-
-    this.transferFundsHeader = page.locator('#transfer-form-header');
-    this.transferFormContent = page.locator('#transfer-form-content');
-    this.transferToUserId = page.locator('#transfer-toUserId');
-    this.transferAmount = page.locator('#transfer-amount');
-    this.transferDescription = page.locator('#transfer-description');
-    this.transferSubmit = page.locator('#submit-transfer');
-    this.transferSuccess = page.locator('#transfer-form-success');
-    this.transferAmountError = page.locator('#transfer-amount-error');
-    this.transferFormError = page.locator('#transfer-form-errors');
-    this.startDateInput = page.getByLabel('Start Date');
-    this.endDateInput = page.getByLabel('End Date');
-
-    this.transactionFormHeader = page.locator('#transaction-form-header');
-    this.transactionContent = page.locator('#transaction-form-content');
-    this.transactionTypeIncome = page.locator('[data-type="income"]');
-    this.transactionTypeExpense = page.locator('[data-type="expense"]');
-    this.transactionAmount = page.locator('#transaction-amount');
-    this.transactionCategory = page.locator('#transaction-category');
-    this.transactionIncomeCardNumber = page.locator('#transaction-card-number');
-    this.transactionCvv = page.locator('#transaction-cvv');
-    this.transactionDescription = page.locator('#transaction-description');
-    this.transactionSubmit = page.locator('#submit-transaction');
-    this.transactionRows = page.locator('#transactions-container tbody tr');
-
-    this.transactionTable = page.locator('.transactions-table');
-    this.filterType = page.locator('#filter-type');
-    this.filterCategory = page.locator('#filter-category');
-    this.prevTransactionPage = page.locator('#prev-page');
-    this.nextTransactionPage = page.locator('#next-page');
-  }
+  readonly transactionTable = this.page.locator('.transactions-table');
+  readonly filterType = this.page.locator('#filter-type');
+  readonly filterCategory = this.page.locator('#filter-category');
+  readonly prevTransactionPage = this.page.locator('#prev-page');
+  readonly nextTransactionPage = this.page.locator('#next-page');
 
   async expandTransferForm(): Promise<void> {
     const isCollapsed = await this.transferFormContent.evaluate((element) =>

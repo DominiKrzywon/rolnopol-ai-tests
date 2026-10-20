@@ -53,7 +53,9 @@ test.describe('Staff Assignment Management', () => {
       await assignPage.goto();
       await assignPage.assignStaffToField(fieldName, fullName);
 
-      await expect(assignPage.notification).toHaveText(expectedSuccessMessage);
+      await expect(assignPage.notificationMessage).toHaveText(
+        expectedSuccessMessage,
+      );
     },
   );
 

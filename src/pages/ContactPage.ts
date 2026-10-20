@@ -3,12 +3,9 @@ import { BasePage } from 'src/pages/BasePage';
 
 export class ContactPage extends BasePage {
   readonly PAGE_URL = PAGE_URLS.CONTACT;
-
   readonly contactHeader = this.page.getByRole('heading', {
     name: 'Contact Us',
   });
-  readonly notificationMessage = this.page.locator('.notification-message');
-
   readonly nameInput = this.page.getByPlaceholder('Jane Doe');
   readonly emailInput = this.page.getByPlaceholder('jane@example.com');
   readonly subjectInput = this.page.getByPlaceholder('How can we help?');

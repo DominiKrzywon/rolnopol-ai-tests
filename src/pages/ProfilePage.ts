@@ -1,5 +1,3 @@
-import { Locator, Page } from '@playwright/test';
-
 import { PAGE_URLS } from '../constants/pageUrls';
 import { BasePage } from './BasePage';
 
@@ -10,73 +8,45 @@ import { BasePage } from './BasePage';
 export class ProfilePage extends BasePage {
   readonly PAGE_URL = PAGE_URLS.PROFILE;
 
-  readonly profileInformationHeading: Locator;
-  readonly updateProfileHeading: Locator;
-  readonly dangerZoneHeading: Locator;
-  readonly logoutBtn: Locator;
-  readonly editProfileInfoButton: Locator;
-  readonly updateUserName: Locator;
-  readonly saveUpdatedUserInfo: Locator;
-  readonly notificationMessage: Locator;
+  readonly profileInformationHeading = this.page.getByRole('heading', {
+    name: 'Profile Information',
+  });
+  readonly updateProfileHeading = this.page.getByRole('heading', {
+    name: 'Update Profile',
+  });
+  readonly dangerZoneHeading = this.page.getByRole('heading', {
+    name: 'Danger Zone',
+  });
+  readonly logoutBtn = this.page
+    .getByTestId('header-component')
+    .getByTestId('logout-btn');
+  readonly editProfileInfoButton = this.page.locator('#editProfileInfoBtn');
+  readonly updateUserName = this.page.getByPlaceholder('Enter display name');
+  readonly saveUpdatedUserInfo = this.page.locator('#editProfileSave');
 
-  readonly welcomeMessage: Locator;
-  readonly displayedName: Locator;
-  readonly emailValue: Locator;
-  readonly userId: Locator;
-  readonly createdAt: Locator;
-  readonly lastLogin: Locator;
+  readonly welcomeMessage = this.page.getByTestId('nav-profile');
+  readonly displayedName = this.page.getByTestId('displayed-name');
+  readonly emailValue = this.page.getByTestId('email-value');
+  readonly userId = this.page.getByTestId('user-id');
+  readonly createdAt = this.page.getByTestId('created-at');
+  readonly lastLogin = this.page.getByTestId('last-login');
 
-  readonly displayNameInput: Locator;
-  readonly newPasswordInput: Locator;
-  readonly confirmPasswordInput: Locator;
-  readonly saveChangesBtn: Locator;
+  readonly displayNameInput = this.page.getByTestId('new-displayed-name-input');
+  readonly newPasswordInput = this.page.getByTestId('new-password-input');
+  readonly confirmPasswordInput = this.page.getByTestId(
+    'confirm-password-input',
+  );
+  readonly saveChangesBtn = this.page.getByTestId('update-profile-submit-btn');
 
-  readonly deleteAccountBtn: Locator;
-  readonly confirmDeleteAccountBtn: Locator;
-  readonly deleteModalTitle: Locator;
-  readonly deleteConfirmationInput: Locator;
-
-  constructor(page: Page) {
-    super(page);
-    this.profileInformationHeading = page.getByRole('heading', {
-      name: 'Profile Information',
-    });
-    this.updateProfileHeading = page.getByRole('heading', {
-      name: 'Update Profile',
-    });
-    this.dangerZoneHeading = page.getByRole('heading', {
-      name: 'Danger Zone',
-    });
-    this.logoutBtn = page
-      .getByTestId('header-component')
-      .getByTestId('logout-btn');
-
-    this.editProfileInfoButton = page.locator('#editProfileInfoBtn');
-    this.updateUserName = page.getByPlaceholder('Enter display name');
-    this.saveUpdatedUserInfo = page.locator('#editProfileSave');
-    this.notificationMessage = page.locator('.notification-message');
-
-    this.welcomeMessage = page.getByTestId('nav-profile');
-    this.displayedName = page.getByTestId('displayed-name');
-    this.emailValue = page.getByTestId('email-value');
-    this.userId = page.getByTestId('user-id');
-    this.createdAt = page.getByTestId('created-at');
-    this.lastLogin = page.getByTestId('last-login');
-
-    this.displayNameInput = page.getByTestId('new-displayed-name-input');
-    this.newPasswordInput = page.getByTestId('new-password-input');
-    this.confirmPasswordInput = page.getByTestId('confirm-password-input');
-    this.saveChangesBtn = page.getByTestId('update-profile-submit-btn');
-
-    this.deleteAccountBtn = page.getByTestId('delete-account-btn');
-    this.confirmDeleteAccountBtn = page.getByTestId('confirm-delete-btn');
-    this.deleteModalTitle = page.getByRole('heading', {
-      name: 'Confirm Account Deletion',
-    });
-    this.deleteConfirmationInput = page.getByPlaceholder(
-      'Type DELETE to confirm',
-    );
-  }
+  readonly deleteAccountBtn = this.page.getByTestId('delete-account-btn');
+  readonly confirmDeleteAccountBtn =
+    this.page.getByTestId('confirm-delete-btn');
+  readonly deleteModalTitle = this.page.getByRole('heading', {
+    name: 'Confirm Account Deletion',
+  });
+  readonly deleteConfirmationInput = this.page.getByPlaceholder(
+    'Type DELETE to confirm',
+  );
 
   async logout(): Promise<void> {
     await this.logoutBtn.click();

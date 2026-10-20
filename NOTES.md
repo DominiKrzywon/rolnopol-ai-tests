@@ -93,6 +93,31 @@ Chart switching without JavaScript errors (`TC-CHART-001`) and visual housekeepi
 above remain alternatives. Keep any new exercise small and let the learner
 implement test, source and configuration changes.
 
+### 5. Page Object locator declarations: migration completed October 20
+
+The learner prefers the `ContactPage` style, where fixed locators are initialized
+beside their declarations through `this.page` (for example,
+`readonly nameInput = this.page.getByPlaceholder('Jane Doe')`). Apply this
+The agreed style initializes fixed locators beside their declarations through
+`this.page`, as in `ContactPage`. Migrated all derived Page Objects with locator
+constructors: Home, Financial, Login, Register, Profile, Marketplace, Docs,
+API Docs, and both management pages. Kept `BasePage`'s constructor, action
+methods, parameterized locator methods and existing locator behavior. Preserved
+dependent-field order in `ManagementPage`, including `fieldsList` before
+`fieldCards` and pagination before its child locators. The Page Object example
+in `CODING_STANDARDS.md` now reflects this convention.
+
+Verification on October 20: `npm run check:ci` passed. The UI run across
+`smoke-tests`, `no-auth-tests`, `isolated-user-tests`, `demo-user-tests` and
+`visual-test` reported 53 passed and 1 failed (54 total, including setup and
+health). Financial isolated scenarios, management, registration, login,
+Marketplace, documentation and the visual test passed. The remaining
+`profile.e2e.spec.ts` failure expected `Demo User` but read `Demo Userr` from
+both the displayed-name locator and input. Diagnose the demo profile data
+separately; this run does not establish a clean full UI result. The failed
+assertions observed the DOM through unchanged locators; no profile assertions
+or test code were changed in this migration.
+
 ## Agreed learning scope
 
 The learner edits test, source and configuration files. The mentor explains,

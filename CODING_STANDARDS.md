@@ -186,18 +186,9 @@ test('should register new user', async ({ page }) => {
 ### Basic Structure
 
 ```typescript
-export class PageName {
-  readonly page: Page;
-  readonly elementName: Locator;
-
-  constructor(page: Page) {
-    this.page = page;
-    this.elementName = page.getByTestId('element-id');
-  }
-
-  async goto() {
-    await this.page.goto('/page-path');
-  }
+export class PageName extends BasePage {
+  readonly PAGE_URL = '/page-path';
+  readonly elementName = this.page.getByTestId('element-id');
 
   async performAction(param: string) {
     await this.elementName.fill(param);

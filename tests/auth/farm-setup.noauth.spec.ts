@@ -75,7 +75,7 @@ test.describe('E2E user journeys', () => {
 
         await assignStaff(page, field.name, staff.fullName);
 
-        await expect(assignPage.notification).toHaveText(
+        await expect(assignPage.notificationMessage).toHaveText(
           expectedSuccessMessage,
         );
         await expect(assignPage.unassignedStaffCount).toHaveText('0');
