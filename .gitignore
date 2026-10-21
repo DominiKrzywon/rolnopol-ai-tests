@@ -16,3 +16,4 @@ playwright-report-ci/
 .playwright-cli/
 /coverage-report/
 REFACTOR.md
+NOTES.md

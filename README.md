@@ -52,6 +52,31 @@ exit code after generating the report. `coverage:report` rebuilds from saved
 results without executing tests. Outputs are replaced on the next run; copy the
 output folder before running again if you need history.
 
+To preserve an execution and compare it with earlier runs:
+
+```bash
+npm run coverage:archive
+npm run coverage:history
+```
+
+Run these after `coverage:run`, including when tests fail. Archiving is manual;
+do not connect it to the test command with a success-only `&&`. The archiver
+checks that raw and normalized results match and refuses to overwrite a run.
+It stores JSON and available HTML in Git-ignored
+`playwright-report-ci/learning-history/<time>-<runId>/`. Playwright HTML is copied
+only when its embedded metadata matches the execution. Missing or mismatched
+HTML is reported; JSON remains available for analysis. Interrupted archives
+stop analysis and need inspection. Archives have no automatic expiry.
+
+Open `playwright-report-ci/learning-history/history.md` for the summary, or
+`history.json` for per-run outcomes and attempts. The analyzer separates recorded
+source, command, environment, application and execution settings, then compares
+case IDs within each project. It shows observed outcomes and duration ranges;
+mixed outcomes are investigation signals, not root-cause diagnoses. A single
+pass cannot establish stability. OS/browser builds and external state still
+need manual control, especially when application version is `unknown`.
+Historical outcomes do not replace the source-aware confirmation metric below.
+
 **Implemented** measures collected cases against included catalog scenarios.
 **Confirmed** requires passing results matching the current source fingerprint.
 Old or unknown results are not current confirmation. These metrics measure the

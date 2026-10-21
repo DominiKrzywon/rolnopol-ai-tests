@@ -13,6 +13,7 @@ export default [
       'test-results/**',
       'node_modules/**',
       'coverage-report/**',
+      'playwright-report-ci/**',
     ],
   },
   { files: ['**/*.ts'] },

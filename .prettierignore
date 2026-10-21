@@ -8,3 +8,4 @@ dist
 build
 .playwright-cli/
 coverage-report/
+playwright-report-ci/

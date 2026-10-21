@@ -71,23 +71,49 @@ Contact implementation is complete; do not assign these two scenarios again.
 After focused verification, the entire `no-auth-tests` project remains a separate
 completion check; no full-project or full-suite result is implied.
 
-Small remaining quality step: `check:ci` succeeds with one ESLint warning at
-`tests/auth/contact.noauth.spec.ts:18` for the missing explicit return type of
-`trackRequests`. The learner can make the listener return `void` explicitly and
-use a block body for `requests.push(request)`; the current expression returns
-the array's new length. This is a typing/style warning, not a failed assertion.
-It does block commits: `.husky/pre-commit` runs lint-staged, whose TypeScript
-ESLint command uses `--max-warnings=0`. Reproduced with
-`npx eslint tests/auth/contact.noauth.spec.ts --max-warnings=0` (exit 1), while
-`npm run check:ci` exits 0 with the same warning. Fix the listener before
-committing; do not bypass the hook.
+October 21 source inspection confirms the Contact listener now has an explicit
+`void` return type and block body. The earlier typing exercise is complete in
+source; the October 19 warning below remains historical evidence. No new lint
+result is implied.
 
-Suggested next small case: Alerts page controls (`TC-PUBLIC-001`). First inspect
-`../rolnopol/public/alerts.html` and agree which main controls the scenario covers.
-Then add a no-auth spec and a minimal Alerts Page Object using the base fixture,
-asserting the heading and those controls. Verify the new file first, then run
-`npm run check:ci` and `npm run coverage:validate`; retain the reserved case ID.
-This is a proposed choice, not an agreed implementation request.
+The requested portfolio follow-up is now a concrete
+[implemented history pilot](#portfolio-inspired-learning-review-october-21-2026).
+Start by reading the generated history; implementation was explicitly requested. The
+existing UI choices below remain alternatives.
+
+October 21 learning preference: use reporting history occasionally on local runs.
+Do not plan daily CI execution or recurring paid infrastructure for this personal
+learning repository. The archiver/analyzer remains available as a work-relevant
+example; collecting more history is not the next required exercise.
+
+Suggested next small case: Alerts page controls (`TC-PUBLIC-001`). Source review
+of `../rolnopol/public/alerts.html` confirms an Alerts heading, Search alerts
+input, Select region combobox and Refresh alerts button (title attribute).
+The page is gated by `alertsEnabled`; the severity filter has its own flag and
+may be hidden/disabled. Initial proposed scope: heading, search, region and
+refresh, with Alerts enabled as a known environment prerequisite. Do not make
+assertions conditional merely to accommodate an unexpected environment state.
+
+The learner's implementation target is `src/pages/AlertsPage.ts`,
+`tests/auth/alerts.noauth.spec.ts`, an `ALERTS` entry in
+`src/constants/pageUrls.ts` and an `alertsPage` fixture in
+`src/fixtures/test.fixture.ts`. Follow ContactPage's locator declarations and
+base fixture; no authenticated user is needed. Use the reserved case ID and
+keep assertions in the spec. Verify visibility of the heading and visibility/
+enabled state of the three controls; do not depend on daily alert counts.
+This is a proposal, not authorization for the mentor to implement these files.
+
+Focused verification after implementation:
+`npm run coverage:run -- tests/auth/alerts.noauth.spec.ts --project=no-auth-tests --workers=1 --retries=0`,
+then `npm run check:ci` and `npm run coverage:validate`. A shared Page Object
+fixture addition may justify a focused Contact check if existing wiring changes;
+do not run the full suite without a concrete impact. Update the catalog note
+after implementation; only regenerate README if its generated index changes.
+
+Follow-up choices: first inspect the UI/request after selecting a different
+region and define a separate behavior case, or explore Contact keyboard/focus
+accessibility. Assign new scenario IDs only once the follow-up contract is
+defined. No application or browser run was performed for this planning update.
 
 Chart switching without JavaScript errors (`TC-CHART-001`) and visual housekeeping
 above remain alternatives. Keep any new exercise small and let the learner
@@ -117,6 +143,114 @@ both the displayed-name locator and input. Diagnose the demo profile data
 separately; this run does not establish a clean full UI result. The failed
 assertions observed the DOM through unchanged locators; no profile assertions
 or test code were changed in this migration.
+
+## Portfolio-inspired learning review: October 21, 2026
+
+The [revised portfolio analysis](ANALIZA_PROJEKTOW_SDET.md) now describes
+Rolnopol correctly. The learner explicitly requested implementation of the
+archiver and analyzer after reporting a successful Contact run. This supersedes
+the earlier proposal that the learner would write these scripts.
+
+### Implemented: archive first, analyze recorded history
+
+- `scripts/coverage/history.mjs` implements a standalone local archiver and
+  deterministic history analyzer; no external tool or new dependency was added.
+- `npm run coverage:archive` saves the current raw/normalized JSON and available
+  report HTML under ignored `playwright-report-ci/learning-history/`.
+  Each destination uses the execution timestamp and run ID. Existing archives
+  cannot be overwritten. A manifest is written only after copying finishes.
+- Raw and normalized reports must have matching provenance, statistics and
+  global error count. Missing provenance or inputs fail visibly. Failed runs
+  can be archived. The Playwright HTML is copied only when its embedded
+  metadata matches the raw execution; missing/unsupported/mismatched HTML is
+  reported explicitly. Coverage HTML availability is recorded separately.
+- `npm run coverage:history` produces `history.md` and `history.json` in the
+  archive root. It reads archives, never contacts the application, and refuses
+  duplicate run IDs, invalid evidence or interrupted archives.
+- The analyzer groups by recorded fingerprint, revision, command, target origin,
+  application version, workers, project retry/repetition settings and Playwright
+  version. Within a group, case ID plus project identifies a scenario.
+- Outcomes remain separate: passes, failures, retry variation, skips, absent and
+  other outcomes. Durations sum attempts for each observation. Counts include
+  their run denominator and time window. Catalog rows without observations are
+  not treated as executed tests. Health is a catalog scenario and remains
+  visible; setup infrastructure has a separate count.
+- Only the requested artifacts are copied from `coverage-report/`; unrelated
+  historical subdirectories or screenshots are not recursively archived.
+  Full Playwright HTML attachments are preserved when the HTML matches.
+- Generated archive files are excluded from Prettier and ESLint; the archive
+  root was already Git-ignored. The learner's existing .gitignore change was
+  preserved. No test scenario, fixture or CI execution behavior was changed.
+
+The user's October 21 run was inspected and archived successfully: one Contact
+case (`TC-PUBLIC-002`, `no-auth-tests`) passed, plus the health case
+(`TC-SMOKE-007`, `health-check`). The recorded run starts at
+`2026-10-21T18:48:37.144Z`, ID
+`84bc69bd-f372-465f-b4d7-18fe4f7ec588`. Both JSON reports agree and the
+Playwright HTML matches. Application version is `unknown`. This is one
+historical run, not a repeated-run stability result or current full-suite
+confirmation. It was not rerun by the mentor during implementation.
+
+### Why the two steps matter
+
+The normal output paths are reused. An archive preserves the evidence needed
+to compare an earlier failure against a later pass. The analyzer turns separate
+reports into observations about the same case under matching recorded settings.
+
+For example, passed/failed/passed on unchanged recorded inputs is mixed-outcome
+evidence worth investigating. Failed/failed/failed is a persistent failure in
+the sample. A failed attempt followed by a successful retry is retained as
+retry variation. None of these observations establishes the cause. Sessions,
+rate limiting, application state and the test itself remain possible causes.
+
+OS/browser builds, data and external services are not fully identified by the
+existing report metadata. An `unknown` application version cannot establish an
+unchanged application. Matching groups are provisional comparisons, not proof
+of controlled conditions. Embedded-document or tooling changes can also alter
+the source fingerprint and intentionally split groups.
+
+### Next small steps for the learner
+
+1. Open `playwright-report-ci/learning-history/history.md` and compare its two
+   rows with the archived original HTML. Explain why Contact and health appear
+   separately and why one pass cannot prove stability.
+2. After a future run of the same command, invoke `coverage:archive`, then
+   `coverage:history`. Run archiving even when the test fails. Do not place it
+   behind a success-only shell operator. Re-archiving the same run intentionally
+   fails rather than adding another observation.
+3. Keep browser/OS, app, environment and command consistent when collecting a
+   small series. Code changes made for this implementation change the source
+   fingerprint, so future runs may form a new group relative to the original.
+   Retain the pilot archives until review; there is no automatic deletion.
+4. If outcomes vary, inspect the corresponding archived HTML/trace before
+   modifying waits, adding retries or attributing a root cause.
+5. External flaky-analytics/CTRF/qa-report-lake remain optional later comparisons.
+   They were not installed. Accessibility and existing visual housekeeping
+   remain independent UI learning choices.
+
+Archiving is manual by design and does not modify the runner or a test exit code.
+Missing/partial current output after collection failure must be investigated
+before archiving; this command snapshots files and does not prove they came from
+the most recently attempted shell command.
+
+### Verification record
+
+`npm run coverage:test` passed 42/42 tooling tests, including 8 new history tests.
+These exercise mixed outcomes, persistent failures, retry evidence, skipped and
+absent executions, separation of conditions/projects, renamed case identity,
+chronology, duplicate rejection, failed-run archiving, missing inputs, mismatched
+reports, nesting protection and interrupted archives.
+
+`npm run coverage:validate` passed with 94 collected entries including 1 setup
+entry. It collected declarations only; it did not execute application tests.
+The first isolated Node test attempt was blocked by sandbox `spawn EPERM`;
+successful tooling tests and collection used approved execution outside that
+restriction. `npm run check:ci` passed formatting, ESLint and TypeScript.
+The archived HTML was also checked in headless Chromium: all three embedded
+documents opened, scenario pagination and filtering worked, details expanded,
+and a chapter anchor revealed its document section. A screenshot was inspected.
+This successful saved run has no failure links to click; failure-link mapping
+is covered by the existing tooling tests. No HTML renderer changes were needed.
 
 ## Agreed learning scope
 

@@ -4,6 +4,7 @@
 export const PAGE_URLS = {
   HOME: '',
   LOGIN: '/login.html',
+  ALERTS: '/alerts.html',
   CONTACT: '/contact.html',
   REGISTER: '/register.html',
   PROFILE: '/profile.html',
