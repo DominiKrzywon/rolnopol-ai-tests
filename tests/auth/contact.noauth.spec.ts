@@ -13,6 +13,7 @@ test.describe('contact page tests', () => {
     async ({ contactPage, page }) => {
       await contactPage.goto();
 
+      // Observe requests from before submission through the validation checks
       const requests: Request[] = [];
 
       const trackRequests = (request: Request): void => {
@@ -30,6 +31,7 @@ test.describe('contact page tests', () => {
           'Message should be at least 10 characters',
         ]);
         await expect(page).toHaveURL('/contact.html');
+        // Verify validation prevented a contact POST during this interval
         expect(
           requests.filter(
             (request) =>
@@ -59,6 +61,7 @@ test.describe('contact page tests', () => {
 
       await contactPage.goto();
 
+      // Capture the contact response before submitting the completed form
       const [sendResponse] = await Promise.all([
         page.waitForResponse(
           (response) =>
@@ -76,6 +79,7 @@ test.describe('contact page tests', () => {
         expectedSuccessMessageUI,
       );
 
+      // Check every field resets after a successful submission
       await expect.soft(contactPage.nameInput).toHaveValue('');
       await expect.soft(contactPage.emailInput).toHaveValue('');
       await expect.soft(contactPage.subjectInput).toHaveValue('');

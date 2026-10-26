@@ -87,6 +87,33 @@ See [metric definitions](TEST_PLAN.md#metric-definitions),
 and [reporting reference](NOTES.md#reporting-reference) for details, commands,
 artifact formats, and Playwright links.
 
+### How report updates work
+
+`scripts/coverage/` contains the report tooling: `cli.mjs` collects tests and
+coordinates runs, `model.mjs` maps results to the catalog, `snapshot.mjs` checks
+source fingerprints, `html.mjs` renders this page, and `history.mjs` archives
+and compares saved executions. `app-code.mjs` is the separate backend coverage pilot.
+
+- `npm test` replaces `coverage-report/playwright-results.json`, but does not
+  rebuild the scenario HTML or normally record its source fingerprint.
+- `npm run coverage:run` collects the inventory, runs the full configured suite
+  (or the scope passed after `--`), and replaces the JSON/HTML report even after
+  test failures. A focused run also replaces the previous full-suite result;
+  results are not merged and the previous passing result is not retained.
+- `npm run coverage:collect` followed by `npm run coverage:report` rebuilds the
+  page from saved results without running tests. It checks the saved run's source
+  fingerprint against current project files, not against the previous run.
+  Missing provenance means `unknown`; a different fingerprint means `stale`.
+  Even changes to the embedded documentation affect this check.
+- Run `npm run coverage:archive` after each execution you want to keep, before
+  another execution replaces it. Then `npm run coverage:history` compares archived
+  observations grouped by matching recorded conditions. Neither command runs
+  automatically with the suite or replaces its results with a better outcome.
+
+The HTML is a saved snapshot: its date and freshness label describe generation
+time. Reopening it does not load newer JSON or recheck source changes. For a full
+suite report with new execution evidence, use `npm run coverage:run` without filters.
+
 ## Application Code Coverage
 
 The scenario report above measures test cases. A separate backend pilot measures
@@ -140,6 +167,13 @@ formatting), and TypeScript types without writing files. `npm run check` also
 formats files and is intended for local editing. Husky/lint-staged check staged
 changes. Existing ESLint, Prettier and TypeScript configurations remain the source
 of tooling rules.
+
+The repository was also scanned locally with SonarQube in October 2026. Three
+reported findings led to review of test-email randomness and numeric parsing;
+the source follow-up and verification limits are recorded in
+[NOTES](NOTES.md#sonarqube-review-october-25-scan-october-26-source-follow-up).
+The Quality Gate status has not been independently verified. This local scan
+is separate from the CI checks below.
 
 [GitHub Actions](.github/workflows/playwright-e2e-tests.yml) runs manually with
 `workflow_dispatch`. Quality includes coverage-tool tests and ID validation.

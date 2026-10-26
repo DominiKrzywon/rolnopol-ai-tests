@@ -67,6 +67,7 @@ test.describe('Registration Negative Tests', () => {
       await registerPage.goto();
       await registerPage.registerSubmitBtn.click();
 
+      // Inspect native required-field validation and the first invalid control
       const isEmailMissing = await registerPage.emailInput.evaluate(
         (input: HTMLInputElement) => input.validity.valueMissing,
       );

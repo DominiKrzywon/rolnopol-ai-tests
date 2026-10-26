@@ -58,7 +58,7 @@ export class MarketplacePage extends BasePage {
   async getBalance(): Promise<number> {
     const balanceText = await this.userBalance.innerText();
     const balanceValue = balanceText.replace(/[^0-9.]/g, '');
-    return parseFloat(balanceValue);
+    return Number.parseFloat(balanceValue);
   }
 
   async buyOfferByDescription(description: string): Promise<void> {
@@ -98,13 +98,9 @@ export class MarketplacePage extends BasePage {
     return { price, description };
   }
 
-  private parseAmount(text: string): number {
-    return parseFloat(text.replace('ROL', ''));
-  }
-
   async getLastTransactionAmount(): Promise<number> {
     const text = await this.transactionAmount.last().innerText();
-    return this.parseAmount(text);
+    return Number.parseFloat(text.replace('ROL', ''));
   }
 
   get myOfferCardLast(): Locator {

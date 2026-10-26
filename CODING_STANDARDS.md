@@ -2,13 +2,6 @@
 
 ## API clients and explicit response assertions
 
-Selected on October 12, 2026. This is the target convention for incremental
-refactoring; existing tests have not all been migrated. The pilot
-`TC-MARKET-004` and follow-ups `005` and `007` are implemented in source
-(inspection: October 15, 2026; no new application run). See
-[REFACTOR.md](REFACTOR.md#api-client-learning-exercise-october-12-2026) for the design
-and [NOTES.md](NOTES.md#current-learning-queue-october-18-2026) for the next exercises.
-
 ### Responsibilities
 
 - Domain API modules (`src/api/<domain>.api.ts`) own endpoint URLs, HTTP

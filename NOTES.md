@@ -5,7 +5,110 @@ The active learning queue, durable decisions and a short completion record.
 [CODING_STANDARDS](CODING_STANDARDS.md) owns conventions. Git history preserves
 older notes. This file is not embedded in the coverage report.
 
+## SonarQube review: October 25 scan, October 26 source follow-up
+
+The learner supplied a scanner log reporting ANALYSIS SUCCESSFUL (59.825 seconds)
+for the [local project](http://localhost:9000/dashboard?id=rolnopol-tests), then
+provided an earlier agent's review of three findings. According to that review,
+the scan covered src and tests, excluding scripts; this scope was not independently
+retrieved from the server. The earlier processing-task request returned HTTP 401.
+The Quality Gate and server-side resolution of the findings remain unverified.
+
+October 26 inspection confirms the learner's changes:
+
+- src/helpers/testDataHelpers.ts: generateUniqueEmail now uses randomUUID from
+  node:crypto, replacing the timestamp/Math.random combination. The reviewed
+  previous use only distinguished test addresses; it was not a confirmed security
+  vulnerability. UUID generation is a simpler chosen implementation.
+- src/pages/MarketplacePage.ts: getBalance and getLastTransactionAmount now use
+  Number.parseFloat. The unused parseAmount method has been removed. These are
+  behavior-preserving changes to the function reference and parsing location;
+  existing text normalization is retained.
+- Before the final source follow-up, the learner reported both suggested focused
+  commands passing: Marketplace purchase in isolated-user-tests and blocked
+  transaction in no-auth-tests, one worker and zero retries. This is learner-reported
+  evidence, not a mentor-run suite result or verification of every subsequent edit.
+- The latest raw JSON currently records October 26 at 17:15:12 UTC: health-check
+  and TC-JOURNEY-003 passed (2 expected, 0 unexpected, 0 skipped, 0 flaky;
+  one worker, zero retries). It contains no source fingerprint. A new registration
+  result after the UUID change has not been supplied.
+
+A new SonarQube analysis is needed to verify server-side closure. Do not infer a
+passed Quality Gate or security clearance from these source changes. No scanner
+command or credential setup is documented because it has not been verified.
+The app-code LCOV pilot measures selected backend files in the separate application
+checkout; it does not establish code coverage of this test-framework repository.
+
+## Current next steps: October 26, 2026
+
+This queue takes precedence over the older learning choices below. Finish and
+commit the current SonarQube/documentation work, then investigate one failing
+scenario at a time. The unfinished Alerts exercise remains separate; it currently
+has an empty callback and an unused alertsPage parameter and blocked the earlier
+check:ci lint stage. Do not silently treat the commit as fully checked. Completing
+Alerts or explicitly marking the unfinished scenario as skipped is a separate
+learner decision; removing its unused parameter alone would leave a misleading pass.
+
+### Evidence preserved before another run
+
+The normalized coverage-report/coverage.json generated October 26 at 16:56:36 UTC
+still describes the October 25 execution starting at 09:48:42 UTC against
+http://localhost:3000: 42 expected and 6 unexpected Playwright outcomes, zero
+skipped/flaky and zero global errors, two workers, zero retries. This is a UI-scope
+execution, not a complete-suite result: 47 catalog scenarios are not-run in the
+normalized report. Its projects metadata lists configured projects and does not
+by itself establish execution scope. Source provenance is absent (unknown).
+The normalized outcomes include 41 passed catalog scenarios and 6 failed; the
+additional expected Playwright entry is infrastructure.
+
+The raw JSON and Playwright HTML were replaced by newer focused runs. Therefore
+old failure summaries below identify investigation targets, not proven causes.
+Preserve any remaining matching trace/report locally before running again; do not
+assume current Playwright links still refer to the October 25 execution.
+
+| Order | Case           | Saved observation                                                                                  | Next small investigation                                                                                                                                                                              |
+| ----- | -------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1     | TC-FARM-002    | Field-card visibility timed out at staff-management.isolated.spec.ts:96.                           | Check whether the herd POST finishes before the immediate navigation; distinguish save, reload and locator failures.                                                                                  |
+| 2     | TC-FARM-003    | Staff-added visibility timed out at staff-management.isolated.spec.ts:125.                         | Inspect the staff POST and the actual message element/visibility before changing the expectation.                                                                                                     |
+| 3     | TC-ASSIGN-001  | Notification assertion failed at staff-assign.isolated.spec.ts:56.                                 | Capture the assignment POST status and resulting notification; the saved summary omits expected/actual text.                                                                                          |
+| 4     | TC-FARM-013    | Execution failed, with no actionable location in the normalized summary.                           | Reproduce once and identify setup, pagination or teardown as the failing phase before choosing a correction.                                                                                          |
+| 5     | TC-PROFILE-001 | Profile run timed out with 9 recorded errors; first summarized location is profile.e2e.spec.ts:26. | Check the first failure, authenticated page and expected demo data. October 20 separately recorded Demo User versus Demo Userr; this is a hypothesis for investigation, not the October 25 diagnosis. |
+| 6     | TC-JOURNEY-003 | Failed during the expensive-purchase step on October 25.                                           | Already passed in the latest October 26 focused JSON. Keep under observation; do not call it fixed or flaky from these two uncontrolled observations.                                                 |
+
+### First exercise only: herd creation
+
+Relevant files: tests/auth/staff-management.isolated.spec.ts (TC-FARM-002) and
+src/pages/managementPages/ManagementMainPage.ts (addAnimalGroup). The helper
+awaits the submit click; the spec immediately navigates away. A click completion
+does not prove the asynchronous save has completed. This is a concrete race
+candidate, not a reproduced root cause. Nearby Contact and Profile tests provide
+the existing pattern: register a matching response waiter before the UI action.
+
+1. Reproduce only the herd scenario with one worker and zero retries, recording
+   the first failure and whether POST /api/v1/animals completes. Do not increase
+   timeouts or add retries as a fix.
+2. If the save/navigation race is observed, make the smallest spec change:
+   register the exact POST response waiter before addAnimalGroup, await both,
+   assert the documented status/success and the created herd's important values,
+   then navigate and retain the field-card assertions. Keep assertions in the spec.
+   If the request completes successfully, inspect the subsequent field load and
+   locator instead; do not assume a waiter fixes a different problem.
+3. Focused verification command:
+
+```powershell
+npx playwright test tests/auth/staff-management.isolated.spec.ts --project=isolated-user-tests --grep "should create a new animal herd" --workers=1 --retries=0
+```
+
+After a reproduced timing fix, repeat the focused scenario at least five times
+without retries, then run check:ci. Broaden to the management file/project only
+when shared Page Object behavior changes or further evidence justifies it.
+Review this result before starting TC-FARM-003; the table is a queue, not a batch
+implementation request. No application tests or new SonarQube scan were run for
+this planning update; the mentor changed Markdown only.
+
 ## Current learning queue: October 18, 2026
+
+Historical learning choices: the October 26 queue above now takes precedence.
 
 Reviewed again on October 19, 2026 against the four October 18 commits
 (`e1877bf` through `4f01a1b`) and the learner's subsequent Contact changes.
@@ -281,7 +384,7 @@ Keep `TC-MARKET-004` focused on the owner's active offer, successful DELETE and
 fresh `my-offers` read showing the same offer cancelled. No buyer listing check:
 the public listing excludes the current user's own offers.
 Other application exclusions remain in
-[TEST_PLAN](TEST_PLAN.md#2-repository-evidence-and-environment).
+[TEST_PLAN](TEST_PLAN.md#2-scope-decisions).
 
 ## Completed exercises
 
@@ -357,3 +460,69 @@ Use [README](README.md#scenario-coverage-report) for commands and artifacts,
 Scenario coverage measures catalog cases, not application code or assertion
 quality. Collection does not run tests; saved results need matching source
 provenance for current confirmation. Copy report outputs before comparing runs.
+
+## Repository evidence and environment: historical reference
+
+### Scope decision: anonymous access to Staff & Fields
+
+A Playwright check run from the terminal on September 7, 2026, using a separate
+clean browser context for each route, confirmed:
+
+- `/profile.html`, `/marketplace.html`, and `/financial.html` redirect
+  anonymous users to `/login.html`;
+- `/staff-fields-main.html`, `/staff-fields-assign.html`, and
+  `/staff-fields-charts.html` remain open; the redirect assertion did not
+  pass within the 5-second wait;
+- observed requests from those pages to `/api/v1/fields`, `/api/v1/staff`,
+  `/api/v1/fields/assign`, and `/api/v1/animals` received `401`;
+- the HTML document for each of the six pages initially returned `200`.
+
+Because this is an educational project, **I will not report the missing
+redirects on those three pages as defects**. The agreed change was to remove only
+the three `/staff-fields-*.html` entries from `protectedRoutes` in
+`tests/auth/access-control.noauth.spec.ts`. The remaining cases cover the profile,
+marketplace, and financial redirect tests. The three entries have now been removed (code inspection: September 13, 2026).
+
+This is a deliberate limit on UI redirect testing. It does not remove application
+endpoints, authenticated farm tests, or planned API authorization tests.
+HTML page routes and endpoints such as `/api/v1/staff` or `/api/v1/fields`
+are different elements. Opening a page does not prove access to protected data;
+the observed `401` responses are not a complete authorization audit either.
+I do not assume that the missing redirect is an intended application requirement.
+
+### Scope decision: zero field area through API
+
+On September 30, 2026, the user checked `POST /fields` with `area: 0` and
+observed `201`. The UI requires a positive area, but the current API does not
+enforce that rule. For this educational application, do not add a test requiring
+the API to reject zero area or report this difference as a defect. The temporary
+`TC-FARM-011` test was removed; no catalog row was assigned to it.
+
+### Known environment constraints
+
+- The server maintains one active session per user. Logging into the same account
+  again invalidates the previous token, so state-changing tests cannot share accounts.
+- `page` and `request` have separate cookie stores. `applySessionCookies` copies
+  the session only from `request` to the browser context; later UI session changes
+  do not automatically update `request`.
+- Rate limiting is per IP. Registering and logging in a fresh account adds requests,
+  so worker count should be selected through measurement rather than hiding 429
+  responses with retries.
+- Swagger is a guide, not a complete contract. For example, it omits
+  `GET /fields/assign`, while the `/financial/transactions` response includes
+  `hasMore`, which is missing from the schema.
+
+### Initial inventory and verification
+
+Application inventory: September 5, 2026, Rolnopol v1.79.0.
+September 7, 2026 update: code review, test collection, `check:ci`,
+and anonymous access checks at `http://localhost:3000`.
+
+## API client convention: adoption record
+
+Selected on October 12, 2026. This is the target convention for incremental
+refactoring; existing tests have not all been migrated. The pilot
+`TC-MARKET-004` and follow-ups `005` and `007` are implemented in source
+(inspection: October 15, 2026; no new application run). See
+[REFACTOR.md](REFACTOR.md#api-client-learning-exercise-october-12-2026) for the design
+and [NOTES.md](NOTES.md#current-learning-queue-october-18-2026) for the next exercises.

@@ -12,6 +12,7 @@ test.describe('marketplace isolated tests', () => {
     async ({ freshUser: _, request, activeFieldOffer, marketplacePage }) => {
       const expectedSuccessMessage = 'Offer cancelled successfully!';
       const { offerId, fieldId } = activeFieldOffer;
+      // Establish that the owned offer is active before cancellation
       const offers = await getMyOffers(request);
       const offer = offers.find((item) => item.id === offerId);
 
@@ -20,6 +21,7 @@ test.describe('marketplace isolated tests', () => {
       await marketplacePage.goto();
       await marketplacePage.myOffers.click();
 
+      // Cancel through the UI while capturing this offer's DELETE response
       const [cancelResponse] = await Promise.all([
         marketplacePage.page.waitForResponse(
           (response) =>
@@ -35,6 +37,7 @@ test.describe('marketplace isolated tests', () => {
         expectedSuccessMessage,
       );
 
+      // Read back the offer to verify cancellation was persisted
       const offersAfterCancel = await getMyOffers(request);
       const offerAfterCancel = offersAfterCancel.find(
         (offer) => offer.id === offerId,

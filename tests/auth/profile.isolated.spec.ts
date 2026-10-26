@@ -18,6 +18,7 @@ test.describe('profile isolated tests', () => {
 
       await profilePage.goto();
 
+      // Capture the profile update response before submitting the new name
       const [updateResponse] = await Promise.all([
         page.waitForResponse(
           (response) =>
@@ -38,6 +39,7 @@ test.describe('profile isolated tests', () => {
       expect(body.data.displayedName).toBe(expectedUpdatedName);
       await expect(profilePage.displayedName).toHaveText(expectedUpdatedName);
 
+      // Verify the new name persists while the account email stays unchanged
       await page.reload();
       await expect(profilePage.displayedName).toHaveText(expectedUpdatedName);
       await expect(profilePage.emailValue).toHaveText(userEmail);
@@ -55,6 +57,7 @@ test.describe('profile isolated tests', () => {
       const expectedErrorMessage = 'Invalid credentials';
 
       await profilePage.goto();
+      // Require explicit confirmation before allowing account deletion
       await profilePage.openDeleteAccountModal();
 
       await expect(profilePage.deleteModalTitle).toBeVisible();
@@ -64,6 +67,7 @@ test.describe('profile isolated tests', () => {
 
       await expect(profilePage.confirmDeleteAccountBtn).toBeEnabled();
 
+      // Confirm deletion while capturing the matching API response
       const [deleteResponse] = await Promise.all([
         page.waitForResponse(
           (response) =>
@@ -84,6 +88,7 @@ test.describe('profile isolated tests', () => {
       await expect(homePage.statsSection).toBeVisible();
       await expect(page).toHaveURL(ENV.BASE_URL);
 
+      // Verify the deleted account can no longer authenticate
       const attemptToLogInAfterDelete = await loginUser(request, freshUser);
       const attemptJson = await attemptToLogInAfterDelete.json();
 

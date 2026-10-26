@@ -1,9 +1,5 @@
 # Rolnopol test development plan
 
-> Application inventory: September 5, 2026, Rolnopol v1.79.0.
-> September 7, 2026 update: code review, test collection, `check:ci`,
-> and anonymous access checks at `http://localhost:3000`.
-
 ## 1. Repository purpose
 
 This repository is primarily for learning TypeScript, Playwright, test design,
@@ -29,59 +25,20 @@ Core development principles:
 5. Each test should have one clear reason to fail.
 6. Each small change should belong in one commit.
 
-## 2. Repository evidence and environment
+## 2. Scope decisions
 
-Dated observations and completed exercises are archived in [Notes](NOTES.md).
-Use the generated report for current collection and execution evidence.
+- Anonymous redirects are tested for Profile, Marketplace and Finance.
+  Staff & Fields page redirects are excluded from this learning scope;
+  authenticated farm tests and API authorization remain in scope.
+- API rejection of zero field area is outside scope. Do not add a test requiring
+  `POST /fields` with `area: 0` to fail; the UI's positive-area rule does not
+  establish that API contract. `TC-FARM-011` remains unused.
+- State-changing tests use isolated users because another login invalidates the
+  account's previous session. Account for separate browser/request cookie stores
+  and per-IP rate limits when choosing setup and parallelism.
 
-### Scope decision: anonymous access to Staff & Fields
-
-A Playwright check run from the terminal on September 7, 2026, using a separate
-clean browser context for each route, confirmed:
-
-- `/profile.html`, `/marketplace.html`, and `/financial.html` redirect
-  anonymous users to `/login.html`;
-- `/staff-fields-main.html`, `/staff-fields-assign.html`, and
-  `/staff-fields-charts.html` remain open; the redirect assertion did not
-  pass within the 5-second wait;
-- observed requests from those pages to `/api/v1/fields`, `/api/v1/staff`,
-  `/api/v1/fields/assign`, and `/api/v1/animals` received `401`;
-- the HTML document for each of the six pages initially returned `200`.
-
-Because this is an educational project, **I will not report the missing
-redirects on those three pages as defects**. The agreed change was to remove only
-the three `/staff-fields-*.html` entries from `protectedRoutes` in
-`tests/auth/access-control.noauth.spec.ts`. The remaining cases cover the profile,
-marketplace, and financial redirect tests. The three entries have now been removed (code inspection: September 13, 2026).
-
-This is a deliberate limit on UI redirect testing. It does not remove application
-endpoints, authenticated farm tests, or planned API authorization tests.
-HTML page routes and endpoints such as `/api/v1/staff` or `/api/v1/fields`
-are different elements. Opening a page does not prove access to protected data;
-the observed `401` responses are not a complete authorization audit either.
-I do not assume that the missing redirect is an intended application requirement.
-
-### Scope decision: zero field area through API
-
-On September 30, 2026, the user checked `POST /fields` with `area: 0` and
-observed `201`. The UI requires a positive area, but the current API does not
-enforce that rule. For this educational application, do not add a test requiring
-the API to reject zero area or report this difference as a defect. The temporary
-`TC-FARM-011` test was removed; no catalog row was assigned to it.
-
-### Known environment constraints
-
-- The server maintains one active session per user. Logging into the same account
-  again invalidates the previous token, so state-changing tests cannot share accounts.
-- `page` and `request` have separate cookie stores. `applySessionCookies` copies
-  the session only from `request` to the browser context; later UI session changes
-  do not automatically update `request`.
-- Rate limiting is per IP. Registering and logging in a fresh account adds requests,
-  so worker count should be selected through measurement rather than hiding 429
-  responses with retries.
-- Swagger is a guide, not a complete contract. For example, it omits
-  `GET /fields/assign`, while the `/financial/transactions` response includes
-  `hasMore`, which is missing from the schema.
+Historical observations and environment details are recorded in
+[NOTES](NOTES.md#repository-evidence-and-environment-historical-reference).
 
 ## 3. Priorities
 
@@ -93,13 +50,11 @@ the API to reject zero area or report this difference as a defect. The temporary
 - **Outside ordinary CI**: `/shutdown`, database restoration, feature flag changes,
   and other destructive administrative endpoints. Test these only in a disposable environment.
 
-## 4. Learning notes
+## 4. Execution evidence
 
-The [current learning queue](NOTES.md#current-learning-queue-october-18-2026),
-[reference roadmap](NOTES.md#reference-roadmap), completed exercises and dated
-verification records live in NOTES. Keep mentor plans and progress notes there;
-they are not embedded in the coverage report. This document owns test strategy,
-scope decisions, scenario catalog and the reporting contract.
+Use the generated report for collection and execution evidence. A passing run
+supports only its recorded scope and source version; collection alone does not
+verify behavior. Metric definitions below specify confirmation requirements.
 
 ## 5. Scenario catalog and coverage contract
 
@@ -291,6 +246,15 @@ The standalone tooling lives in `scripts/coverage/` and runs with Node.js.
 one worker and zero retries by default, generates the report even after failure,
 and preserves a failing exit code. Pass Playwright filters after `--`.
 `coverage:report` only reads saved inputs and does not contact the application.
+
+Each execution replaces the raw result file; `coverage:run` also rebuilds the
+scenario report. Plain `npm test` does not rebuild it. Full and filtered runs use
+the same output paths, without merging results or preserving an earlier pass.
+Freshness compares run provenance with current source files, not two executions.
+Historical comparison is separate and manual: archive each execution with
+`coverage:archive` before replacement, then run `coverage:history`.
+See [the update workflow](README.md#how-report-updates-work) for tooling roles
+and the difference between regenerating HTML and executing tests.
 
 Generated outputs live in ignored `coverage-report/`: inventory, raw Playwright
 results, normalized coverage JSON, and a standalone HTML document. The HTML

@@ -125,6 +125,7 @@ test.describe('Marketplace e2e tests', () => {
         expectedErrorMessage,
       );
 
+      // Verify rejection preserves funds, the active offer and field ownership
       const balanceAfter = await getAccountBalance(request);
       expect(balanceAfter).toBe(0);
 
