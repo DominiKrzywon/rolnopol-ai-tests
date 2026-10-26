@@ -82,10 +82,9 @@ Historical outcomes do not replace the source-aware confirmation metric below.
 Old or unknown results are not current confirmation. These metrics measure the
 scenario catalog, not application code coverage or assertion quality.
 
-See [metric definitions](TEST_PLAN.md#metric-definitions),
-[scenario ID conventions](CODING_STANDARDS.md#scenario-ids-and-catalog-maintenance),
-and [reporting reference](NOTES.md#reporting-reference) for details, commands,
-artifact formats, and Playwright links.
+See [metric definitions](TEST_PLAN.md#metric-definitions) and
+[scenario ID conventions](CODING_STANDARDS.md#scenario-ids-and-catalog-maintenance)
+for reporting rules and catalog maintenance. Report commands are documented above.
 
 ### How report updates work
 
@@ -169,9 +168,7 @@ changes. Existing ESLint, Prettier and TypeScript configurations remain the sour
 of tooling rules.
 
 The repository was also scanned locally with SonarQube in October 2026. Three
-reported findings led to review of test-email randomness and numeric parsing;
-the source follow-up and verification limits are recorded in
-[NOTES](NOTES.md#sonarqube-review-october-25-scan-october-26-source-follow-up).
+reported findings led to review of test-email randomness and numeric parsing.
 The Quality Gate status has not been independently verified. This local scan
 is separate from the CI checks below.
 
@@ -183,11 +180,8 @@ artifacts after both successful and failed runs. It is not currently a PR gate.
 ## Documentation
 
 - [TEST_PLAN.md](TEST_PLAN.md): strategy, scope exclusions, scenario catalog and
-  the reporting contract. Learning exercises live in NOTES.
+  the reporting contract.
 - [CODING_STANDARDS.md](CODING_STANDARDS.md): AAA, Page Objects and locator rules.
-- [NOTES.md](NOTES.md): current learning queue, reference roadmap, historical
-  evidence, completed exercises and reporting reference.
-- [NOTES_CODING_DEBT.md](NOTES_CODING_DEBT.md): refactoring history and deferred concerns.
 - [.agents/skills/CONTEXT.md](.agents/skills/CONTEXT.md): shared agent workflow.
 
 ## Scenario Index
@@ -304,8 +298,8 @@ Implementation and execution states are computed in the report, not edited here.
 
 All project skills are maintained in [.agents/skills](.agents/skills).
 The [shared context](.agents/skills/CONTEXT.md) defines mentoring mode,
-repository sources, and verification scope. NOTES.md owns the learning queue;
-TEST_PLAN.md owns strategy, scope and the scenario catalog.
+repository sources, and verification scope. TEST_PLAN.md owns strategy, scope
+and the scenario catalog. Personal learning notes are maintained locally.
 
 | Skill                                                                                      | Purpose                                                                      |
 | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |

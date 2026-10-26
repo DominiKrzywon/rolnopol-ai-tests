@@ -15,5 +15,7 @@ playwright-report-ci/
 !.env.example
 .playwright-cli/
 /coverage-report/
-REFACTOR.md
-NOTES.md
+/NOTES.md
+/NOTES_CODING_DEBT.md
+/ANALIZA_PROJEKTOW_SDET.md
+/REFACTOR.md
