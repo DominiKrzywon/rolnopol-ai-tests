@@ -77,6 +77,32 @@ pass cannot establish stability. OS/browser builds and external state still
 need manual control, especially when application version is `unknown`.
 Historical outcomes do not replace the source-aware confirmation metric below.
 
+For a compact JSON and a terminal table across all archived runs:
+
+```bash
+npm run coverage:run
+npm run coverage:archive
+npm run coverage:summary
+```
+
+Use `coverage:run` for executions intended for archiving. Raw `npm test` or editor
+runs can replace Playwright JSON without refreshing the normalized report or
+adding archive provenance. Do not combine those outputs or invent a run ID.
+
+This refreshes history from the archives and saves
+`playwright-report-ci/learning-history/summary.json`. It does not run tests or
+archive the latest execution. After each test run, including a failed one, use
+`npm run coverage:archive` before generating the summary. Run these as separate
+commands so a failing test exit code does not prevent archiving.
+
+Each summary row contains date, test-source fingerprint, observed case/project
+scope, outcome counts, whole-run duration in milliseconds, and global errors.
+Scope and source changes are flagged against the previous chronological row.
+Counts include repetitions; health cases are included and setup/excluded cases
+are omitted. Missing observations are not inferred as successes. Application
+version is omitted. Cross-run differences are investigation signals.
+For JSON-only stdout, use `node scripts/coverage/summary.mjs --json`.
+
 **Implemented** measures collected cases against included catalog scenarios.
 **Confirmed** requires passing results matching the current source fingerprint.
 Old or unknown results are not current confirmation. These metrics measure the
@@ -272,6 +298,9 @@ Implementation and execution states are computed in the report, not edited here.
 | TC-PUBLIC-001  | Public      | Alerts page opens and displays its main controls                       | UI     | P2       | low      | included |
 | TC-PUBLIC-002  | Public      | Contact rejects missing required fields                                | UI     | P2       | medium   | included |
 | TC-PUBLIC-003  | Public      | Contact accepts a valid submission                                     | UI     | P2       | medium   | included |
+| TC-PUBLIC-004  | Public      | Alerts search with no matches empties all lists and counters           | UI     | P2       | low      | included |
+| TC-PUBLIC-005  | Public      | Clearing Alerts search restores the initial card counts                | UI     | P2       | low      | included |
+| TC-PUBLIC-006  | Public      | Alerts search returns cards containing the selected title              | UI     | P2       | low      | included |
 | TC-REG-001     | Auth        | should register new user successfully                                  | UI     | P0       | high     | included |
 | TC-REG-002     | Auth        | should display validation errors for invalid email and short password  | UI     | P0       | medium   | included |
 | TC-REG-003     | Auth        | should prevent registration with empty required fields                 | UI     | P0       | medium   | included |
@@ -314,9 +343,13 @@ and the scenario catalog. Personal learning notes are maintained locally.
 | [analyzing-quality-metrics](.agents/skills/analyzing-quality-metrics/SKILL.md)             | Interpret outcomes, duration, and repeatability                              |
 | [unslop-answers](.agents/skills/unslop-answers/SKILL.md)                                   | Report work using actual evidence                                            |
 | [creating-skills](.agents/skills/creating-skills/SKILL.md)                                 | Maintain and validate skill packages                                         |
+| [grilling](.agents/skills/grilling/SKILL.md)                                               | Interview in Polish through dependent rounds of decisions                    |
+| [teach](.agents/skills/teach/SKILL.md)                                                     | Explicit teaching sessions with practice, feedback, and durable insights     |
 
 Example requests:
 
+- "Użyj teach: chcę nauczyć się walidacji odpowiedzi API."
+- "Zrób serię grillowania mojego planu z użyciem grilling."
 - "Review the overdraft test."
 - "Use challenging-assumptions: challenge my idea of sharing an account across tests."
 - "Use refining-implementation: analyze this helper and show a clearer alternative."

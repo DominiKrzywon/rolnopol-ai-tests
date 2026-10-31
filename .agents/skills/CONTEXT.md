@@ -22,6 +22,8 @@ that materially changes the scope or expected behavior.
 - [NOTES.md](../../NOTES.md): the single active learning queue, reference roadmap,
   historical evidence, completed exercises and reporting reference; dated records
   are not current run evidence.
+- [DECISION_LOG.md](../../DECISION_LOG.md): concise agreed project choices and
+  intent. Keep exercise sequencing and progress in NOTES.md.
 - [NOTES_CODING_DEBT.md](../../NOTES_CODING_DEBT.md): historical proposals and deferred concerns; NOTES owns the active learning queue.
 - [playwright.config.ts](../../playwright.config.ts): actual projects, filename
   patterns, dependencies, parallelism, and reporting.
@@ -34,6 +36,9 @@ with current code; the presence of a file does not prove that its tests pass.
 Plan small tasks in the conversation. Create a separate document when it is a
 needed deliverable; do not duplicate the roadmap in mandatory `.ai-docs/` plans.
 When code and standards disagree, describe the discrepancy instead of copying an antipattern.
+
+Respect the [agreed Marketplace cleanup decision](../../NOTES.md#agreed-decision-keep-marketplace-purchase-cleanup).
+Do not propose its refactoring or fault-injection exercises in routine reviews.
 
 ## Implementation map
 

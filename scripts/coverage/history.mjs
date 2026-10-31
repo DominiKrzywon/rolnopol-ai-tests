@@ -145,6 +145,7 @@ export function analyzeRuns(inputs) {
     group.runs.push({
       runId: run.provenance.runId,
       startTime: run.startTime,
+      durationMs: run.durationMs,
       globalErrorCount: run.globalErrorCount,
       infrastructureEntries: report.infrastructure.length,
     });

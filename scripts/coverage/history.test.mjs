@@ -132,6 +132,7 @@ function save(directory, input) {
 test('one success is one observation, and repeated passes are not a stability verdict', () => {
   const one = analyzeRuns([sample('one', ['passed'], () => {})]);
   assert.equal(one[0].cases[0].runCount, 1);
+  assert.equal(one[0].runs[0].durationMs, 30);
   assert.match(renderHistory(one), /One run cannot establish stability/);
   const many = analyzeRuns([
     sample('one', ['passed'], () => {}),

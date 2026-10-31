@@ -46,6 +46,13 @@ Do not record an expected answer as the result of an actual test run.
 6. "This simple helper has one caller. Should it become a class?"
    Both skills allow keeping the code unchanged and explain the decision.
    A request for a proposal does not authorize writing a refactor.
+7. "Zrób serię grillowania mojego planu."
+   Select grilling, inspect available facts, ask only independent frontier
+   decisions in Polish, and wait. A critique alone does not complete the interview.
+8. "Użyj teach, aby wyjaśnić archiwum raportów."
+   Read the existing learning state and reporting sources, teach one small skill,
+   then wait for the learner's attempt. Do not infer mastery from exposure or
+   create exercise code without an implementation request. Teach stays explicit-only.
 
 Record whether validation covered structure, a manual scenario walkthrough,
 or an actual client trial. These are different levels of evidence.

@@ -1,0 +1,6 @@
+interface:
+  display_name: 'Teach'
+  short_description: 'Learn through focused lessons, practice and feedback'
+  default_prompt: 'Użyj $teach, aby nauczyć mnie wybranego tematu krok po kroku.'
+policy:
+  allow_implicit_invocation: false

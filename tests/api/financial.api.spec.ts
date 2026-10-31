@@ -13,6 +13,7 @@ import {
   CreateTransactionPayload,
   TransactionResponse,
 } from 'src/models/financial';
+import { validateAccountData } from 'src/schemas/financial.schema';
 import { AccountData } from 'src/types/accountData';
 
 test.describe('Financial API', () => {
@@ -25,6 +26,12 @@ test.describe('Financial API', () => {
     async ({ apiSession, request }) => {
       const response = await getAccountResponse(request);
       const body = await expectApiSuccess<AccountData>(response, 200);
+      const isValidAccountData = validateAccountData(body.data);
+
+      expect(
+        isValidAccountData,
+        `Account data does not match the schema: ${JSON.stringify(validateAccountData.errors)}`,
+      ).toBe(true);
 
       expect(body.data?.account).toMatchObject({
         id: expect.any(Number),

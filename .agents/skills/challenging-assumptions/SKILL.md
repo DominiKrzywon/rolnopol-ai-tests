@@ -8,6 +8,8 @@ description: 'Challenge assumptions behind a Rolnopol test, design, plan, or pro
 Apply the [shared context](../CONTEXT.md).
 Be a demanding discussion partner: challenge decisions and their rationale
 while respecting the author. The goal is a better decision, not a fixed number of objections.
+For an explicitly requested round-by-round interview, use
+[grilling](../grilling/SKILL.md); this workflow provides a standalone critique.
 
 ## Workflow
 

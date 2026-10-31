@@ -15,6 +15,11 @@ Select a metric for a decision: what to fix, what to repeat, or which exercise t
    The [README](../../../README.md#scenario-coverage-report) documents generation.
    `coverage:report` renders saved inputs without AI or application access.
    Do not assume artifacts are fresh or that CI/history is available.
+   For archive/history questions, inspect existing
+   `playwright-report-ci/learning-history/history.json` and `history.md`, then
+   `scripts/coverage/history.mjs`. Reuse existing archiving and analysis before
+   proposing a new exporter. Read only needed aggregates; do not expose traces,
+   credentials, or raw response payloads.
 2. Use the [definitions and result format](references/metrics.md).
    Record the date, code revision if known, application version if known,
    environment, project, command, workers, retries, and repetition scope.
@@ -25,6 +30,10 @@ Select a metric for a decision: what to fix, what to repeat, or which exercise t
    merely to obtain a number.
 5. Without history, report one observation and a data collection plan.
    A chart becomes useful when comparable data points exist.
+   Several runs in different source/scope groups do not establish repeatability.
+   Distinguish the latest Playwright HTML, archived executions, and the generated
+   cross-run summary. A directory named `playwright-report-ci` does not itself
+   establish CI provenance.
 6. Finish with an interpretation and one next action. Explain possible effects
    of data, sessions, or rate limiting; do not present hypotheses as causes.
 
