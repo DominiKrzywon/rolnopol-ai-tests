@@ -91,6 +91,15 @@ export async function archiveRun({
         path.join(coverageDestination, name),
       );
   }
+  const archivedHtml = path.join(coverageDestination, 'index.html');
+  if (existsSync(archivedHtml))
+    writeFileSync(
+      archivedHtml,
+      readFileSync(archivedHtml, 'utf8').replaceAll(
+        'href="../playwright-report-ci/learning-history/summary.html"',
+        'href="../../summary.html"',
+      ),
+    );
   if (html.status === 'matched')
     cpSync(playwright, path.join(destination, 'playwright-report'), {
       recursive: true,

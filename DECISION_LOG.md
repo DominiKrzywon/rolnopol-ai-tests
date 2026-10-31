@@ -8,9 +8,15 @@ This is my personal repository for practice and learning against Rolnopol runnin
 
 GitHub Actions runs are deliberately triggered manually, rather than on every push or pull request.
 
+## Scope decisions
+
+- Test anonymous redirects for Profile, Marketplace, and Finance; omit Staff & Fields redirects. Authenticated farm tests and API authorization remain in scope.
+- Omit API rejection of zero field area: the UI restriction does not establish an API contract. Do not require `POST /fields` with `area: 0` to fail; `TC-FARM-011` stays unused.
+- Use isolated users for state changes because a new login invalidates the previous session. Account for separate browser/request cookies and per-IP rate limits when choosing setup and parallelism.
+
 ## Report history
 
-Use teach and grilling to learn the existing archive/history, then start with a terminal table from history.json: date, scope, test-source identifier, outcome counts, duration, and global errors. Compare runs across application changes, flag scope/test-source differences, and omit application version from the summary.
+Keep a compact JSON, terminal table, and HTML history with date, scope, test source, outcome counts, duration, and global errors. Flag scope/source changes and non-passing cases; omit application version.
 
 npm run coverage:run
 npm run coverage:archive

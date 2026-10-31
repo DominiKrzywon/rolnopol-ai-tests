@@ -5,6 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 
 import { buildSummary, renderSummary, summarizeHistory } from './summary.mjs';
+import { renderSummaryHtml } from './summary-html.mjs';
 
 function group(runId, date, source, id, statuses, durationMs = 100) {
   return {
@@ -73,6 +74,18 @@ test('repetitions and non-success outcomes are preserved; run duration is not su
   });
   assert.equal(run.durationMs, 100);
   assert.equal(run.globalErrors, 1);
+  assert.deepEqual(run.caseOutcomes['TC-A@api-tests'], [
+    'failed',
+    'flaky',
+    'skipped',
+    'interrupted',
+    'not-run',
+  ]);
+  const html = renderSummaryHtml(summary);
+  assert.match(html, />-fail<\/span>/);
+  assert.match(html, />-flaky<\/span>/);
+  assert.match(html, />-skip<\/span>/);
+  assert.ok(!html.includes('>-passed</span>'));
   assert.match(renderSummary(summary), /api-tests/);
   assert.match(renderSummary(summary), /0\.10/);
 });
@@ -93,10 +106,34 @@ test('unknown duration stays unknown and unsupported history is rejected', () =>
 test('empty archive produces a valid saved JSON and useful terminal guidance', (t) => {
   const directory = mkdtempSync(path.join(os.tmpdir(), 'rolnopol-summary-'));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
-  const { summary, output } = summarizeHistory(directory);
+  const { summary, output, html } = summarizeHistory(directory);
   assert.deepEqual(JSON.parse(readFileSync(output, 'utf8')), {
     schemaVersion: 1,
     runs: [],
   });
   assert.match(renderSummary(summary), /coverage:archive/);
+  assert.match(readFileSync(html, 'utf8'), /No archived runs/);
+});
+
+test('HTML preserves failure and interruption counts while escaping source and scope', () => {
+  const summary = buildSummary({
+    schemaVersion: 1,
+    groups: [
+      group(
+        'one',
+        '2026-10-21T10:00:00Z',
+        '<script>alert(1)</script>',
+        '<img src=x onerror=alert(1)>',
+        ['failed', 'interrupted'],
+      ),
+    ],
+  });
+  const html = renderSummaryHtml(summary);
+  assert.ok(!html.includes('<script>'));
+  assert.ok(!html.includes('<img'));
+  assert.ok(html.includes('&lt;script&gt;'));
+  assert.ok(html.includes('&lt;img'));
+  assert.match(html, /interrupted: 1/);
+  assert.match(html, /class="number fail">1<\/td>/);
+  assert.ok(!html.includes('private-app-label'));
 });

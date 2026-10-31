@@ -33,7 +33,7 @@ Apply the [shared context](../CONTEXT.md), including mentoring mode and check se
    `*.journey.spec.ts` is a roadmap proposal until configuration collects it.
    Do not create tests that will never execute.
 9. Assign exactly one static `case-id` annotation from the
-   [scenario catalog](../../../TEST_PLAN.md#5-scenario-catalog-and-coverage-contract).
+   [scenario catalog](../../../TEST_PLAN.md#4-scenario-catalog-and-coverage-contract).
    Keep IDs after renames; never reuse retired IDs. Parameterized data contains
    explicit IDs per collected case. Setup uses `coverage-role: setup` instead.
    New planned rows need no placeholder test.

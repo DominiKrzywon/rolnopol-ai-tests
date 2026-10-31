@@ -23,7 +23,7 @@ that materially changes the scope or expected behavior.
   historical evidence, completed exercises and reporting reference; dated records
   are not current run evidence.
 - [DECISION_LOG.md](../../DECISION_LOG.md): concise agreed project choices and
-  intent. Keep exercise sequencing and progress in NOTES.md.
+  scope decisions. Keep exercise sequencing and progress in NOTES.md.
 - [NOTES_CODING_DEBT.md](../../NOTES_CODING_DEBT.md): historical proposals and deferred concerns; NOTES owns the active learning queue.
 - [playwright.config.ts](../../playwright.config.ts): actual projects, filename
   patterns, dependencies, parallelism, and reporting.
@@ -65,7 +65,7 @@ through [env.config.ts](../../src/config/env.config.ts) and
 and contains information intended for the conversation. Do not paste raw login
 responses, cookies, or traces containing credentials.
 
-Respect the exclusions and environment constraints in TEST_PLAN.md. Operate on
+Respect scope decisions in DECISION_LOG.md and environment constraints in TEST_PLAN.md. Operate on
 your own test users and resources; do not delete demo data or another test's data.
 Destructive administrative operations require an agreed disposable environment.
 CLI and MCP are optional exploration tools.

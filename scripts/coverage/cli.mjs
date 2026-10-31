@@ -107,7 +107,11 @@ async function generate(resultPath) {
   writeJson(path.join(output, 'coverage.json'), report);
   writeFileSync(
     path.join(output, 'index.html'),
-    renderReport(report, readme, plan, standards),
+    renderReport(report, readme, plan, standards, {
+      historyAvailable: existsSync(
+        path.join(root, 'playwright-report-ci/learning-history/summary.html'),
+      ),
+    }),
   );
   process.stdout.write(
     `Report: ${path.join(output, 'index.html')}\nImplemented: ${report.metrics.implemented}/${report.metrics.denominator}; result freshness: ${report.freshness}\n`,

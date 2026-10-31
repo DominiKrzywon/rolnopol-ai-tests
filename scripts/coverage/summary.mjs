@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { analyzeHistory } from './history.mjs';
+import { renderSummaryHtml } from './summary-html.mjs';
 
 const defaultHistory = fileURLToPath(
   new URL('../../playwright-report-ci/learning-history/', import.meta.url),
@@ -16,10 +17,17 @@ export function buildSummary(history) {
     group.runs.map((run) => {
       const counts = {};
       const scope = new Set();
+      const caseOutcomes = {};
       for (const item of group.cases) {
         for (const observation of item.observations) {
           if (observation.runId !== run.runId) continue;
-          scope.add(`${item.id}@${item.project}`);
+          const key = `${item.id}@${item.project}`;
+          scope.add(key);
+          if (observation.status !== 'passed') {
+            caseOutcomes[key] ??= [];
+            if (!caseOutcomes[key].includes(observation.status))
+              caseOutcomes[key].push(observation.status);
+          }
           counts[observation.status] = (counts[observation.status] || 0) + 1;
         }
       }
@@ -28,6 +36,7 @@ export function buildSummary(history) {
         date: run.startTime,
         source: group.conditions.fingerprint,
         scope: [...scope].sort(),
+        caseOutcomes,
         counts,
         durationMs: run.durationMs ?? null,
         globalErrors: run.globalErrorCount,
@@ -122,7 +131,9 @@ export function summarizeHistory(history = defaultHistory) {
   );
   const output = path.join(history, 'summary.json');
   writeFileSync(output, JSON.stringify(summary, null, 2) + '\n');
-  return { summary, output };
+  const html = path.join(history, 'summary.html');
+  writeFileSync(html, renderSummaryHtml(summary));
+  return { summary, output, html };
 }
 
 if (
@@ -133,11 +144,11 @@ if (
     const args = process.argv.slice(2);
     if (args.length && !(args.length === 1 && args[0] === '--json'))
       throw new Error('Usage: npm run coverage:summary -- [--json]');
-    const { summary, output } = summarizeHistory();
+    const { summary, output, html } = summarizeHistory();
     process.stdout.write(
       args[0] === '--json'
         ? JSON.stringify(summary, null, 2) + '\n'
-        : renderSummary(summary) + `JSON: ${output}\n`,
+        : renderSummary(summary) + `JSON: ${output}\nHTML: ${html}\n`,
     );
   } catch (error) {
     process.stderr.write(`Summary: ${error.message}\n`);

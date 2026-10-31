@@ -8,8 +8,7 @@ easy to debug, rather than cover every button.
 
 The Rolnopol application itself was created for learning automated testing and
 has an educational design. I choose the exercise scope deliberately; I will
-not report every observed deviation as a defect. I record specific exclusions
-in the plan together with the observation and rationale. The application's
+not report every observed deviation as a defect. The application's
 educational purpose does not imply that every deviation was intentionally
 designed by its author.
 
@@ -25,21 +24,7 @@ Core development principles:
 5. Each test should have one clear reason to fail.
 6. Each small change should belong in one commit.
 
-## 2. Scope decisions
-
-- Anonymous redirects are tested for Profile, Marketplace and Finance.
-  Staff & Fields page redirects are excluded from this learning scope;
-  authenticated farm tests and API authorization remain in scope.
-- API rejection of zero field area is outside scope. Do not add a test requiring
-  `POST /fields` with `area: 0` to fail; the UI's positive-area rule does not
-  establish that API contract. `TC-FARM-011` remains unused.
-- State-changing tests use isolated users because another login invalidates the
-  account's previous session. Account for separate browser/request cookie stores
-  and per-IP rate limits when choosing setup and parallelism.
-
-Historical observations and environment details are maintained in local learning notes.
-
-## 3. Priorities
+## 2. Priorities
 
 - **P0**: a passing baseline, healthcheck, login/session, route protection,
   and one basic farm flow.
@@ -49,13 +34,13 @@ Historical observations and environment details are maintained in local learning
 - **Outside ordinary CI**: `/shutdown`, database restoration, feature flag changes,
   and other destructive administrative endpoints. Test these only in a disposable environment.
 
-## 4. Execution evidence
+## 3. Execution evidence
 
 Use the generated report for collection and execution evidence. A passing run
 supports only its recorded scope and source version; collection alone does not
 verify behavior. Metric definitions below specify confirmation requirements.
 
-## 5. Scenario catalog and coverage contract
+## 4. Scenario catalog and coverage contract
 
 This is the only manually maintained scenario registry. The initial catalog
 maps all existing scenario tests and selected next exercises from the roadmap.
@@ -214,63 +199,36 @@ annotated by Playwright are separated from cases not executed after setup failur
 An ID only proves a declared mapping. Review assertions before interpreting a
 passing test as evidence; known weaknesses remain visible in the Notes column.
 
-## 6. Conventions for new tests
+## 5. Conventions for new tests
 
 See [Coding Standards](CODING_STANDARDS.md#test-file-conventions-and-stability) for
 file naming, Arrange-Act-Assert, locators, and stability rules.
 
-## 7. Useful verification commands
+## 6. Useful verification commands
 
 ```bash
-# What Playwright actually collects
-npx playwright test --list
-
-# Code quality
-npm run check:ci
-
-# Fast layers
-npx playwright test --project=api-tests --workers=1
-npx playwright test --project=smoke-tests --workers=1
-
-# P0 priority after adding tags
-npx playwright test --grep @p0 --workers=1
-
-# Full baseline without parallelism
-npx playwright test --workers=1 --reporter=list
+npm run coverage:run -- --project=api-tests
+npm run coverage:run -- --project=smoke-tests
 ```
 
-## 8. Coverage implementation workflow
+These select a focused layer while preserving report provenance. For the full
+run, archive, and summary sequence, use the [README](README.md#scenario-coverage-report).
 
-The standalone tooling lives in `scripts/coverage/` and runs with Node.js.
-`coverage:collect` uses Playwright discovery with no browser or credentials.
-`coverage:validate` checks mappings and the generated README index.
-`coverage:run` collects the full inventory, executes the selected scope with
-one worker and zero retries by default, generates the report even after failure,
-and preserves a failing exit code. Pass Playwright filters after `--`.
-`coverage:report` only reads saved inputs and does not contact the application.
+## 7. Coverage implementation workflow
 
-Each execution replaces the raw result file; `coverage:run` also rebuilds the
-scenario report. Plain `npm test` does not rebuild it. Full and filtered runs use
-the same output paths, without merging results or preserving an earlier pass.
-Freshness compares run provenance with current source files, not two executions.
-Historical comparison is separate and manual: archive each execution with
-`coverage:archive` before replacement, then run `coverage:history`.
-See [the update workflow](README.md#how-report-updates-work) for tooling roles
-and the difference between regenerating HTML and executing tests.
-
-Generated outputs live in ignored `coverage-report/`: inventory, raw Playwright
-results, normalized coverage JSON, and a standalone HTML document. The HTML
-renders README, this plan, and Coding Standards as collapsed chapters alongside
-the metrics and a collapsed, paginated scenario table. Historical notes are not embedded.
-CI retains both Playwright HTML and coverage artifacts, including failed runs.
+Use the [README workflow](README.md#scenario-coverage-report) for commands,
+output paths, archiving, history HTML/JSON, and manual CI behavior.
+The tooling in `scripts/coverage/` preserves failing exit codes and does not
+merge separate executions. Health scenarios remain in scope; setup is separate.
 
 The source fingerprint includes test and helper code, report tooling, config,
 package files and the three embedded documents. A Git revision alone cannot identify local
 uncommitted edits. Application version is optional run metadata supplied with
-`COVERAGE_APP_VERSION`; unknown is reported honestly. No historical trend or
+`COVERAGE_APP_VERSION`; it is omitted from the compact history summary.
+Freshness compares saved evidence with current source inputs. No historical trend or
 release threshold is inferred from one run.
 
-## 9. Definition of Done for a single task
+## 8. Definition of Done for a single task
 
 - The test fails for the expected reason before the application/test fix.
 - Data is unique and independent of execution order.

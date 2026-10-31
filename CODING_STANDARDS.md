@@ -261,7 +261,7 @@ test('should register new user', async ({ page }) => {
 
 ## Scenario IDs and catalog maintenance
 
-[TEST_PLAN.md](TEST_PLAN.md#5-scenario-catalog-and-coverage-contract) owns the
+[TEST_PLAN.md](TEST_PLAN.md#4-scenario-catalog-and-coverage-contract) owns the
 manual catalog. Every scenario test declares exactly one annotation:
 
 ```ts

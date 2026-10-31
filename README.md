@@ -20,64 +20,17 @@ that account. State-changing scenarios should create their own users.
 
 ## Scenario Coverage Report
 
-Open `coverage-report/index.html` directly in a browser. The standalone report
-shows summary metrics first; priority, risk, and area breakdowns expand on demand.
-Expand **Scenarios** to search and filter the full
-catalog by ID, area, priority, risk, or result. Results use pages of 20 rows;
-**Details** opens execution evidence for one scenario. Failure links open the
-correct page automatically.
+Open `coverage-report/index.html` for scenario metrics, filters, and per-case
+execution details. **Implemented** means a catalog scenario has a collected test;
+**Confirmed** requires passing evidence matching the current source in every
+required project. This measures scenarios, not application code coverage.
 
-Filters and the current page are stored in the URL and restored after refresh.
-Copy the address to return to the same view of this report. Failure counts stay
-visible while the list expands on demand. The summary explains why confirmation
-is unavailable for missing, unknown, stale, or globally failed run evidence and
-how to obtain new evidence with `coverage:run`.
+Use **History** to open the archived-run summary and **Latest scenario coverage**
+to return. **Run details** keeps timing and setup results; full data is in JSON.
+**Source metadata missing** means the saved run cannot confirm the current source,
+even if its observed tests passed. Use `coverage:run` for new evidence.
 
-README, TEST_PLAN, and CODING_STANDARDS are collapsed by default, with expandable
-chapters. Document links reveal the referenced chapter. Historical notes and
-coding-debt notes are not embedded. The generated README index is omitted from
-the HTML view because the report already provides the scenario table.
-
-```bash
-npm run coverage:validate
-npm run coverage:collect
-npm run coverage:report -- --no-results
-npm run coverage:run -- --project=api-tests
-npm run coverage:report
-npm run coverage:verify
-```
-
-`coverage:run` defaults to one worker and zero retries and preserves a failing
-exit code after generating the report. `coverage:report` rebuilds from saved
-results without executing tests. Outputs are replaced on the next run; copy the
-output folder before running again if you need history.
-
-To preserve an execution and compare it with earlier runs:
-
-```bash
-npm run coverage:archive
-npm run coverage:history
-```
-
-Run these after `coverage:run`, including when tests fail. Archiving is manual;
-do not connect it to the test command with a success-only `&&`. The archiver
-checks that raw and normalized results match and refuses to overwrite a run.
-It stores JSON and available HTML in Git-ignored
-`playwright-report-ci/learning-history/<time>-<runId>/`. Playwright HTML is copied
-only when its embedded metadata matches the execution. Missing or mismatched
-HTML is reported; JSON remains available for analysis. Interrupted archives
-stop analysis and need inspection. Archives have no automatic expiry.
-
-Open `playwright-report-ci/learning-history/history.md` for the summary, or
-`history.json` for per-run outcomes and attempts. The analyzer separates recorded
-source, command, environment, application and execution settings, then compares
-case IDs within each project. It shows observed outcomes and duration ranges;
-mixed outcomes are investigation signals, not root-cause diagnoses. A single
-pass cannot establish stability. OS/browser builds and external state still
-need manual control, especially when application version is `unknown`.
-Historical outcomes do not replace the source-aware confirmation metric below.
-
-For a compact JSON and a terminal table across all archived runs:
+Run these commands separately, including after test failures:
 
 ```bash
 npm run coverage:run
@@ -85,127 +38,60 @@ npm run coverage:archive
 npm run coverage:summary
 ```
 
-Use `coverage:run` for executions intended for archiving. Raw `npm test` or editor
-runs can replace Playwright JSON without refreshing the normalized report or
-adding archive provenance. Do not combine those outputs or invent a run ID.
+| Output                                               | Purpose                                                         |
+| ---------------------------------------------------- | --------------------------------------------------------------- |
+| `coverage-report/index.html`                         | Latest scenario report and embedded project documentation       |
+| `playwright-report/index.html`                       | Playwright execution details and traces                         |
+| `playwright-report-ci/learning-history/summary.html` | Archived runs, changes in scope/source, and case outcome labels |
+| `playwright-report-ci/learning-history/summary.json` | Compact data for the same history                               |
 
-This refreshes history from the archives and saves
-`playwright-report-ci/learning-history/summary.json`. It does not run tests or
-archive the latest execution. After each test run, including a failed one, use
-`npm run coverage:archive` before generating the summary. Run these as separate
-commands so a failing test exit code does not prevent archiving.
-
-Each summary row contains date, test-source fingerprint, observed case/project
-scope, outcome counts, whole-run duration in milliseconds, and global errors.
-Scope and source changes are flagged against the previous chronological row.
-Counts include repetitions; health cases are included and setup/excluded cases
-are omitted. Missing observations are not inferred as successes. Application
-version is omitted. Cross-run differences are investigation signals.
-For JSON-only stdout, use `node scripts/coverage/summary.mjs --json`.
-
-**Implemented** measures collected cases against included catalog scenarios.
-**Confirmed** requires passing results matching the current source fingerprint.
-Old or unknown results are not current confirmation. These metrics measure the
-scenario catalog, not application code coverage or assertion quality.
-
-See [metric definitions](TEST_PLAN.md#metric-definitions) and
-[scenario ID conventions](CODING_STANDARDS.md#scenario-ids-and-catalog-maintenance)
-for reporting rules and catalog maintenance. Report commands are documented above.
+In the history list, unsuccessful cases have `-fail`, `-flaky`, or `-skip`
+labels. Fail counts unsuccessful tests; global errors concern the run itself.
+Counts include repetitions; setup and excluded cases are omitted.
 
 ### How report updates work
 
-`scripts/coverage/` contains the report tooling: `cli.mjs` collects tests and
-coordinates runs, `model.mjs` maps results to the catalog, `snapshot.mjs` checks
-source fingerprints, `html.mjs` renders this page, and `history.mjs` archives
-and compares saved executions. `app-code.mjs` is the separate backend coverage pilot.
+`coverage:run` runs the full suite, or filters passed after `--`, with one worker
+and zero retries by default. It replaces the latest results and generates the
+report even after test failures. `npm test` and editor runs do not provide the
+complete reporting/archiving workflow. Archive before the next execution.
 
-- `npm test` replaces `coverage-report/playwright-results.json`, but does not
-  rebuild the scenario HTML or normally record its source fingerprint.
-- `npm run coverage:run` collects the inventory, runs the full configured suite
-  (or the scope passed after `--`), and replaces the JSON/HTML report even after
-  test failures. A focused run also replaces the previous full-suite result;
-  results are not merged and the previous passing result is not retained.
-- `npm run coverage:collect` followed by `npm run coverage:report` rebuilds the
-  page from saved results without running tests. It checks the saved run's source
-  fingerprint against current project files, not against the previous run.
-  Missing provenance means `unknown`; a different fingerprint means `stale`.
-  Even changes to the embedded documentation affect this check.
-- Run `npm run coverage:archive` after each execution you want to keep, before
-  another execution replaces it. Then `npm run coverage:history` compares archived
-  observations grouped by matching recorded conditions. Neither command runs
-  automatically with the suite or replaces its results with a better outcome.
+`coverage:summary` refreshes JSON, HTML, and the terminal table from existing
+archives; it does not run or archive tests. `coverage:history` exposes detailed
+comparison groups. Archives are local, Git-ignored, and have no automatic expiry.
 
-The HTML is a saved snapshot: its date and freshness label describe generation
-time. Reopening it does not load newer JSON or recheck source changes. For a full
-suite report with new execution evidence, use `npm run coverage:run` without filters.
+To refresh documentation without running tests, use `npm run coverage:collect`
+then `npm run coverage:report`. Source or documentation edits can make saved
+results stale; regeneration does not turn them into new passing evidence.
+See [metric definitions](TEST_PLAN.md#metric-definitions) for the reporting contract.
 
 ## Application Code Coverage
 
-The scenario report above measures test cases. A separate backend pilot measures
-the Rolnopol application code executed by the farm and financial API specs. It
-uses Node’s V8 coverage and runs the application on a temporary copy, so the
-application checkout’s JSON databases are not modified. Node.js 22 or newer and
-an adjacent `../rolnopol` checkout with installed dependencies are required.
+An optional backend pilot is separate from scenario coverage:
 
 ```bash
 npm run coverage:app-code
-# Or point to another application checkout:
-npm run coverage:app-code -- --app path/to/rolnopol
 ```
 
-Open `coverage-report/app-code/index.html` for line, function, and branch
-coverage of the 14 explicitly listed backend files. The report also writes
-`summary.json` and `lcov.info`. The same run refreshes the scenario report with
-the selected Playwright result. It needs no demo credentials because the selected
-specs create their own users. The application’s frontend JavaScript, other
-backend modules, and its own Vitest suite are outside this pilot denominator.
-A loaded route file can have high line coverage from registration at startup;
-use the scenario assertions to judge behavior.
-
-## Running and Debugging Tests
-
-```bash
-npm test
-npm run test:headed
-npm run test:debug
-npm run test:report
-npx playwright test --project=no-auth-tests --grep @auth
-```
-
-`npm test` also writes the raw JSON reporter output; use `coverage:run` for a
-complete report with source provenance. Current projects are `health-check`,
-`setup-demo-user`, `smoke-tests`, `demo-user-tests`, `no-auth-tests`,
-`api-tests`, `isolated-user-tests`, and `visual-test`. See
-[playwright.config.ts](playwright.config.ts) for filename matching and dependencies.
+Requires Node.js 22+ and an adjacent `../rolnopol` checkout with dependencies
+(or `-- --app path/to/rolnopol`). Runs farm/financial API specs against a temporary
+application copy and writes `coverage-report/app-code/index.html`,
+`summary.json`, and `lcov.info`. Its scope is 14 backend files, excluding the
+frontend; it also replaces the latest scenario results.
 
 ## Code Quality and CI
 
-```bash
-npm run check:ci
-npm run lint
-npm run tsc:check
-npm run format:check
-```
+`npm run check:ci` checks formatting, ESLint, and TypeScript without editing files.
+`npm run coverage:test` tests the report tooling; `npm run coverage:validate`
+checks scenario IDs and the README index. `npm run check` applies formatting.
 
-`check:ci` checks non-TypeScript formatting, ESLint (including TypeScript
-formatting), and TypeScript types without writing files. `npm run check` also
-formats files and is intended for local editing. Husky/lint-staged check staged
-changes. Existing ESLint, Prettier and TypeScript configurations remain the source
-of tooling rules.
-
-The repository was also scanned locally with SonarQube in October 2026. Three
-reported findings led to review of test-email randomness and numeric parsing.
-The Quality Gate status has not been independently verified. This local scan
-is separate from the CI checks below.
-
-[GitHub Actions](.github/workflows/playwright-e2e-tests.yml) runs manually with
-`workflow_dispatch`. Quality includes coverage-tool tests and ID validation.
-The test job generates reports and retains coverage and standard Playwright
-artifacts after both successful and failed runs. It is not currently a PR gate.
+[GitHub Actions](.github/workflows/playwright-e2e-tests.yml) is deliberately manual
+(`workflow_dispatch`). It runs quality checks and tests, retaining available
+Playwright/coverage artifacts after success or failure for 30 days.
 
 ## Documentation
 
-- [TEST_PLAN.md](TEST_PLAN.md): strategy, scope exclusions, scenario catalog and
+- [TEST_PLAN.md](TEST_PLAN.md): strategy, scenario catalog and
   the reporting contract.
 - [CODING_STANDARDS.md](CODING_STANDARDS.md): AAA, Page Objects and locator rules.
 - [.agents/skills/CONTEXT.md](.agents/skills/CONTEXT.md): shared agent workflow.

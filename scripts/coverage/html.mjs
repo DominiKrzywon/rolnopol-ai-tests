@@ -191,7 +191,26 @@ function freshnessExplanation(report) {
   return 'The saved results match the current code and report inputs. Confirmed counts only included scenarios passing in every required project; unselected or blocked scenarios remain unconfirmed.';
 }
 
-export function renderReport(report, readme, plan, standards = '') {
+function resultStatus(report) {
+  if (!report.run) return 'No execution recorded';
+  if (report.freshness === 'unknown') return 'Source metadata missing';
+  if (report.freshness === 'stale') return 'Results from earlier sources';
+  return 'Results match current sources';
+}
+
+function runDetails(report) {
+  if (!report.run) return '';
+  const run = report.run;
+  return `<details id="run-details"><summary>Run details</summary><p>Started: ${escapeHtml(run.startTime)} · Duration: ${duration(run.durationMs)} · Workers: ${escapeHtml(run.workers)} · Global errors: ${escapeHtml(run.globalErrorCount)}</p><p>Setup entries: ${report.infrastructure.length}</p>${report.infrastructure.map((entry) => `<p>${escapeHtml(entry.project)}: <strong>${escapeHtml(entry.status)}</strong> · ${duration(entry.durationMs)}</p>${failureDetails(entry.failure)}`).join('')}<a href="coverage.json">Full report JSON</a></details>`;
+}
+
+export function renderReport(
+  report,
+  readme,
+  plan,
+  standards = '',
+  { historyAvailable = false } = {},
+) {
   const { metrics } = report;
   const percentText = (percent) =>
     percent === null ? 'N/A' : `${Number(percent.toFixed(1))}%`;
@@ -248,7 +267,7 @@ export function renderReport(report, readme, plan, standards = '') {
   const failedCases = report.cases.filter((item) =>
     ['failed', 'interrupted'].includes(item.execution.status),
   );
-  const failureSummary = `<section class="failure-summary" aria-labelledby="failure-summary-title"><h2 id="failure-summary-title">${report.freshness === 'current' ? 'Current failure summary' : 'Failure summary — saved run'}</h2><p>${report.freshness === 'current' ? '' : `Result freshness: ${escapeHtml(report.freshness)}. `}${report.run ? `${failedCases.length} failed or interrupted scenarios in the selected run.` : 'No test run supplied.'}</p>${failedCases.length ? `<details id="failure-list"><summary>Show failed or interrupted scenarios (${failedCases.length})</summary><ul>${failedCases.map((item) => `<li><a href="#case-${item.id}" data-open-case="${item.id}">${item.id} · ${escapeHtml(item.scenario.title)}</a> — ${escapeHtml(item.execution.status)}</li>`).join('')}</ul></details>` : ''}<small>Only reviewed public messages are shown. Unknown values, raw errors, logs and attachments are omitted. Global run errors: ${report.run?.globalErrorCount || 0}. Playwright report: ${escapeHtml(report.playwrightReport?.status || 'unavailable')}.</small></section>`;
+  const failureSummary = `<section class="failure-summary" aria-labelledby="failure-summary-title"><h2 id="failure-summary-title">${report.freshness === 'current' ? 'Current failure summary' : 'Failure summary — saved run'}</h2><p>${report.run ? `${failedCases.length} failed or interrupted scenarios in the selected run.` : 'No test run supplied.'}</p>${failedCases.length ? `<details id="failure-list"><summary>Show failed or interrupted scenarios (${failedCases.length})</summary><ul>${failedCases.map((item) => `<li><a href="#case-${item.id}" data-open-case="${item.id}">${item.id} · ${escapeHtml(item.scenario.title)}</a> — ${escapeHtml(item.execution.status)}</li>`).join('')}</ul></details>` : ''}${report.run?.globalErrorCount ? `<p>Global run errors: ${report.run.globalErrorCount}. See Run details.</p>` : ''}</section>`;
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; base-uri 'none'; form-action 'none'">
@@ -257,10 +276,10 @@ export function renderReport(report, readme, plan, standards = '') {
 .coverage-overview{max-width:860px;margin:0 auto 28px}.coverage-panel{background:#e8ebe8;border:1px solid var(--line);border-radius:12px;padding:24px;margin-bottom:18px}.coverage-panel h2{margin:0 0 18px}.summary-metric{margin:12px 0}.summary-metric strong{font-size:24px}.coverage-group{margin-top:16px}.coverage-label{display:flex;justify-content:space-between;gap:16px;margin-bottom:7px}.coverage-label span{font-variant-numeric:tabular-nums;font-weight:650}.coverage-track{height:14px;background:#aeb5b0;border:1px solid #929d95;border-radius:20px;overflow:hidden;print-color-adjust:exact}.coverage-fill{display:block;height:100%;background:#fff;border-radius:20px}.freshness{font-size:13px;color:var(--muted)}@media(max-width:480px){.coverage-panel{padding:18px}.summary-metric strong{font-size:21px}}
 .detail-toggle{font:inherit;background:none;border:0;padding:0;color:var(--green);cursor:pointer;text-decoration:underline;text-underline-offset:3px}.detail-toggle.failed,.detail-toggle.interrupted{color:#a52f2b}.failure-brief{max-width:260px}.case-details>td{background:#f0f4ee;padding:20px;overflow-wrap:anywhere}.case-details h4{margin:12px 0 6px}.execution-run{border-top:1px solid var(--line);margin-top:16px;padding-top:8px}.attempt{margin:12px 0}.failure-fields{display:grid;gap:12px;max-width:900px}.failure-fields dt{font-weight:650}.failure-fields dd{margin:2px 0;white-space:pre-wrap}.failure-summary{border:1px solid var(--line);background:white;border-radius:12px;padding:20px;margin:24px 0}.failure-summary h2{margin-top:0}
 .pagination{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:16px 0}.pagination button{font:inherit;padding:8px 14px;border:1px solid var(--line);border-radius:6px;background:white;cursor:pointer}.pagination button:disabled{opacity:.5;cursor:default}.document-section{border-top:1px solid var(--line);padding-top:10px}.document-section summary{font-size:17px}.document-section .document-section{margin-left:16px}summary:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #b27717;outline-offset:3px}
-</style></head><body><header><nav><a href="#coverage">Coverage</a><a href="#scenarios">Scenarios</a><a href="#readme">README</a><a href="#test_plan">Test plan</a><a href="#coding_standards">Coding standards</a></nav>
+</style></head><body><header><nav><a href="#coverage">Coverage</a><a href="#scenarios">Scenarios</a>${historyAvailable ? '<a href="../playwright-report-ci/learning-history/summary.html">History</a>' : ''}<a href="#readme">README</a><a href="#test_plan">Test plan</a><a href="#coding_standards">Coding standards</a></nav>
 <h1>Rolnopol scenario coverage</h1><p>Which planned scenarios have tests, and what did the selected run demonstrate? The catalog defines the denominator. Test mappings and passing results do not assess assertion quality.</p></header>
 <main><section id="coverage"><div class="coverage-overview">
-<section class="coverage-panel" aria-labelledby="scenario-summary"><h2 id="scenario-summary">Scenario coverage</h2>${summaryMetric('Implemented', metrics.implemented, metrics.automationPercent)}${selectedMetric}${summaryMetric('Confirmed', metrics.confirmed, metrics.confirmedPercent)}<p class="freshness">Result freshness: ${report.freshness} · ${escapeHtml(report.run?.startTime || 'No test run supplied')}</p><p id="freshness-explanation" class="freshness">${escapeHtml(freshnessExplanation(report))}</p></section>
+<section class="coverage-panel" aria-labelledby="scenario-summary"><h2 id="scenario-summary">Scenario coverage</h2>${summaryMetric('Implemented', metrics.implemented, metrics.automationPercent)}${selectedMetric}${summaryMetric('Confirmed', metrics.confirmed, metrics.confirmedPercent)}<p class="freshness"><strong>${resultStatus(report)}</strong> · ${escapeHtml(report.run?.startTime || 'No test run supplied')}</p><p id="freshness-explanation" class="freshness">${escapeHtml(freshnessExplanation(report))}</p></section>
 <details id="breakdowns"><summary>Coverage by priority, risk and area</summary>
 <section class="coverage-panel" id="priorities" aria-labelledby="priority-summary"><h2 id="priority-summary">Priority coverage</h2><p>Implementation and current execution confirmation for each priority.</p>${priorityBars}</section>
 <section class="coverage-panel" id="risks" aria-labelledby="risk-summary"><h2 id="risk-summary">Risk coverage</h2><p>Initial impact estimate for this learning application, separate from execution priority.</p>${riskBars}</section>
@@ -274,7 +293,7 @@ export function renderReport(report, readme, plan, standards = '') {
       .map(([key, value]) => `${key}: ${value}`)
       .join(' · '),
   )}</p>
-<details><summary>Run and setup evidence</summary><pre>${escapeHtml(JSON.stringify({ run: report.run, infrastructure: report.infrastructure }, null, 2))}</pre></details>
+${runDetails(report)}
 ${failureSummary}
 <details id="scenarios"><summary>Scenarios &middot; ${report.cases.length} catalog entries</summary><div class="filters"><label>Search<input id="search" type="search" placeholder="ID, scenario or file"></label><label>Area<select id="area"><option value="">All areas</option>${choices('area')}</select></label><label>Priority<select id="priority"><option value="">All priorities</option>${choices('priority')}</select></label><label>Risk<select id="risk"><option value="">All risks</option>${choices('risk')}</select></label><label>Status<select id="status"><option value="">All statuses</option>${choices('status')}</select></label></div><div class="pagination"><button type="button" id="previous-page">Previous</button><p id="visible" aria-live="polite"></p><button type="button" id="next-page">Next</button></div>
 <div class="table-scroll"><table id="cases"><thead><tr><th>ID</th><th>Area</th><th>Scenario</th><th>Priority</th><th>Risk</th><th>Status</th><th>Failure</th><th>Details</th></tr></thead><tbody>${rows}</tbody></table></div></details></section>

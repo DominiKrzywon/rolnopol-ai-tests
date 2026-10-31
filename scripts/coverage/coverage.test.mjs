@@ -388,6 +388,33 @@ test('failure count remains visible while the failure list starts collapsed', ()
   assert.doesNotMatch(clean, /id="failure-list"/);
 });
 
+test('missing source metadata stays unconfirmed and compact details retain setup failures', () => {
+  const input = run(
+    [
+      result(),
+      result('failed', {
+        projectName: 'setup-demo-user',
+        annotations: [{ type: 'coverage-role', description: 'setup' }],
+      }),
+    ],
+    null,
+  );
+  const report = buildReport(catalog, inventory(), input, snapshot);
+  const html = renderReport(report, '', '', '', { historyAvailable: true });
+  assert.equal(report.freshness, 'unknown');
+  assert.equal(report.metrics.confirmed, null);
+  assert.match(html, /Source metadata missing/);
+  assert.match(html, /Confirmed: N\/A/);
+  assert.match(html, /setup-demo-user: <strong>failed<\/strong>/);
+  assert.match(html, /href="coverage.json"/);
+  assert.match(
+    html,
+    /href="\.\.\/playwright-report-ci\/learning-history\/summary.html"/,
+  );
+  assert.doesNotMatch(html, /Run and setup evidence|Result freshness: unknown/);
+  assert.doesNotMatch(renderReport(report, '', ''), />History<\/a>/);
+});
+
 test('unknown result mappings and invalid JSON structures fail loudly', () => {
   assert.throws(
     () => buildReport(catalog, inventory(), {}, snapshot),

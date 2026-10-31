@@ -109,6 +109,8 @@ test.describe('Financial functionality tests', () => {
       const description = `E2E transfer ${Date.now()}`;
 
       await financialPage.goto();
+
+      await expect.poll(() => financialPage.getBalance()).toBe(9500);
       const balanceBefore = await financialPage.getBalance();
 
       // Transfer funds to the prepared recipient
@@ -120,6 +122,10 @@ test.describe('Financial functionality tests', () => {
 
       // Verify the debit and history entry after reloading
       await page.reload();
+
+      await expect
+        .poll(() => financialPage.getBalance())
+        .toBeCloseTo(balanceBefore - amount, 2);
 
       const balanceAfter = await financialPage.getBalance();
 

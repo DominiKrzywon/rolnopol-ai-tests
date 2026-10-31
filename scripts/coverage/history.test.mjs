@@ -237,6 +237,10 @@ test('archives preserve failed runs, refuse overwrite and mark missing HTML', as
   const history = path.join(directory, 'history');
   const input = sample('failed-run', ['failed'], () => {});
   save(source, input);
+  writeFileSync(
+    path.join(source, 'index.html'),
+    '<a href="../playwright-report-ci/learning-history/summary.html">History</a>',
+  );
   const options = {
     source,
     history,
@@ -245,6 +249,13 @@ test('archives preserve failed runs, refuse overwrite and mark missing HTML', as
   const archived = await archiveRun(options);
   assert.equal(archived.playwrightHtml, 'missing');
   assert.equal(archived.coverageHtml, true);
+  assert.match(
+    readFileSync(
+      path.join(archived.destination, 'coverage-report/index.html'),
+      'utf8',
+    ),
+    /href="\.\.\/\.\.\/summary.html"/,
+  );
   assert.deepEqual(
     JSON.parse(
       readFileSync(
