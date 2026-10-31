@@ -16,6 +16,7 @@ import {
   FIELD_AREA,
   getDifferentAnimalType,
 } from 'src/helpers/testDataHelpers';
+import { validateStaffList } from 'src/schemas/farm.schema';
 import { CreatedStaff, StaffListResponse } from 'src/types/testData';
 
 test.describe('Farm API', () => {
@@ -225,10 +226,16 @@ test.describe('Farm API', () => {
     },
     async ({ request, createdStaff }) => {
       const response = await request.get(`${BASE_API_URL}/staff`);
-      const body = (await response.json()) as { data: CreatedStaff[] };
-      const worker = body.data.find((item) => item.id === createdStaff.id);
-
       expect(response.status()).toBe(200);
+
+      const body = (await response.json()) as { data: CreatedStaff[] };
+      const isValidStaffList = validateStaffList(body.data);
+      expect(
+        isValidStaffList,
+        `Staff list does not match the schema: ${JSON.stringify(validateStaffList.errors)}`,
+      ).toBe(true);
+
+      const worker = body.data.find((item) => item.id === createdStaff.id);
       expect(worker).toMatchObject({
         id: createdStaff.id,
         name: createdStaff.name,
