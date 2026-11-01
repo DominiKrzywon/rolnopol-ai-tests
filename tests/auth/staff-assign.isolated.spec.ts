@@ -37,8 +37,11 @@ test.describe('Staff Assignment Management', () => {
   });
 
   test.afterEach(async ({ request }) => {
-    await deleteStaff(request, staffId).catch(() => {});
-    await deleteField(request, fieldId).catch(() => {});
+    try {
+      await deleteStaff(request, staffId);
+    } finally {
+      await deleteField(request, fieldId);
+    }
   });
 
   test(
@@ -53,9 +56,13 @@ test.describe('Staff Assignment Management', () => {
       await assignPage.goto();
       await assignPage.assignStaffToField(fieldName, fullName);
 
+      const assignCard = assignPage.getAssignmentGridByField(fieldName);
+
       await expect(assignPage.notificationMessage).toHaveText(
         expectedSuccessMessage,
       );
+      await expect(assignCard).toHaveCount(1);
+      await expect(assignCard).toContainText(fullName);
     },
   );
 

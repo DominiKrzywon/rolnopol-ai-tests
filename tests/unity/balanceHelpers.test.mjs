@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+
 import { parseBalance } from '../../src/helpers/balanceHelpers.ts';
 
 test('check validation of balance helper', () => {

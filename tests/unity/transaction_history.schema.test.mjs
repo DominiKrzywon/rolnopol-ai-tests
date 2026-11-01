@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+
 import { validateTransactionHistory } from '../../src/schemas/transaction_history.schema.ts';
 
 const validTransaction = {

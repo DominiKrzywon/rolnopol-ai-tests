@@ -84,6 +84,8 @@ frontend; it also replaces the latest scenario results.
 `npm run check:ci` checks formatting, ESLint, and TypeScript without editing files.
 `npm run coverage:test` tests the report tooling; `npm run coverage:validate`
 checks scenario IDs and the README index. `npm run check` applies formatting.
+`npm run test:unit` runs the offline helper and schema tests in `tests/unity`.
+The quality job runs these separately from the reporting-tool tests.
 
 [GitHub Actions](.github/workflows/playwright-e2e-tests.yml) is deliberately manual
 (`workflow_dispatch`). It runs quality checks and tests, retaining available

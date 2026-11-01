@@ -36,6 +36,9 @@ jobs:
       - name: Test coverage tooling
         run: npm run coverage:test
 
+      - name: Unity tests
+        run: npm run test:unit
+
       - name: Validate scenario IDs and README index
         run: npm run coverage:validate
 

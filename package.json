@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "npx playwright test",
+    "test:unit": "node --test tests/unity/*.test.mjs",
     "test:headed": "npx playwright test --headed",
     "test:debug": "npx playwright test --debug",
     "codegen": "npx playwright codegen",
