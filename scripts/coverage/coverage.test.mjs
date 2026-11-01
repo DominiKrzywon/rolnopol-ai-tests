@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import vm from 'node:vm';
 
 import ts from 'typescript';
+import yazl from 'yazl';
 
 import { summarizeFailure } from './failures.mjs';
 import { renderMarkdown, renderReport } from './html.mjs';
@@ -802,54 +802,49 @@ test('missing or mismatched report evidence never produces a direct test link', 
   );
 });
 
-test('HTML report index is read from its embedded ZIP without exporting raw diagnostics', async () => {
-  const require = createRequire(import.meta.url);
-  const { yazl } = require(
-    path.join(
-      path.dirname(require.resolve('playwright-core/package.json')),
-      'lib/zipBundle.js',
-    ),
-  );
-  const input = run();
-  const zip = new yazl.ZipFile();
-  const chunks = [];
-  const finished = new Promise((resolve, reject) => {
-    zip.outputStream.on('data', (chunk) => chunks.push(chunk));
-    zip.outputStream.on('end', resolve);
-    zip.outputStream.on('error', reject);
+for (const tag of ['script', 'template']) {
+  test(`HTML report index is read from its embedded ZIP in ${tag} without exporting raw diagnostics`, async () => {
+    const input = run();
+    const zip = new yazl.ZipFile();
+    const chunks = [];
+    const finished = new Promise((resolve, reject) => {
+      zip.outputStream.on('data', (chunk) => chunks.push(chunk));
+      zip.outputStream.on('end', resolve);
+      zip.outputStream.on('error', reject);
+    });
+    zip.addBuffer(
+      Buffer.from(JSON.stringify(htmlIndex(input, [htmlTest()]))),
+      'report.json',
+    );
+    zip.addBuffer(Buffer.from('synthetic-private-log'), 'private.json');
+    zip.end();
+    await finished;
+    const directory = mkdtempSync(path.join(os.tmpdir(), 'rolnopol-links-'));
+    try {
+      const file = path.join(directory, 'index.html');
+      writeFileSync(
+        file,
+        `<${tag} id="playwrightReportBase64">data:application/zip;base64,${Buffer.concat(chunks).toString('base64')}</${tag}>`,
+      );
+      const links = await loadPlaywrightLinks(file, input);
+      assert.equal(links.status, 'matched');
+      assert.equal(links.tests[0].playwrightTestId, htmlTest().testId);
+      assert.doesNotMatch(JSON.stringify(links), /synthetic-private-log/);
+      writeFileSync(file, '<html>unsupported report</html>');
+      assert.equal(
+        (await loadPlaywrightLinks(file, input)).status,
+        'unavailable',
+      );
+    } finally {
+      assert.equal(
+        path.dirname(path.resolve(directory)),
+        path.resolve(os.tmpdir()),
+      );
+      assert.ok(path.basename(directory).startsWith('rolnopol-links-'));
+      rmSync(directory, { recursive: true });
+    }
   });
-  zip.addBuffer(
-    Buffer.from(JSON.stringify(htmlIndex(input, [htmlTest()]))),
-    'report.json',
-  );
-  zip.addBuffer(Buffer.from('synthetic-private-log'), 'private.json');
-  zip.end();
-  await finished;
-  const directory = mkdtempSync(path.join(os.tmpdir(), 'rolnopol-links-'));
-  try {
-    const file = path.join(directory, 'index.html');
-    writeFileSync(
-      file,
-      `<script id="playwrightReportBase64" type="application/zip">data:application/zip;base64,${Buffer.concat(chunks).toString('base64')}</script>`,
-    );
-    const links = await loadPlaywrightLinks(file, input);
-    assert.equal(links.status, 'matched');
-    assert.equal(links.tests[0].playwrightTestId, htmlTest().testId);
-    assert.doesNotMatch(JSON.stringify(links), /synthetic-private-log/);
-    writeFileSync(file, '<html>unsupported report</html>');
-    assert.equal(
-      (await loadPlaywrightLinks(file, input)).status,
-      'unavailable',
-    );
-  } finally {
-    assert.equal(
-      path.dirname(path.resolve(directory)),
-      path.resolve(os.tmpdir()),
-    );
-    assert.ok(path.basename(directory).startsWith('rolnopol-links-'));
-    rmSync(directory, { recursive: true });
-  }
-});
+}
 
 test('saved failures are not labelled current and details have accessible controls', () => {
   const input = run(

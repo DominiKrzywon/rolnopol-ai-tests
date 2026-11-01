@@ -1,8 +1,7 @@
 import { readFile } from 'node:fs/promises';
-import { createRequire } from 'node:module';
-import path from 'node:path';
 
-const require = createRequire(import.meta.url);
+import yauzl from 'yauzl';
+
 const validId = (id) =>
   typeof id === 'string' && /^[a-f0-9]{20}-[a-f0-9]{20}$/.test(id);
 
@@ -42,19 +41,13 @@ export function matchPlaywrightReport(summary, run) {
   return { status: 'matched', tests };
 }
 
-// Playwright 1.58 embeds its report index in a ZIP. Unsupported formats disable links.
+// Playwright embeds its report ZIP in a script (1.58) or template (1.64).
 async function readSummary(html) {
   const base64 =
-    /<script[^>]*id="playwrightReportBase64"[^>]*>data:application\/zip;base64,([A-Za-z0-9+/=]+)<\/script>/.exec(
+    /<(script|template)\b[^>]*\bid="playwrightReportBase64"[^>]*>data:application\/zip;base64,([A-Za-z0-9+/=]+)<\/\1>/.exec(
       html,
-    )?.[1];
+    )?.[2];
   if (!base64) throw new Error('Unsupported HTML report format');
-  const { yauzl } = require(
-    path.join(
-      path.dirname(require.resolve('playwright-core/package.json')),
-      'lib/zipBundle.js',
-    ),
-  );
   return new Promise((resolve, reject) => {
     yauzl.fromBuffer(
       Buffer.from(base64, 'base64'),

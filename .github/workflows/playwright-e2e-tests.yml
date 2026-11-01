@@ -10,7 +10,7 @@ concurrency:
 jobs:
   quality:
     name: Lint, Format & Type Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -36,7 +36,7 @@ jobs:
       - name: Test coverage tooling
         run: npm run coverage:test
 
-      - name: Unity tests
+      - name: Unit tests
         run: npm run test:unit
 
       - name: Validate scenario IDs and README index
@@ -44,7 +44,7 @@ jobs:
 
   test:
     needs: quality
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     environment: dev
     timeout-minutes: 10
     env:
