@@ -3,34 +3,32 @@ import test from 'node:test';
 
 import { validateStaffList } from '../../src/schemas/farm.schema.ts';
 
+const validStaff = {
+  id: 1,
+  name: 'Jan',
+  surname: 'Kowalski',
+  age: 30,
+};
+
 test('accepts a valid staff list', async () => {
   const staff = [
     {
-      id: 1,
-      name: 'Ziutek',
-      surname: 'Ziutkowski',
-      age: 99,
+      ...validStaff,
     },
   ];
 
-  const ifValid = validateStaffList(staff);
-
-  assert.equal(ifValid, true);
+  assert.equal(validateStaffList(staff), true);
 });
 
 test('not accepts invalid staff list data', async () => {
   const staff = [
     {
-      id: 100,
-      name: 'Ziutek',
-      surname: 'Ziutkowki',
-      age: '68',
+      ...validStaff,
+      age: '22',
     },
   ];
 
-  const ifValid = validateStaffList(staff);
-
-  assert.equal(ifValid, false);
+  assert.equal(validateStaffList(staff), false);
 });
 
 test('rejects a staff member without surname', async () => {
@@ -42,53 +40,36 @@ test('rejects a staff member without surname', async () => {
     },
   ];
 
-  const ifValid = validateStaffList(staff);
-
-  assert.equal(ifValid, false);
+  assert.equal(validateStaffList(staff), false);
 });
 
 test('accepts an empty staff list', async () => {
   const staff = [];
-  const ifValid = validateStaffList(staff);
-  assert.equal(ifValid, true);
+  assert.equal(validateStaffList(staff), true);
 });
 
 test('valid for more than one staff', async () => {
-  const staff1 = [
+  const staff = [
     {
-      id: 1,
-      name: 'Ziutek',
-      surname: 'Ziutkowski',
-      age: 11,
+      ...validStaff,
     },
-  ];
-  const staff2 = [
     {
+      ...validStaff,
       id: 2,
-      name: 'Zdzisek',
-      surname: 'Potocki',
       age: '123',
     },
   ];
 
-  const ifValidStaff1 = validateStaffList(staff1);
-  const ifValidStaff2 = validateStaffList(staff2);
-
-  assert.equal(ifValidStaff1, true);
-  assert.equal(ifValidStaff2, false);
+  assert.equal(validateStaffList(staff), false);
 });
 
 test('accept staff with extra field', async () => {
   const staff = [
     {
-      id: 3,
-      name: 'Ziutek',
-      surname: 'Ziutkowski',
-      age: 44,
+      ...validStaff,
       skills: ['coding', 'testing', 'acrobatics'],
     },
   ];
 
-  const ifValid = validateStaffList(staff);
-  assert.equal(ifValid, true);
+  assert.equal(validateStaffList(staff), true);
 });
