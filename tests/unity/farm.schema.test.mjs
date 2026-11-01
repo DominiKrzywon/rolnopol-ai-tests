@@ -10,7 +10,7 @@ const validStaff = {
   age: 30,
 };
 
-test('accepts a valid staff list', async () => {
+test('accepts a valid staff list', () => {
   const staff = [
     {
       ...validStaff,
@@ -20,7 +20,7 @@ test('accepts a valid staff list', async () => {
   assert.equal(validateStaffList(staff), true);
 });
 
-test('not accepts invalid staff list data', async () => {
+test('not accepts invalid staff list data', () => {
   const staff = [
     {
       ...validStaff,
@@ -31,7 +31,7 @@ test('not accepts invalid staff list data', async () => {
   assert.equal(validateStaffList(staff), false);
 });
 
-test('rejects a staff member without surname', async () => {
+test('rejects a staff member without surname', () => {
   const staff = [
     {
       id: 1,
@@ -43,12 +43,12 @@ test('rejects a staff member without surname', async () => {
   assert.equal(validateStaffList(staff), false);
 });
 
-test('accepts an empty staff list', async () => {
+test('accepts an empty staff list', () => {
   const staff = [];
   assert.equal(validateStaffList(staff), true);
 });
 
-test('valid for more than one staff', async () => {
+test('valid for more than one staff', () => {
   const staff = [
     {
       ...validStaff,
@@ -63,7 +63,7 @@ test('valid for more than one staff', async () => {
   assert.equal(validateStaffList(staff), false);
 });
 
-test('accept staff with extra field', async () => {
+test('accept staff with extra field', () => {
   const staff = [
     {
       ...validStaff,

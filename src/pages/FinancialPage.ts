@@ -1,4 +1,5 @@
 import { PAGE_URLS } from 'src/constants/pageUrls';
+import { parseBalance } from 'src/helpers/balanceHelpers';
 import { BasePage } from 'src/pages/BasePage';
 
 export type TransactionType = '' | 'income' | 'expense' | 'transfer';
@@ -119,12 +120,7 @@ export class FinancialPage extends BasePage {
   async getBalance(): Promise<number> {
     const balance = await this.currentBalance.innerText();
 
-    return Number(
-      balance
-        .replace(',', '.')
-        .replace(/\s/g, '')
-        .replace(/[^\d.]/g, ''),
-    );
+    return parseBalance(balance);
   }
 
   async filterBy({ type, category }: FilterOptions): Promise<void> {
