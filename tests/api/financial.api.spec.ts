@@ -203,8 +203,15 @@ test.describe('Financial API', () => {
         transferRecipient.recipientApi,
       );
 
-      expect(senderAccountAfter).toBe(senderAccountBalance - amount);
-      expect(recipientAccountAfter).toBe(recipientAccountBalance + amount);
+      const expectedSenderBalance = Number(
+        (senderAccountBalance - amount).toFixed(2),
+      );
+      const expectedRecipientBalance = Number(
+        (recipientAccountBalance + amount).toFixed(2),
+      );
+
+      expect(senderAccountAfter).toBe(expectedSenderBalance);
+      expect(recipientAccountAfter).toBe(expectedRecipientBalance);
     },
   );
 

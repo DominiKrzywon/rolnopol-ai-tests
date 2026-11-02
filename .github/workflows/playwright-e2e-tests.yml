@@ -60,6 +60,8 @@ jobs:
         image: jaktestowac/rolnopol:1.126.0@sha256:e496a86a035e5c68d081cdec92f1518e197c2ab62853abbfdf1128d46c42747e
         ports:
           - 3000:3000
+        env:
+          NODE_ENV: test
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
