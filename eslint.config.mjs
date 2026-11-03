@@ -65,7 +65,7 @@ export default [
   },
   eslintPluginPrettierRecommended,
   {
-    files: ['scripts/coverage/**/*.mjs'],
+    files: ['scripts/coverage/**/*.mjs', 'tests/unity/**/*.mjs'],
     rules: {
       '@typescript-eslint/explicit-function-return-type': 'off',
       ...Object.fromEntries(

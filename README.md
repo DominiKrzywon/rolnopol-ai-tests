@@ -96,6 +96,11 @@ Playwright/coverage artifacts after success or failure for 30 days.
 - [TEST_PLAN.md](TEST_PLAN.md): strategy, scenario catalog and
   the reporting contract.
 - [CODING_STANDARDS.md](CODING_STANDARDS.md): AAA, Page Objects and locator rules.
+- [NOTES.md](NOTES.md): active learning queue, collaboration preferences and
+  historical investigation records.
+- [DECISION_LOG.md](DECISION_LOG.md): agreed scope and project choices.
+- [REFACTOR.md](REFACTOR.md): completed refactoring reference; current exercises
+  remain in NOTES.
 - [.agents/skills/CONTEXT.md](.agents/skills/CONTEXT.md): shared agent workflow.
 
 ## Scenario Index
