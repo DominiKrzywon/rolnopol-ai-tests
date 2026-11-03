@@ -93,18 +93,22 @@ jobs:
         run: npx playwright install-deps chromium
 
       - name: Wait for rolnopol service
+        shell: bash
         run: |
+          healthcheck_url="${BASE_URL%/}/api/v1/healthcheck"
+          echo "Waiting for rolnopol at ${healthcheck_url}..."
+
           for attempt in {1..20}; do
-            if curl --fail --max-time 5 "$BASE_URL/api/v1/healthcheck"; then
+            if curl --silent --show-error --fail --max-time 5 --output /dev/null "$healthcheck_url"; then
               echo "Service is ready"
               exit 0
             fi
 
-            echo "Service is not ready, waiting..."
+            echo "Attempt ${attempt}/20 failed; retrying in 2 seconds..."
             sleep 2
           done
 
-          echo "Service did not start"
+          echo "Service did not start at ${healthcheck_url}" >&2
           exit 1
 
       - name: Run Playwright tests
