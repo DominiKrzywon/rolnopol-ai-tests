@@ -1,5 +1,5 @@
-import Ajv, { JSONSchemaType } from 'ajv';
-import { AccountData } from 'src/types/accountData';
+import Ajv, { type JSONSchemaType } from 'ajv';
+import type { AccountData } from 'src/types/accountData';
 
 const accountDataSchema: JSONSchemaType<AccountData> = {
   type: 'object',
