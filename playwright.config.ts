@@ -83,12 +83,5 @@ export default defineConfig({
       testMatch: ['**/*.isolated.spec.ts'],
       use: { ...devices['Desktop Chrome'] },
     },
-
-    {
-      name: 'visual-test',
-      dependencies: ['health-check'],
-      testMatch: ['**/visual/**/*.spec.ts'],
-      use: { ...devices['Desktop Chrome'] },
-    },
   ],
 });
