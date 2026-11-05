@@ -67,6 +67,18 @@ test('rejects data without account', () => {
 
   const result = validateAccountData(data);
   assert.equal(result, false);
+
+  const emptyAccount = validateAccountData.errors.find(
+    (error) =>
+      error.keyword === 'required' &&
+      error.instancePath === '' &&
+      error.params.missingProperty === 'account',
+  );
+
+  assert.ok(
+    emptyAccount,
+    'Expected a missing required property error for account',
+  );
 });
 
 test('accepts an account with an additional property', () => {
