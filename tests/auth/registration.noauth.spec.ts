@@ -133,12 +133,20 @@ test.describe('Registration Negative Tests', () => {
       tag: ['@auth', '@registration', '@validation', '@negative'],
     },
     async ({ page, request, registerPage }) => {
-      const user = prepareRandomUser();
+      const user = {
+        ...prepareRandomUser(),
+        displayName: 'Duplicate Email Test',
+      };
       const expectedErrorMessage = 'User with this email already exists';
 
       // Register the email before attempting to reuse it
       const setupResponse = await registerUser(request, user);
-      expect(setupResponse.status()).toBe(201);
+      const setupBody = await setupResponse.json();
+      expect(
+        setupResponse.status(),
+        `Setup registration failed:
+        ${setupBody.error ?? setupBody.message ?? 'No error description'}`,
+      ).toBe(201);
 
       await registerPage.goto();
 
