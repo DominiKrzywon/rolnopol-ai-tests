@@ -2,8 +2,6 @@ import { summarizeFailure } from './failures.mjs';
 
 export const START = '<!-- coverage-catalog:start -->';
 export const END = '<!-- coverage-catalog:end -->';
-export const INDEX_START = '<!-- coverage-index:start -->';
-export const INDEX_END = '<!-- coverage-index:end -->';
 const ID = /^TC-[A-Z]+-\d{3}$/;
 const RISK_LEVELS = ['critical', 'high', 'medium', 'low'];
 const columns = [
@@ -117,26 +115,6 @@ export function validateInventory(catalog, inventory) {
     definitions.set(id, definition);
     units.add(unit);
   }
-}
-
-export function readmeIndex(catalog) {
-  const cell = (value) => value.replaceAll('|', '\\|');
-  return (
-    '\n\n| ID | Area | Scenario | Layer | Priority | Risk | Scope |\n' +
-    '| --- | --- | --- | --- | --- | --- | --- |\n' +
-    catalog
-      .map(
-        (item) =>
-          `| ${[item.id, item.area, item.scenario, item.layer, item.priority, item.risk, item.scope].map(cell).join(' | ')} |`,
-      )
-      .join('\n') +
-    '\n\n'
-  );
-}
-
-export function updateReadme(readme, catalog) {
-  const { from, to } = section(readme, INDEX_START, INDEX_END);
-  return readme.slice(0, from) + readmeIndex(catalog) + readme.slice(to);
 }
 
 export function flattenResults(report) {

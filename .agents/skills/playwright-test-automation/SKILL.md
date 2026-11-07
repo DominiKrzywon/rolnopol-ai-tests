@@ -37,8 +37,8 @@ Apply the [shared context](../CONTEXT.md), including mentoring mode and check se
    Keep IDs after renames; never reuse retired IDs. Parameterized data contains
    explicit IDs per collected case. Setup uses `coverage-role: setup` instead.
    New planned rows need no placeholder test.
-10. Update the source catalog when scope changes, regenerate README with
-    `npm run coverage:readme`, and validate with `npm run coverage:validate`.
+10. Update the TEST_PLAN catalog when scope changes and validate with
+    `npm run coverage:validate`. README links to the catalog.
     Use `npm run coverage:run -- <Playwright filters>` for execution evidence.
     Verify the change according to shared context and record the actual result.
 

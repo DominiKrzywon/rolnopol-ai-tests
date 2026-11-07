@@ -10,13 +10,10 @@ import {
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { format, resolveConfig } from 'prettier';
-
 import { renderReport } from './html.mjs';
 import {
   buildReport,
   parseCatalog,
-  updateReadme,
   validateCoverageReport,
   validateInventory,
 } from './model.mjs';
@@ -76,16 +73,6 @@ function collect() {
   return inventory;
 }
 
-async function expectedReadme() {
-  return format(
-    updateReadme(read('README.md'), parseCatalog(read('TEST_PLAN.md'))),
-    {
-      ...(await resolveConfig(path.join(root, 'README.md'))),
-      parser: 'markdown',
-    },
-  );
-}
-
 async function generate(resultPath) {
   const plan = read('TEST_PLAN.md');
   const readme = read('README.md');
@@ -125,23 +112,10 @@ async function main() {
         `${command} does not accept filters; inventory must be complete.`,
       );
     collect();
-    if (
-      command === 'validate' &&
-      read('README.md').replaceAll('\r\n', '\n') !==
-        (await expectedReadme()).replaceAll('\r\n', '\n')
-    ) {
-      throw new Error(
-        'README index is out of date. Run npm run coverage:readme.',
-      );
-    }
   } else if (command === 'verify') {
     if (args.length) throw new Error('verify does not accept arguments');
     validateCoverageReport(readJson(path.join(output, 'coverage.json')));
     process.stdout.write('Coverage JSON is valid.\n');
-  } else if (command === 'readme') {
-    if (args.length) throw new Error('readme does not accept arguments');
-    writeFileSync(path.join(root, 'README.md'), await expectedReadme());
-    process.stdout.write('Updated README scenario index.\n');
   } else if (command === 'report') {
     let resultPath = existsSync(resultsFile) ? resultsFile : null;
     if (args.length) {
@@ -198,7 +172,7 @@ async function main() {
     process.exitCode = code;
   } else {
     throw new Error(
-      'Usage: node scripts/coverage/cli.mjs collect|validate|verify|readme|run|report',
+      'Usage: node scripts/coverage/cli.mjs collect|validate|verify|run|report',
     );
   }
 }

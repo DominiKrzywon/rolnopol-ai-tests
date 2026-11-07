@@ -39,7 +39,7 @@ jobs:
       - name: Unit tests
         run: npm run test:unit
 
-      - name: Validate scenario IDs and README index
+      - name: Validate scenario catalog and collected IDs
         run: npm run coverage:validate
 
   test:

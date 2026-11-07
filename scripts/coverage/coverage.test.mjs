@@ -13,7 +13,6 @@ import { renderMarkdown, renderReport } from './html.mjs';
 import {
   buildReport,
   parseCatalog,
-  updateReadme,
   validateCoverageReport,
   validateInventory,
 } from './model.mjs';
@@ -114,17 +113,6 @@ test('catalog parses escaped pipes and rejects duplicate IDs and malformed colum
       parseCatalog(markdown(catalogRow) + '<!-- coverage-catalog:start -->'),
     /exactly one/,
   );
-});
-
-test('README generation preserves authored content and is idempotent', () => {
-  const original =
-    '# Hello\n<!-- coverage-index:start -->old<!-- coverage-index:end -->\nFooter';
-  const updated = updateReadme(original, catalog);
-  assert.match(updated, /^# Hello/);
-  assert.match(updated, /Footer$/);
-  assert.equal(updateReadme(updated, catalog), updated);
-  assert.match(updated, /TC-AUTH-002/);
-  assert.match(updated, /\| Risk \|/);
 });
 
 test('inventory validates IDs without treating planned gaps as errors', () => {
@@ -483,15 +471,17 @@ test('collapsible Markdown preserves anchors, nesting and code fences', () => {
   );
 });
 
-test('report omits the duplicate README index and collapses documentation and scenarios', () => {
+test('report accepts an authored README without index markers and keeps catalog scenarios', () => {
   const report = buildReport(catalog, inventory(), null, snapshot);
   const html = renderReport(
     report,
-    '# README\n\n<!-- coverage-index:start -->\nUNIQUE_DUPLICATE_INDEX\n<!-- coverage-index:end -->',
+    '# README\n\n## Quick Start\n\nRun the first healthcheck.\n\n[Scenario catalog](TEST_PLAN.md#scope)',
     '# Plan\n\n## Scope\n\nKeep scope visible on demand.',
     '# Standards\n\n## Rules\n\nUnique coding rule.',
   );
-  assert.doesNotMatch(html, /UNIQUE_DUPLICATE_INDEX/);
+  assert.match(html, /Run the first healthcheck/);
+  assert.match(html, /Scenario catalog/);
+  assert.match(html, /TC-AUTH-002/);
   assert.match(html, /Unique coding rule/);
   for (const id of ['readme', 'test_plan', 'coding_standards', 'scenarios']) {
     assert.ok(html.includes(`<details id="${id}">`));

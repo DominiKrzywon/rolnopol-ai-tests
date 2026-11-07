@@ -7,4 +7,7 @@ export class HomePage extends BasePage {
   readonly statsSection = this.page.locator('.glass.futuristic-card');
   readonly modernKpiSection = this.page.locator('.home-modern-grid');
   readonly dynamicInsight = this.page.locator('main').getByText(/per farm\./);
+
+  readonly mobileMenuToggle = this.page.getByTestId('mobile-menu-toggle');
+  readonly loginLink = this.page.getByTestId('nav-login');
 }

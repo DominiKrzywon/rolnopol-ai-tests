@@ -83,5 +83,19 @@ export default defineConfig({
       testMatch: ['**/*.isolated.spec.ts'],
       use: { ...devices['Desktop Chrome'] },
     },
+
+    {
+      name: 'mobile-pixel-5',
+      dependencies: ['health-check'],
+      testMatch: ['**/*.mobile.spec.ts'],
+      use: { ...devices['Pixel 5'] },
+    },
+
+    {
+      name: 'mobile-iPhone-13',
+      dependencies: ['health-check'],
+      testMatch: ['**/*.mobile.spec.ts'],
+      use: { ...devices['iPhone 13'] },
+    },
   ],
 });

@@ -25,7 +25,6 @@
     "coverage:collect": "node scripts/coverage/cli.mjs collect",
     "coverage:run": "node scripts/coverage/cli.mjs run",
     "coverage:report": "node scripts/coverage/cli.mjs report",
-    "coverage:readme": "node scripts/coverage/cli.mjs readme",
     "coverage:test": "node --test scripts/coverage/coverage.test.mjs scripts/coverage/history.test.mjs scripts/coverage/summary.test.mjs",
     "coverage:archive": "node scripts/coverage/history.mjs archive",
     "coverage:history": "node scripts/coverage/history.mjs analyze",

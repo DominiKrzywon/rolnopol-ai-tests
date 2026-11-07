@@ -78,9 +78,8 @@ still needs BASE_URL; `npm run coverage:collect` supplies a local URL and bypass
 dotenv loading, without requiring account credentials or running fixtures.
 
 - Documentation/skills: names, YAML, links, instruction consistency, and formatting.
-- Scenario catalog or ID changes: `npm run coverage:readme`, then
-  `npm run coverage:validate`. TEST_PLAN owns manually edited rows; README
-  contains the generated index. Neither stores live pass counts.
+- Scenario catalog or ID changes: `npm run coverage:validate`. TEST_PLAN owns
+  scenario rows; README links to it. Neither stores live pass counts.
 - Coverage tooling: `npm run coverage:test`, `npm run coverage:validate`, and
   `npm run check:ci`; inspect generated HTML, including all three embedded documents,
   chapter links, scenario pagination, filters, and failure links.
