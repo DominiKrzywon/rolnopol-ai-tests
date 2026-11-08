@@ -122,6 +122,7 @@ test.describe('Farm API', () => {
 
       // Verify the changes are persisted
       const fields = await getFields(request);
+      const field = fields.find((field) => field.id === fieldId);
 
       expect(response.status()).toBe(200);
       expect(body.message).toBe(expectedMessage);
@@ -131,12 +132,11 @@ test.describe('Farm API', () => {
         name: updatedFieldName,
         area: FIELD_AREA + 100,
       });
-      expect(fields.find((field) => field.id === fieldId)?.name).toBe(
-        updatedFieldName,
-      );
-      expect(fields.find((field) => field.id === fieldId)?.area).toBe(
-        FIELD_AREA + 100,
-      );
+      expect(field).toMatchObject({
+        id: fieldId,
+        name: updatedFieldName,
+        area: FIELD_AREA + 100,
+      });
     },
   );
 

@@ -51,6 +51,7 @@ export class ManagementPage extends BasePage {
   readonly staffAddedMessage = this.page.getByText('Staff added!');
   readonly searchStaffInput = this.page.getByPlaceholder('Search staff...');
 
+  readonly animalCards = this.page.locator('li.animal-card');
   readonly addAnimal = this.page.locator('#openAddAnimalModal');
   readonly animalHeading = this.page.getByRole('heading', {
     name: ' Animals (groups)',
@@ -177,6 +178,22 @@ export class ManagementPage extends BasePage {
 
   getAnimalCardByAmount(amount: number): Locator {
     return this.page.locator('li', { hasText: String(amount) }).first();
+  }
+
+  getAssignedAnimalLabel(fieldCard: Locator): Locator {
+    return fieldCard.locator('.assigned-animal > span');
+  }
+
+  getAssignedFieldLabel(animalCard: Locator): Locator {
+    return animalCard.locator('.field-badge > span');
+  }
+
+  getAnimalTypeLabel(animalCard: Locator): Locator {
+    return animalCard.locator('.list-card-title-animal > strong');
+  }
+
+  getAnimalAmountLabel(animalCard: Locator): Locator {
+    return animalCard.locator('.list-card-amount');
   }
 
   async editStaff(name: string, surname: string, age: number): Promise<void> {

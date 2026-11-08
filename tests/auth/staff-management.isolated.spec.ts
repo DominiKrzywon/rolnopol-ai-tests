@@ -1,12 +1,12 @@
 import { faker } from '@faker-js/faker';
 import { randomUUID } from 'crypto';
-import { createField, deleteField } from 'src/api/farm.api';
+import { createField, deleteField, getStaff } from 'src/api/farm.api';
 import { expect, test } from 'src/fixtures/data.fixture';
 import {
   FIELD_AREA,
+  getDifferentAnimalType,
   getRandomAnimalType,
   newAmount,
-  STAFF_AGE,
 } from 'src/helpers/testDataHelpers';
 
 test.use({ storageState: undefined });
@@ -57,7 +57,7 @@ test.describe('Staff & Fields Management', () => {
       const fieldName = faker.word.noun();
       const animalAmount = faker.number.int({ min: 1, max: 99_999 });
       const expectedErrorMessage = 'Amount is required.';
-
+      const animalType = getRandomAnimalType();
       await managementPage.goto();
 
       await expect(managementPage.header).toBeVisible();
@@ -81,20 +81,39 @@ test.describe('Staff & Fields Management', () => {
       await managementPage.goto();
 
       // Create the herd on the prepared field
-      await managementPage.addAnimalGroup(
-        getRandomAnimalType(),
-        animalAmount,
-        fieldName,
-      );
+      await managementPage.addAnimalGroup(animalType, animalAmount, fieldName);
+      const expectedAnimalLabel =
+        animalType.charAt(0).toUpperCase() + animalType.slice(1);
       await managementPage.goto();
 
       // Verify the field card shows the created herd size
       await managementPage.searchFields(fieldName);
 
-      const createdFieldCard = managementPage.getFieldCardByName(fieldName);
+      const fieldCard = managementPage.getFieldCardByName(fieldName);
+      const assignedAnimalLabel =
+        managementPage.getAssignedAnimalLabel(fieldCard);
 
-      await expect(createdFieldCard).toBeVisible();
-      await expect(createdFieldCard).toContainText(String(animalAmount));
+      const animalCard = managementPage.animalCards;
+
+      await expect(animalCard).toHaveCount(1);
+      await expect(animalCard).toBeVisible();
+      await expect(fieldCard).toBeVisible();
+
+      await expect(managementPage.getAnimalTypeLabel(animalCard)).toHaveText(
+        animalType,
+      );
+
+      await expect(managementPage.getAnimalAmountLabel(animalCard)).toHaveText(
+        String(animalAmount),
+      );
+
+      await expect(managementPage.getAssignedFieldLabel(animalCard)).toHaveText(
+        `: ${fieldName}`,
+      );
+
+      await expect(assignedAnimalLabel).toHaveText(
+        new RegExp(`:\\s*${animalAmount}\\s+${expectedAnimalLabel}$`),
+      );
     },
   );
 
@@ -142,7 +161,7 @@ test.describe('Staff & Fields Management - Delete Field', () => {
     },
     async ({ freshUser: _, managementPage, createdField }) => {
       const { name: fieldName } = createdField;
-      const newFieldName = faker.word.noun();
+      const newFieldName = `field_${Date.now()}`;
 
       await managementPage.goto();
       await managementPage.searchFields(fieldName);
@@ -154,6 +173,8 @@ test.describe('Staff & Fields Management - Delete Field', () => {
       await managementPage.editFieldNameModal.clear();
       await managementPage.editFieldNameModal.fill(newFieldName);
       await managementPage.editFieldSaveButton.click();
+
+      await managementPage.goto();
 
       // Verify the field can be found by its new name
       await managementPage.searchFields(newFieldName);
@@ -192,24 +213,37 @@ test.describe('Staff & Fields Management - Delete Staff', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-006' },
       tag: ['@crud', '@farm', '@resources', '@edit'],
     },
-    async ({ freshUser: _, managementPage, createdStaff }) => {
+    async ({ freshUser: _, managementPage, createdStaff, request }) => {
       const { name: staffName } = createdStaff;
       const newName = faker.internet.username();
       const newSurname = faker.internet.username();
+      const newAge = faker.number.int({ min: 31, max: 65 });
       const card = managementPage.getFieldCardByName(newName);
 
       await managementPage.goto();
       await managementPage.searchStaff(staffName);
 
       // Update the existing worker details
-      await managementPage.editStaff(newName, newSurname, STAFF_AGE);
+      await managementPage.editStaff(newName, newSurname, newAge);
+
+      await managementPage.goto();
 
       // Verify the saved name, surname, and age
       await managementPage.searchStaff(newName);
       await expect(managementPage.getFieldByName(newName)).toBeVisible();
       await expect(managementPage.getFieldByName(newSurname)).toBeVisible();
 
-      await expect(card).toContainText(`age: ${STAFF_AGE}`);
+      const staffMembers = await getStaff(request);
+      const staff = staffMembers.find(
+        (member) => member.id === createdStaff.id,
+      );
+      expect(staff).toMatchObject({
+        name: newName,
+        surname: newSurname,
+        age: newAge,
+      });
+
+      await expect(card).toContainText(`age: ${newAge}`);
     },
   );
 
@@ -247,7 +281,7 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
     },
     async ({ freshUser: _, managementPage, createdAnimal }) => {
       const { type: animalType, amount: animalAmount } = createdAnimal;
-      const newType = getRandomAnimalType();
+      const newType = getDifferentAnimalType(animalType);
 
       await managementPage.goto();
       await managementPage.searchAnimals(animalType);
@@ -262,12 +296,20 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
       await managementPage.editAnimalAmountModal.fill(String(newAnimalAmount));
       await managementPage.editAnimalSaveButton.click();
 
+      await managementPage.goto();
+
       // Verify the updated herd can be found
       await managementPage.searchAnimals(newType);
 
-      await expect(
-        managementPage.getAnimalCardByAmount(newAnimalAmount),
-      ).toBeVisible();
+      const animalCard = managementPage.animalCards;
+
+      await expect(managementPage.getAnimalTypeLabel(animalCard)).toHaveText(
+        newType,
+      );
+
+      await expect(managementPage.getAnimalAmountLabel(animalCard)).toHaveText(
+        String(newAnimalAmount),
+      );
     },
   );
 
@@ -305,6 +347,7 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
     async ({ freshUser: _, request, managementPage }) => {
       const uniqueId = randomUUID().slice(0, 8);
       const prefix = `pagination-field-${uniqueId}`;
+      const fieldNameLabels = managementPage.fieldCards.locator('strong');
 
       const fieldNames: string[] = Array.from(
         { length: 6 },
@@ -327,13 +370,31 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
 
         // Verify the first page of filtered results
         await managementPage.searchFields(prefix);
+
+        await expect(managementPage.fieldCards).toHaveCount(5);
+        const cards = await managementPage.fieldCards.all();
+        for (const card of cards) {
+          await expect(card).toBeVisible();
+        }
+        await expect(managementPage.fieldsList).toBeVisible();
         await expect(managementPage.fieldsPagination).toContainText('1/2');
         await expect(managementPage.nextFieldsPageButton).toBeEnabled();
+        await expect(managementPage.previousFieldsPageButton).toBeDisabled();
+        await expect(fieldNameLabels).toHaveText(fieldNames.slice(0, 5));
 
         // Move to the second page of filtered results
         await managementPage.nextFieldsPageButton.click();
         await expect(managementPage.fieldsPagination).toContainText('2/2');
         await expect(managementPage.previousFieldsPageButton).toBeEnabled();
+        await expect(managementPage.fieldCards).toHaveCount(1);
+        await expect(managementPage.nextFieldsPageButton).toBeDisabled();
+        await expect(fieldNameLabels).toHaveText(fieldNames.slice(5));
+
+        await managementPage.previousFieldsPageButton.click();
+
+        await expect(managementPage.fieldsPagination).toContainText('1/2');
+        await expect(managementPage.fieldCards).toHaveCount(5);
+        await expect(fieldNameLabels).toHaveText(fieldNames.slice(0, 5));
       } finally {
         await Promise.all(fieldIds.map((id) => deleteField(request, id)));
       }
