@@ -24,6 +24,8 @@ export class ManagementPage extends BasePage {
   readonly fieldAreaModalError = this.page.locator('#fieldAreaError');
   readonly fieldAddedMessage = this.page.getByText('Field added!');
   readonly searchFieldInput = this.page.getByPlaceholder('Search fields...');
+  readonly fieldListCardTitle = this.page.locator('.list-card-title > strong');
+  readonly fieldListCardArea = this.page.locator('.list-card-area');
 
   readonly fieldsList = this.page.locator('#fieldsList');
   readonly fieldCards = this.fieldsList.locator('li');
@@ -50,6 +52,9 @@ export class ManagementPage extends BasePage {
   readonly staffAgeModalError = this.page.locator('#staffAgeError');
   readonly staffAddedMessage = this.page.getByText('Staff added!');
   readonly searchStaffInput = this.page.getByPlaceholder('Search staff...');
+  readonly staffListCardName = this.page.locator('.list-card-title > strong');
+  readonly staffListAge = this.page.locator('.list-card-age');
+  readonly staffList = this.page.locator('#staffList');
 
   readonly animalCards = this.page.locator('li.animal-card');
   readonly addAnimal = this.page.locator('#openAddAnimalModal');
@@ -156,6 +161,12 @@ export class ManagementPage extends BasePage {
       .first();
   }
 
+  getStaffCardByName(name: string, surname: string): Locator {
+    return this.staffList.locator('li').filter({
+      has: this.page.getByText(`${name} ${surname}`, { exact: true }),
+    });
+  }
+
   async addStaff(name: string, surname: string, age: number): Promise<void> {
     await this.openAddStaffModal();
     await this.staffNameModal.fill(name);
@@ -194,6 +205,14 @@ export class ManagementPage extends BasePage {
 
   getAnimalAmountLabel(animalCard: Locator): Locator {
     return animalCard.locator('.list-card-amount');
+  }
+
+  getFieldAreaLabel(fieldCard: Locator): Locator {
+    return fieldCard.locator('.list-card-area');
+  }
+
+  getStaffAgeLabel(staffCard: Locator): Locator {
+    return staffCard.locator('.list-card-age');
   }
 
   async editStaff(name: string, surname: string, age: number): Promise<void> {

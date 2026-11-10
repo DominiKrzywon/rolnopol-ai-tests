@@ -1,12 +1,17 @@
 import { faker } from '@faker-js/faker';
 import { randomUUID } from 'crypto';
-import { createField, deleteField, getStaff } from 'src/api/farm.api';
+import {
+  createField,
+  deleteField,
+  getAnimals,
+  getFields,
+  getStaff,
+} from 'src/api/farm.api';
 import { expect, test } from 'src/fixtures/data.fixture';
 import {
   FIELD_AREA,
   getDifferentAnimalType,
   getRandomAnimalType,
-  newAmount,
 } from 'src/helpers/testDataHelpers';
 
 test.use({ storageState: undefined });
@@ -43,7 +48,14 @@ test.describe('Staff & Fields Management', () => {
 
       // Verify the created field persists after navigation
       await managementPage.searchFields(fieldName);
+      const fieldCard = managementPage.getFieldCardByName(fieldName);
+
+      await expect(fieldCard).toBeVisible();
       await expect(managementPage.getFieldByName(fieldName)).toBeVisible();
+      await expect(managementPage.fieldListCardTitle).toHaveText(fieldName);
+      await expect(managementPage.getFieldAreaLabel(fieldCard)).toHaveText(
+        `${FIELD_AREA} ha`,
+      );
     },
   );
 
@@ -118,7 +130,7 @@ test.describe('Staff & Fields Management', () => {
   );
 
   test(
-    'should create a new staff  in Staff & Fields view',
+    'should create a new staff in Staff & Fields view',
     {
       annotation: { type: 'case-id', description: 'TC-FARM-003' },
       tag: ['@crud', '@farm', '@resources', '@happy-path'],
@@ -147,7 +159,17 @@ test.describe('Staff & Fields Management', () => {
 
       // Verify the worker persists after navigation
       await managementPage.searchStaff(uniqueName);
+      const staffCard = managementPage.getStaffCardByName(
+        uniqueName,
+        uniqueSurname,
+      );
+
+      await expect(staffCard).toBeVisible();
+
       await expect(managementPage.getFieldByName(uniqueName)).toBeVisible();
+      await expect(managementPage.getStaffAgeLabel(staffCard)).toHaveText(
+        `age: ${String(staffAge)}`,
+      );
     },
   );
 });
@@ -159,7 +181,7 @@ test.describe('Staff & Fields Management - Delete Field', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-004' },
       tag: ['@crud', '@farm', '@resources', '@edit'],
     },
-    async ({ freshUser: _, managementPage, createdField }) => {
+    async ({ request, freshUser: _, managementPage, createdField }) => {
       const { name: fieldName } = createdField;
       const newFieldName = `field_${Date.now()}`;
 
@@ -173,6 +195,13 @@ test.describe('Staff & Fields Management - Delete Field', () => {
       await managementPage.editFieldNameModal.clear();
       await managementPage.editFieldNameModal.fill(newFieldName);
       await managementPage.editFieldSaveButton.click();
+
+      const fields = await getFields(request);
+      const editedField = fields.find((field) => field.id === createdField.id);
+
+      expect(editedField).toMatchObject({
+        name: newFieldName,
+      });
 
       await managementPage.goto();
 
@@ -188,12 +217,14 @@ test.describe('Staff & Fields Management - Delete Field', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-005' },
       tag: ['@crud', '@farm', '@resources', '@delete'],
     },
-    async ({ freshUser: _, managementPage, createdField }) => {
+    async ({ request, freshUser: _, managementPage, createdField }) => {
       const { name: fieldName } = createdField;
 
       await managementPage.goto();
       await managementPage.searchFields(fieldName);
-      await managementPage.getFieldByName(fieldName);
+
+      await expect(managementPage.getFieldByName(fieldName)).toBeVisible();
+
       await managementPage
         .getCardActionButton(fieldName, managementPage.editButtons.deleteField)
         .click();
@@ -202,6 +233,11 @@ test.describe('Staff & Fields Management - Delete Field', () => {
       await managementPage.confirmDeleteLocator.click();
 
       await expect(managementPage.getFieldByName(fieldName)).toBeHidden();
+
+      const fields = await getFields(request);
+      const deletedField = fields.find((field) => field.id === createdField.id);
+
+      expect(deletedField).toBeUndefined();
     },
   );
 });
@@ -253,10 +289,15 @@ test.describe('Staff & Fields Management - Delete Staff', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-007' },
       tag: ['@crud', '@farm', '@resources', '@delete'],
     },
-    async ({ freshUser: _, managementPage, createdStaff }) => {
+    async ({ request, freshUser: _, managementPage, createdStaff }) => {
       const { name: staffName, surname: staffSurname } = createdStaff;
       await managementPage.goto();
       await managementPage.searchStaff(staffName);
+
+      await expect(
+        managementPage.getFieldByName(`${staffName} ${staffSurname}`),
+      ).toBeVisible();
+
       await managementPage
         .getCardActionButton(staffName, managementPage.editButtons.deleteStaff)
         .click();
@@ -268,6 +309,11 @@ test.describe('Staff & Fields Management - Delete Staff', () => {
       await expect(
         managementPage.getFieldByName(`${staffName} ${staffSurname}`),
       ).toBeHidden();
+
+      const staff = await getStaff(request);
+      const deletedStaff = staff.find((s) => s.id === createdStaff.id);
+
+      expect(deletedStaff).toBeUndefined();
     },
   );
 });
@@ -279,14 +325,14 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-008' },
       tag: ['@crud', '@farm', '@resources', '@edit'],
     },
-    async ({ freshUser: _, managementPage, createdAnimal }) => {
+    async ({ freshUser: _, managementPage, createdAnimal, request }) => {
       const { type: animalType, amount: animalAmount } = createdAnimal;
       const newType = getDifferentAnimalType(animalType);
 
       await managementPage.goto();
       await managementPage.searchAnimals(animalType);
       const card = managementPage.getAnimalCardByAmount(animalAmount);
-      const newAnimalAmount = newAmount();
+      const newAnimalAmount = animalAmount + 1;
       await expect(card).toBeVisible();
 
       // Save the new herd type and size
@@ -301,6 +347,18 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
       // Verify the updated herd can be found
       await managementPage.searchAnimals(newType);
 
+      const animalsAfterEdit = await getAnimals(request);
+      const editedAnimal = animalsAfterEdit.find(
+        (animal) => animal.id === createdAnimal.id,
+      );
+
+      expect(editedAnimal).toMatchObject({
+        type: newType,
+        amount: newAnimalAmount,
+      });
+
+      await expect(managementPage.animalCards).toHaveCount(1);
+
       const animalCard = managementPage.animalCards;
 
       await expect(managementPage.getAnimalTypeLabel(animalCard)).toHaveText(
@@ -310,6 +368,7 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
       await expect(managementPage.getAnimalAmountLabel(animalCard)).toHaveText(
         String(newAnimalAmount),
       );
+      expect(newAnimalAmount).not.toEqual(animalAmount);
     },
   );
 
@@ -319,9 +378,15 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
       annotation: { type: 'case-id', description: 'TC-FARM-009' },
       tag: ['@crud', '@farm', '@resources', '@delete'],
     },
-    async ({ freshUser: _, managementPage, createdAnimal }) => {
+    async ({ request, freshUser: _, managementPage, createdAnimal }) => {
       const { type: animalType, amount: animalAmount } = createdAnimal;
       await managementPage.goto();
+      await managementPage.searchAnimals(animalType);
+
+      await expect(
+        managementPage.getAnimalCardByAmount(animalAmount),
+      ).toBeVisible();
+
       await managementPage
         .getCardActionButton(
           animalType,
@@ -335,6 +400,13 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
       await expect(
         managementPage.getAnimalCardByAmount(animalAmount),
       ).toBeHidden();
+
+      const animals = await getAnimals(request);
+      const deletedAnimal = animals.find(
+        (animal) => animal.id === createdAnimal.id,
+      );
+
+      expect(deletedAnimal).toBeUndefined();
     },
   );
 
@@ -347,6 +419,7 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
     async ({ freshUser: _, request, managementPage }) => {
       const uniqueId = randomUUID().slice(0, 8);
       const prefix = `pagination-field-${uniqueId}`;
+      const extraField = 'wrong_field';
       const fieldNameLabels = managementPage.fieldCards.locator('strong');
 
       const fieldNames: string[] = Array.from(
@@ -361,9 +434,15 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
           name,
           area: FIELD_AREA,
         });
-
         fieldIds.push(fieldId);
       }
+
+      // Create wrong field
+      const extraFieldId = await createField(request, {
+        name: extraField,
+        area: FIELD_AREA,
+      });
+      fieldIds.push(extraFieldId);
 
       try {
         await managementPage.goto();
@@ -381,6 +460,9 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
         await expect(managementPage.nextFieldsPageButton).toBeEnabled();
         await expect(managementPage.previousFieldsPageButton).toBeDisabled();
         await expect(fieldNameLabels).toHaveText(fieldNames.slice(0, 5));
+        await expect(
+          fieldNameLabels.filter({ hasText: extraField }),
+        ).toHaveCount(0);
 
         // Move to the second page of filtered results
         await managementPage.nextFieldsPageButton.click();
@@ -389,6 +471,9 @@ test.describe('Staff & Fields Management - Delete Animal', () => {
         await expect(managementPage.fieldCards).toHaveCount(1);
         await expect(managementPage.nextFieldsPageButton).toBeDisabled();
         await expect(fieldNameLabels).toHaveText(fieldNames.slice(5));
+        await expect(
+          fieldNameLabels.filter({ hasText: extraField }),
+        ).toHaveCount(0);
 
         await managementPage.previousFieldsPageButton.click();
 
