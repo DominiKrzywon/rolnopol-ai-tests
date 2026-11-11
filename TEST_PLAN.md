@@ -202,8 +202,9 @@ Reuse the following existing test definitions and IDs in mobile projects:
 
 Keep one test definition per ID; device projects add executions of that definition,
 not new business cases. Select these cases explicitly rather than including entire
-authentication files. Current mobile projects only collect `*.mobile.spec.ts`, so
-the reuse matrix is planned execution scope, not existing mobile coverage.
+authentication files. Current mobile projects collect `*.mobile.spec.ts` and the existing
+`login.noauth.spec.ts`, including TC-LOGIN-001 and TC-LOGIN-002. The remaining
+reuse rows are planned execution scope until explicitly selected.
 Use independent generated users for each execution and retain existing assertions.
 
 Prioritize navigation and login before expanding to registration, session and

@@ -87,14 +87,14 @@ export default defineConfig({
     {
       name: 'mobile-pixel-5',
       dependencies: ['health-check'],
-      testMatch: ['**/*.mobile.spec.ts'],
+      testMatch: ['**/*.mobile.spec.ts', '**/auth/login.noauth.spec.ts'],
       use: { ...devices['Pixel 5'] },
     },
 
     {
       name: 'mobile-iPhone-13',
       dependencies: ['health-check'],
-      testMatch: ['**/*.mobile.spec.ts'],
+      testMatch: ['**/*.mobile.spec.ts', '**/auth/login.noauth.spec.ts'],
       use: { ...devices['iPhone 13'] },
     },
   ],

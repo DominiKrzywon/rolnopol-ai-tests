@@ -57,7 +57,10 @@ test('Should not valid for data with no currency', () => {
       error.params.missingProperty === 'currency',
   );
 
-  assert.ok(currencyError, 'Expected a number-type error for account.balance');
+  assert.ok(
+    currencyError,
+    'Expected a validation error for missing "currency" property',
+  );
 });
 
 test('rejects data without account', () => {
