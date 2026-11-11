@@ -46,9 +46,7 @@ test.describe('Login E2E', () => {
       annotation: { type: 'case-id', description: 'TC-LOGIN-002' },
       tag: ['@auth', '@session', '@logout'],
     },
-    async ({ loginPage, profilePage, page, homePage, registeredUser }) => {
-      const expectedLoginHeaderText = 'Rolnopol';
-
+    async ({ loginPage, profilePage, page, registeredUser }) => {
       await loginPage.goto();
       await loginPage.login(registeredUser);
 
@@ -64,8 +62,11 @@ test.describe('Login E2E', () => {
 
       // Log out and verify the public homepage
       await profilePage.logout();
-      await expect(page).toHaveURL(homePage.PAGE_URL);
-      await expect(homePage.header).toHaveText(expectedLoginHeaderText);
+
+      await expect(page).toHaveURL(loginPage.PAGE_URL);
+      await expect(loginPage.emailInput).toBeVisible();
+      await expect(loginPage.passwordInput).toBeVisible();
+      await expect(loginPage.loginSubmitBtn).toBeVisible();
 
       // Verify the profile requires login again
       await profilePage.goto();

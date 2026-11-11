@@ -17,7 +17,9 @@ export class ProfilePage extends BasePage {
   readonly dangerZoneHeading = this.page.getByRole('heading', {
     name: 'Danger Zone',
   });
-  readonly logoutBtn = this.page.getByTestId('logout-btn');
+  readonly logoutBtn = this.page
+    .getByTestId('profile-header')
+    .getByTestId('logout-btn');
   readonly editProfileInfoButton = this.page.locator('#editProfileInfoBtn');
   readonly updateUserName = this.page.getByPlaceholder('Enter display name');
   readonly saveUpdatedUserInfo = this.page.locator('#editProfileSave');
