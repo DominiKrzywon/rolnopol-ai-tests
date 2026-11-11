@@ -10,4 +10,6 @@ export class HomePage extends BasePage {
 
   readonly mobileMenuToggle = this.page.getByTestId('mobile-menu-toggle');
   readonly loginLink = this.page.getByTestId('nav-login');
+  readonly mobileMenu = this.page.locator('#navbar-nav');
+  readonly mobileRegisterLink = this.page.getByTestId('nav-register');
 }
