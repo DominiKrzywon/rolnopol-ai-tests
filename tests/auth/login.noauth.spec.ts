@@ -8,6 +8,32 @@ test.describe('Login E2E', () => {
       tag: ['@auth', '@login', '@session', '@happy-path'],
     },
     async ({ loginPage, profilePage, page, registeredUser }) => {
+      await page.addInitScript(() => {
+        const descriptor = Object.getOwnPropertyDescriptor(
+          Document.prototype,
+          'cookie',
+        );
+
+        if (!descriptor?.get || !descriptor.set) {
+          throw new Error('Cookie instrumentation unavailable');
+        }
+
+        const originalSetter = descriptor.set;
+
+        Object.defineProperty(document, 'cookie', {
+          configurable: true,
+          get: descriptor.get,
+          set(value: string) {
+            originalSetter.call(document, value);
+
+            if (value.trim().startsWith('rolnopolIsLogged=')) {
+              // eslint-disable-next-line no-console
+              console.trace('Auth marker write:', value);
+            }
+          },
+        });
+      });
+
       await loginPage.goto();
       await loginPage.login(registeredUser);
 
