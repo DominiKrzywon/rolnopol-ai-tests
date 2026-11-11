@@ -11,6 +11,27 @@ test.describe('Login E2E', () => {
       await loginPage.goto();
       await loginPage.login(registeredUser);
 
+      try {
+        await expect(page).toHaveURL(profilePage.PAGE_URL);
+      } finally {
+        // eslint-disable-next-line no-console
+        console.log(
+          'Auth cookie state:',
+          await page.evaluate(() => {
+            const cookies = document.cookie
+              .split(';')
+              .map((cookie) => cookie.trim());
+
+            return {
+              hasToken: cookies.some((cookie) =>
+                cookie.startsWith('rolnopolToken='),
+              ),
+              isLogged: cookies.includes('rolnopolIsLogged=true'),
+            };
+          }),
+        );
+      }
+
       await expect(page).toHaveURL(profilePage.PAGE_URL);
       await expect(profilePage.emailValue).toHaveText(registeredUser.email);
       await expect.soft(profilePage.profileInformationHeading).toBeVisible();
