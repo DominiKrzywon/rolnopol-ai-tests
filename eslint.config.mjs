@@ -8,6 +8,7 @@ import tseslint from 'typescript-eslint';
 export default [
   {
     ignores: [
+      '.local/**',
       'package-lock.json',
       'playwright-report/**',
       'test-results/**',

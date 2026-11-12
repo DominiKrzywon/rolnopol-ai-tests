@@ -8,6 +8,13 @@ This is my personal repository for practice and learning against Rolnopol runnin
 
 GitHub Actions runs are deliberately triggered manually, rather than on every push or pull request.
 
+## Application runtime
+
+Run Rolnopol through npm locally and in GitHub Actions on localhost:3000.
+Use commit fb7fd89f4473f841cfa1560ce4979fe11b81bf6e (1.126.0) with
+`patches/rolnopol-cookie.patch` in both environments. Docker is no longer the
+application runtime for this learning repository. README owns setup commands.
+
 ## Scope decisions
 
 - Test anonymous redirects for Profile, Marketplace, and Finance; omit Staff & Fields redirects. Authenticated farm tests and API authorization remain in scope.

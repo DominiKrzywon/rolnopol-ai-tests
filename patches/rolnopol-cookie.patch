@@ -1,0 +1,12 @@
+diff --git a/public/js/core/storage.js b/public/js/core/storage.js
+--- a/public/js/core/storage.js
++++ b/public/js/core/storage.js
+@@ -35,7 +35,7 @@
+       let cookieString = `${name}=${cookieValue}`;
+ 
+       Object.entries(config).forEach(([key, val]) => {
+-        if (val !== undefined && val !== null) {
++        if (val !== undefined && val !== null && val !== false) {
+           cookieString += `; ${key}`;
+           if (val !== true) {
+             cookieString += `=${val}`;

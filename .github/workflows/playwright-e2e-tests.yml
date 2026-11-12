@@ -48,23 +48,24 @@ jobs:
     environment: dev
     timeout-minutes: 10
     env:
-      BASE_URL: ${{ vars.BASE_URL }}
+      BASE_URL: http://localhost:3000
       EMPTY_USER_EMAIL: ${{ secrets.EMPTY_USER_EMAIL }}
       EMPTY_USER_PASSWORD: ${{ secrets.EMPTY_USER_PASSWORD }}
       EMPTY_USER_DISPLAY_NAME: ${{ vars.EMPTY_USER_DISPLAY_NAME }}
       DEMO_USER_EMAIL: ${{ secrets.DEMO_USER_EMAIL }}
       DEMO_USER_PASSWORD: ${{ secrets.DEMO_USER_PASSWORD }}
       DEMO_USER_DISPLAY_NAME: ${{ vars.DEMO_USER_DISPLAY_NAME }}
-    services:
-      rolnopol:
-        image: jaktestowac/rolnopol:1.126.0@sha256:e496a86a035e5c68d081cdec92f1518e197c2ab62853abbfdf1128d46c42747e
-        ports:
-          - 3000:3000
-        env:
-          NODE_ENV: test
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+
+      - name: Checkout Rolnopol 1.126.0
+        uses: actions/checkout@v5
+        with:
+          repository: jaktestowac/rolnopol
+          ref: fb7fd89f4473f841cfa1560ce4979fe11b81bf6e
+          path: .local/rolnopol
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
@@ -92,6 +93,18 @@ jobs:
         if: steps.cache-browsers.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium webkit
 
+      - name: Prepare Rolnopol
+        run: |
+          git -C .local/rolnopol apply ../../patches/rolnopol-cookie.patch
+          npm ci --prefix .local/rolnopol
+
+      - name: Start Rolnopol
+        working-directory: .local/rolnopol
+        env:
+          NODE_ENV: test
+          PORT: '3000'
+        run: npm run start > "$RUNNER_TEMP/rolnopol.log" 2>&1 &
+
       - name: Wait for rolnopol service
         shell: bash
         run: |
@@ -100,6 +113,7 @@ jobs:
 
           for attempt in {1..20}; do
             if curl --silent --show-error --fail --max-time 5 --output /dev/null "$healthcheck_url"; then
+              node -e "fetch(process.env.BASE_URL + '/api/v1/healthcheck').then(r => r.json()).then(r => { if (r.data.status !== 'healthy' || r.data.version !== '1.126.0') process.exit(1); }).catch(() => process.exit(1))"
               echo "Service is ready"
               exit 0
             fi

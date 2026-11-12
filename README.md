@@ -6,8 +6,8 @@ login test; the full suite also needs configured demo accounts.
 
 ## Quick Start
 
-Requires Git, Node.js 22 (matching CI), npm and Docker Desktop with the Linux
-engine running. First-time image and browser downloads may take several minutes.
+Requires Git, Node.js 22 (matching CI) and npm. Both local execution and CI
+start the application with npm on http://localhost:3000.
 
 ### 1. Install the tests
 
@@ -20,16 +20,32 @@ npx playwright install --with-deps chromium webkit
 
 ### 2. Start the application
 
-Use the same pinned image as CI. Port 3000 must be free; stop any older local
-Rolnopol process first. Run this command once:
+Use the same application commit and cookie patch as CI. From the test repository,
+prepare the application once (the ignored `.local` directory keeps its data):
 
 ```sh
-docker run -d --name rolnopol-local -p 127.0.0.1:3000:3000 -e NODE_ENV=test jaktestowac/rolnopol:1.126.0@sha256:e496a86a035e5c68d081cdec92f1518e197c2ab62853abbfdf1128d46c42747e
+git clone https://github.com/jaktestowac/rolnopol.git .local/rolnopol
+git -C .local/rolnopol checkout --detach fb7fd89f4473f841cfa1560ce4979fe11b81bf6e
+git -C .local/rolnopol apply ../../patches/rolnopol-cookie.patch
+npm ci --prefix .local/rolnopol
 ```
 
-For an existing container, use `docker start rolnopol-local`. Open
+Stop any previous application or container using port 3000. In Windows CMD,
+start the application in its own terminal:
+
+```cmd
+cd .local\rolnopol
+set NODE_ENV=test
+set PORT=3000
+npm run start
+```
+
+Use Ctrl+C to stop it; repeat only these start commands next time. On Linux,
+run `NODE_ENV=test PORT=3000 npm run start` from `.local/rolnopol`. Open
 [healthcheck](http://localhost:3000/api/v1/healthcheck): expect `healthy` and
 version `1.126.0`. The app is at [localhost:3000](http://localhost:3000).
+The shared patch omits false cookie attributes, fixing `secure=false` on HTTP.
+This is version 1.126.0 with a local patch, not an unchanged upstream release.
 
 ### 3. Configure the address
 
@@ -75,7 +91,9 @@ For the full suite, fill the `DEMO_USER_*` and `EMPTY_USER_*` values from
 modify data. Mobile profiles emulate browsers, not physical phones.
 
 CI is [manually triggered](.github/workflows/playwright-e2e-tests.yml). It uses
-its own application container and account settings; local `.env` is not uploaded.
+the same pinned application source and patch, started through npm, with its own
+account settings; local `.env` is not uploaded. Run test commands in a second
+terminal from the test repository root.
 
 ## Scenario Coverage Report
 
