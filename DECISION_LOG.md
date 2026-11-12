@@ -44,3 +44,21 @@ Practise Playwright device emulation on a few selected mobile profiles; this doe
 ## Performance
 
 Later, explore selected endpoints with k6 and retain only the key results and execution context in concise JSON.
+
+## Test size and proportionate assertions
+
+Agreed November 12, 2026:
+
+- Keep each test within one editor page in the learner's normal layout. Prefer
+  a smaller behavioral scope; do not compress formatting or hide excess assertions
+  in helpers just to meet the limit.
+- Judge coverage across the selected suite. Shared mobile login tests already
+  exercise Submit and verify successful login. Do not add trial clicks, viewport
+  checks or more button geometry to TC-MOBILE-003; simplify its layout scope.
+- Do not require exact CSS properties for mobile menu collapse. A deliberate
+  state-and-navigation check is acceptable here: aria-expanded=false verifies
+  declared state, not visual collapse. Accept and describe that limit instead of
+  repeatedly expanding the test. CSS checks also couple it to implementation.
+- The learner implements test changes and aligns TEST_PLAN scenario descriptions.
+  These decisions do not mean existing code has already been simplified.
+  NOTES owns the learning steps and progress.

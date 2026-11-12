@@ -1,4 +1,4 @@
-import { expect, test } from 'src/fixtures/test.fixture';
+import { expect, test } from 'src/fixtures/auth.fixture';
 
 test.describe('mobile tests', () => {
   test(
@@ -23,9 +23,6 @@ test.describe('mobile tests', () => {
         'aria-expanded',
         'false',
       );
-      await expect.soft(homePage.mobileMenu).toHaveCSS('opacity', '0');
-      await expect.soft(homePage.mobileMenu).toHaveCSS('max-height', '0px');
-      await expect.soft(homePage.mobileMenu).toHaveCSS('overflow', 'hidden');
 
       await homePage.mobileMenuToggle.click();
       await homePage.loginLink.click();
@@ -110,6 +107,27 @@ test.describe('mobile tests', () => {
           bounds.width + 1,
         );
       }
+    },
+  );
+
+  test(
+    'Should be able to cancel edit',
+    {
+      annotation: { type: 'case-id', description: 'TC-MOBILE-004' },
+      tag: ['@auth', '@profile', '@mobile'],
+    },
+    async ({ page, freshUser, profilePage }) => {
+      const userUpdatedName = `user_${Date.now()}`;
+
+      await profilePage.goto();
+      await profilePage.editProfileInfoButton.click();
+      await profilePage.updateUserName.fill(userUpdatedName);
+      await profilePage.cancelEditBtn.click();
+      await page.reload();
+
+      await expect(profilePage.displayedName).toHaveText(
+        freshUser.displayName!,
+      );
     },
   );
 });

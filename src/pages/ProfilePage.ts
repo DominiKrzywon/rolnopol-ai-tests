@@ -37,6 +37,7 @@ export class ProfilePage extends BasePage {
     'confirm-password-input',
   );
   readonly saveChangesBtn = this.page.getByTestId('update-profile-submit-btn');
+  readonly cancelEditBtn = this.page.getByTestId('edit-profile-cancel');
 
   readonly deleteAccountBtn = this.page.getByTestId('delete-account-btn');
   readonly confirmDeleteAccountBtn =
