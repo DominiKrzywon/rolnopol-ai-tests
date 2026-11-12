@@ -185,9 +185,8 @@ retain a risk estimate, but remain outside coverage denominators.
 ### Selected mobile coverage
 
 Target browser emulation profiles are Pixel 5/Chromium and iPhone 13/WebKit.
-The three new cases above are planned gaps until implemented. Their expected
-behavior must be checked against the running application before choosing locators;
-this plan does not claim the current UI satisfies the checks.
+The three mobile cases above are implemented. Their presence describes test
+scope; generated execution reports establish passing results for a given run.
 
 Reuse the following existing test definitions and IDs in mobile projects:
 
@@ -201,9 +200,10 @@ Reuse the following existing test definitions and IDs in mobile projects:
 
 Keep one test definition per ID; device projects add executions of that definition,
 not new business cases. Select these cases explicitly rather than including entire
-authentication files. Current mobile projects collect `*.mobile.spec.ts` and the existing
-`login.noauth.spec.ts`, including TC-LOGIN-001 and TC-LOGIN-002. The remaining
-reuse rows are planned execution scope until explicitly selected.
+authentication files. Current mobile projects collect `*.mobile.spec.ts`,
+`login.noauth.spec.ts`, `registration.noauth.spec.ts` and `profile.isolated.spec.ts`,
+filtered by /@mobile|@session/. All five reuse rows above are selected; other
+registration cases and account deletion are outside this mobile selection.
 Use independent generated users for each execution and retain existing assertions.
 
 Prioritize navigation and login before expanding to registration, session and

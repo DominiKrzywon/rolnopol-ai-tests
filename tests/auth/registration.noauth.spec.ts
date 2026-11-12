@@ -8,7 +8,7 @@ test(
   'should register new user successfully',
   {
     annotation: { type: 'case-id', description: 'TC-REG-001' },
-    tag: ['@smoke', '@auth', '@registration'],
+    tag: ['@smoke', '@auth', '@registration', '@mobile'],
   },
   async ({ page, registerPage, loginPage }) => {
     const uniqueEmail = generateUniqueEmail();
@@ -40,7 +40,7 @@ test.describe('Registration Negative Tests', () => {
     'should display validation errors for invalid email and short password',
     {
       annotation: { type: 'case-id', description: 'TC-REG-002' },
-      tag: ['@auth', '@registration', '@validation', '@negative'],
+      tag: ['@auth', '@registration', '@validation', '@negative', '@mobile'],
     },
     async ({ page, registerPage }) => {
       const invalidEmail = 'not-a-valid-email';

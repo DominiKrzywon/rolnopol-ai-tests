@@ -8,7 +8,7 @@ test.describe('profile isolated tests', () => {
     'should be able to change display name',
     {
       annotation: { type: 'case-id', description: 'TC-PROFILE-002' },
-      tag: ['@profile', '@happy-path'],
+      tag: ['@profile', '@happy-path', '@mobile'],
     },
     async ({ freshUser, profilePage, page }) => {
       const expectedSuccessMessageUI = 'Profile information updated';

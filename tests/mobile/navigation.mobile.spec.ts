@@ -76,6 +76,7 @@ test.describe('mobile tests', () => {
       await loginPage.loginSubmitBtn.scrollIntoViewIfNeeded();
 
       await expect(loginPage.loginSubmitBtn).toBeVisible();
+      await expect(loginPage.loginSubmitBtn).toBeEnabled();
       await expect(loginPage.emailInput).toHaveValue(exampleEmail);
       await expect(loginPage.passwordInput).toHaveValue(examplePassword);
 

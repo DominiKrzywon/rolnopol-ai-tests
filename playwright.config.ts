@@ -87,14 +87,26 @@ export default defineConfig({
     {
       name: 'mobile-pixel-5',
       dependencies: ['health-check'],
-      testMatch: ['**/*.mobile.spec.ts', '**/auth/login.noauth.spec.ts'],
+      testMatch: [
+        '**/*.mobile.spec.ts',
+        '**/auth/login.noauth.spec.ts',
+        '**/auth/profile.isolated.spec.ts',
+        '**/auth/registration.noauth.spec.ts',
+      ],
+      grep: /@mobile|@session/,
       use: { ...devices['Pixel 5'] },
     },
 
     {
       name: 'mobile-iPhone-13',
       dependencies: ['health-check'],
-      testMatch: ['**/*.mobile.spec.ts', '**/auth/login.noauth.spec.ts'],
+      testMatch: [
+        '**/*.mobile.spec.ts',
+        '**/auth/login.noauth.spec.ts',
+        '**/auth/profile.isolated.spec.ts',
+        '**/auth/registration.noauth.spec.ts',
+      ],
+      grep: /@mobile|@session/,
       use: { ...devices['iPhone 13'] },
     },
   ],
