@@ -7,7 +7,8 @@ import { BasePage } from './BasePage';
  */
 export class ProfilePage extends BasePage {
   readonly PAGE_URL = PAGE_URLS.PROFILE;
-
+  readonly rolnopolLogo = this.page.locator('.navbar-brand');
+  readonly statusInfo = this.page.locator('#statusText');
   readonly profileInformationHeading = this.page.getByRole('heading', {
     name: 'Profile Information',
   });
@@ -40,6 +41,7 @@ export class ProfilePage extends BasePage {
   readonly cancelEditBtn = this.page.getByTestId('edit-profile-cancel');
 
   readonly deleteAccountBtn = this.page.getByTestId('delete-account-btn');
+  readonly cancelDeleteAccountBtn = this.page.getByTestId('cancel-delete-btn');
   readonly confirmDeleteAccountBtn =
     this.page.getByTestId('confirm-delete-btn');
   readonly deleteModalTitle = this.page.getByRole('heading', {

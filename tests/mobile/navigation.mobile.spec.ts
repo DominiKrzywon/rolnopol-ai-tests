@@ -123,11 +123,60 @@ test.describe('mobile tests', () => {
       await profilePage.editProfileInfoButton.click();
       await profilePage.updateUserName.fill(userUpdatedName);
       await profilePage.cancelEditBtn.click();
+
+      await expect(profilePage.updateUserName).toBeHidden();
+      await expect(profilePage.displayedName).toHaveText(
+        freshUser.displayName!,
+      );
       await page.reload();
 
       await expect(profilePage.displayedName).toHaveText(
         freshUser.displayName!,
       );
+    },
+  );
+
+  test(
+    'Should be able to cancel delete account',
+    {
+      annotation: { type: 'case-id', description: 'TC-MOBILE-005' },
+      tag: ['@auth', '@profile', '@mobile'],
+    },
+    async ({ page, freshUser, profilePage }) => {
+      await profilePage.goto();
+      await profilePage.openDeleteAccountModal();
+
+      await profilePage.cancelDeleteAccountBtn.click();
+
+      await expect(profilePage.deleteModalTitle).toBeHidden();
+
+      await page.reload();
+      await expect(profilePage.emailValue).toHaveText(freshUser.email);
+    },
+  );
+
+  test(
+    'Should close mobile navigation when clicking outside it',
+    {
+      annotation: { type: 'case-id', description: 'TC-MOBILE-006' },
+      tag: ['@auth', '@profile', '@mobile'],
+    },
+    async ({ page, homePage }) => {
+      await homePage.goto();
+      const addressURL = page.url();
+      await homePage.mobileMenuToggle.click();
+      await expect(homePage.mobileRegisterLink).toBeVisible();
+      await expect(homePage.mobileMenuToggle).toHaveAttribute(
+        'aria-expanded',
+        'true',
+      );
+
+      await homePage.generalStats.click();
+      await expect(homePage.mobileMenuToggle).toHaveAttribute(
+        'aria-expanded',
+        'false',
+      );
+      expect(page.url()).toEqual(addressURL);
     },
   );
 });

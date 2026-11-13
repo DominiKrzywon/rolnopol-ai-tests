@@ -4,6 +4,7 @@ import { BasePage } from './BasePage';
 export class HomePage extends BasePage {
   readonly PAGE_URL = PAGE_URLS.HOME;
   readonly header = this.page.locator('.main-title');
+  readonly generalStats = this.page.locator('#general-stats');
   readonly statsSection = this.page.locator('.glass.futuristic-card');
   readonly modernKpiSection = this.page.locator('.home-modern-grid');
   readonly dynamicInsight = this.page.locator('main').getByText(/per farm\./);
@@ -11,5 +12,6 @@ export class HomePage extends BasePage {
   readonly mobileMenuToggle = this.page.getByTestId('mobile-menu-toggle');
   readonly loginLink = this.page.getByTestId('nav-login');
   readonly mobileMenu = this.page.locator('#navbar-nav');
+  readonly loginForm = this.page.getByTestId('login-form-container');
   readonly mobileRegisterLink = this.page.getByTestId('nav-register');
 }

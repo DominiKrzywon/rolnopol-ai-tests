@@ -30,7 +30,7 @@ test.describe('Financial functionality tests', () => {
     'verify account balance and transaction history',
     {
       annotation: { type: 'case-id', description: 'TC-FIN-001' },
-      tag: ['@financial', '@balance', '@history'],
+      tag: ['@financial', '@balance', '@history', '@mobile'],
     },
     async ({ financialPage }) => {
       const randomDescription = `Crops expense ${Date.now()}`;
