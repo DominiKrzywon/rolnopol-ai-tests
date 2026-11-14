@@ -9,7 +9,7 @@ Apply the [shared context](../CONTEXT.md), including mentoring mode and check se
 
 ## Workflow
 
-1. Choose a concrete behavior from TEST_PLAN.md and the layer that verifies it.
+1. Choose a concrete behavior from TEST_CASES.md and the layer that verifies it.
    Test business rules mainly through API, visible behavior through UI,
    and reserve full E2E for a few justified journeys.
 2. Inspect the existing spec, Page Object, actions, fixture, and API helper.
@@ -33,11 +33,11 @@ Apply the [shared context](../CONTEXT.md), including mentoring mode and check se
    `*.journey.spec.ts` is a roadmap proposal until configuration collects it.
    Do not create tests that will never execute.
 9. Assign exactly one static `case-id` annotation from the
-   [scenario catalog](../../../TEST_PLAN.md#4-scenario-catalog-and-coverage-contract).
+   [scenario catalog](../../../TEST_CASES.md#catalog-contract).
    Keep IDs after renames; never reuse retired IDs. Parameterized data contains
    explicit IDs per collected case. Setup uses `coverage-role: setup` instead.
    New planned rows need no placeholder test.
-10. Update the TEST_PLAN catalog when scope changes and validate with
+10. Update the TEST_CASES catalog when scope changes and validate with
     `npm run coverage:validate`. README links to the catalog.
     Use `npm run coverage:run -- <Playwright filters>` for execution evidence.
     Verify the change according to shared context and record the actual result.

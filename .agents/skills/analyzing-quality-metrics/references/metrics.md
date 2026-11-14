@@ -38,7 +38,7 @@ Calculate scenario coverage only against an explicit requirements list.
 Separate planned, implemented, and execution-confirmed scenarios.
 Code coverage requires application instrumentation; types and spec counts do not replace it.
 
-For this repository, included TEST_PLAN catalog rows form the denominator.
+For this repository, included TEST_CASES catalog rows form the denominator.
 `coverage-report/coverage.json` separates implementation from confirmation;
 README is a generated index and is also rendered as documentation in the report.
 Confirmation requires passing evidence for every collected project on the same

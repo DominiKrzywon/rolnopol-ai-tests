@@ -18,12 +18,20 @@ export function escapeHtml(value) {
 function safeLink(href, document) {
   if (/^https?:\/\//i.test(href)) return href;
   if (/^#[\w-]+$/.test(href)) return `#${document}-${href.slice(1)}`;
-  const match =
-    /^(?:\.\/)?(README|TEST_PLAN|CODING_STANDARDS)\.md(?:#([\w-]+))?$/.exec(
-      href,
-    );
-  if (match)
-    return `#${match[1].toLowerCase()}${match[2] ? '-' + match[2] : ''}`;
+  const match = /^([^#]+)(?:#([\w-]+))?$/.exec(href);
+  const documents = {
+    'README.md': 'readme',
+    'TEST_PLAN.md': 'test_plan',
+    'TEST_CASES.md': 'test_cases',
+    'CODING_STANDARDS.md': 'coding_standards',
+    'docs/REPORTING.md': 'reporting',
+  };
+  const file = match?.[1].replace(/^\.\.?\//, '');
+  const target = Object.hasOwn(documents, file) ? documents[file] : null;
+  if (target) {
+    if (file === 'TEST_CASES.md' && !match[2]) return '#scenarios';
+    return `#${target}${match[2] ? '-' + match[2] : ''}`;
+  }
   return null;
 }
 
@@ -298,8 +306,10 @@ ${failureSummary}
 <details id="scenarios"><summary>Scenarios &middot; ${report.cases.length} catalog entries</summary><div class="filters"><label>Search<input id="search" type="search" placeholder="ID, scenario or file"></label><label>Area<select id="area"><option value="">All areas</option>${choices('area')}</select></label><label>Priority<select id="priority"><option value="">All priorities</option>${choices('priority')}</select></label><label>Risk<select id="risk"><option value="">All risks</option>${choices('risk')}</select></label><label>Status<select id="status"><option value="">All statuses</option>${choices('status')}</select></label></div><div class="pagination"><button type="button" id="previous-page">Previous</button><p id="visible" aria-live="polite"></p><button type="button" id="next-page">Next</button></div>
 <div class="table-scroll"><table id="cases"><thead><tr><th>ID</th><th>Area</th><th>Scenario</th><th>Priority</th><th>Risk</th><th>Status</th><th>Failure</th><th>Details</th></tr></thead><tbody>${rows}</tbody></table></div></details></section>
 <details id="readme"><summary>README · parsed project documentation</summary><article>${renderDocument(readme, 'readme')}</article></details>
-<details id="test_plan"><summary>TEST_PLAN · parsed strategy and catalog</summary><article>${renderDocument(plan, 'test_plan')}</article></details>
+<details id="test_cases"><summary>Scenario catalog guide</summary><article>${renderDocument(report.documents?.scenarioGuide || '', 'test_cases')}</article></details>
+<details id="test_plan"><summary>TEST_PLAN · test strategy and scope</summary><article>${renderDocument(plan, 'test_plan')}</article></details>
 <details id="coding_standards"><summary>CODING_STANDARDS &middot; test conventions</summary><article>${renderDocument(standards, 'coding_standards')}</article></details>
+<details id="reporting"><summary>REPORTING &middot; metrics and execution evidence</summary><article>${renderDocument(report.documents?.reporting || '', 'reporting')}</article></details>
 <footer>Standalone report · No AI, external fonts, scripts, or network requests required. Raw logs, credentials and attachments are not embedded.</footer></main>
 <script>
 const filters = ['search','area','priority','risk','status'].map(id => document.getElementById(id));

@@ -19,7 +19,7 @@ does not require a broader review.
    - the test uses its own data, the correct session, and cleans up its resources;
    - waiting is tied to an event or state rather than a fixed delay;
    - Page Objects, AAA, and locators follow repository standards;
-   - the static case ID matches its TEST_PLAN scenario and parameterized cases
+   - the static case ID matches its TEST_CASES scenario and parameterized cases
      have distinct IDs; a passing result does not establish assertion quality.
 3. When correctness depends on several projects, shared authentication,
    or fixture lifecycles, use

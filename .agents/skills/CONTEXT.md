@@ -16,8 +16,9 @@ that materially changes the scope or expected behavior.
 
 ## Sources and freshness
 
-- [TEST_PLAN.md](../../TEST_PLAN.md): test strategy, scope, exclusions, scenario
-  catalog and reporting contract; no mentor queue or progress notes.
+- [TEST_PLAN.md](../../TEST_PLAN.md): test strategy, scope and exclusions.
+- [TEST_CASES.md](../../TEST_CASES.md): scenario catalog and case-level metadata.
+- [REPORTING.md](../../docs/REPORTING.md): metric definitions and reporting contract.
 - [CODING_STANDARDS.md](../../CODING_STANDARDS.md): AAA, Page Objects, and locators.
 - [NOTES.md](../../NOTES.md): the single active learning queue, reference roadmap,
   historical evidence, completed exercises and reporting reference; dated records
@@ -78,10 +79,10 @@ still needs BASE_URL; `npm run coverage:collect` supplies a local URL and bypass
 dotenv loading, without requiring account credentials or running fixtures.
 
 - Documentation/skills: names, YAML, links, instruction consistency, and formatting.
-- Scenario catalog or ID changes: `npm run coverage:validate`. TEST_PLAN owns
+- Scenario catalog or ID changes: `npm run coverage:validate`. TEST_CASES owns
   scenario rows; README links to it. Neither stores live pass counts.
 - Coverage tooling: `npm run coverage:test`, `npm run coverage:validate`, and
-  `npm run check:ci`; inspect generated HTML, including all three embedded documents,
+  `npm run check:ci`; inspect generated HTML, including all embedded documents and the catalog guide,
   chapter links, scenario pagination, filters, and failure links.
 - Test code: the targeted test, then its project, plus `npm run check:ci`.
 - Filename or project changes: also run `npx playwright test --list`.

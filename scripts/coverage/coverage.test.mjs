@@ -1,5 +1,11 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -250,6 +256,38 @@ test('source provenance handles Windows paths with a trailing separator', () => 
   assert.equal(first.revision, second.revision);
 });
 
+test('catalog and reporting edits invalidate source provenance', () => {
+  const directory = mkdtempSync(path.join(os.tmpdir(), 'rolnopol-provenance-'));
+  try {
+    mkdirSync(path.join(directory, 'docs'));
+    for (const file of [
+      'README.md',
+      'TEST_PLAN.md',
+      'TEST_CASES.md',
+      'CODING_STANDARDS.md',
+      'docs/REPORTING.md',
+      'playwright.config.ts',
+      'package.json',
+      'package-lock.json',
+      'tsconfig.json',
+    ])
+      writeFileSync(path.join(directory, file), 'initial');
+    const first = sourceSnapshot(directory).fingerprint;
+    writeFileSync(path.join(directory, 'TEST_CASES.md'), 'changed scope');
+    const second = sourceSnapshot(directory).fingerprint;
+    assert.notEqual(first, second);
+    writeFileSync(path.join(directory, 'docs/REPORTING.md'), 'changed metrics');
+    assert.notEqual(second, sourceSnapshot(directory).fingerprint);
+  } finally {
+    assert.equal(
+      path.dirname(path.resolve(directory)),
+      path.resolve(os.tmpdir()),
+    );
+    assert.ok(path.basename(directory).startsWith('rolnopol-provenance-'));
+    rmSync(directory, { recursive: true });
+  }
+});
+
 test('untrusted numeric metadata is escaped in HTML', () => {
   const report = buildReport(catalog, inventory(), run(), snapshot);
   const payload = '<img src=x onerror=alert(1)>';
@@ -475,7 +513,7 @@ test('report accepts an authored README without index markers and keeps catalog 
   const report = buildReport(catalog, inventory(), null, snapshot);
   const html = renderReport(
     report,
-    '# README\n\n## Quick Start\n\nRun the first healthcheck.\n\n[Scenario catalog](TEST_PLAN.md#scope)',
+    '# README\n\n## Quick Start\n\nRun the first healthcheck.\n\n[Scenario catalog](TEST_CASES.md)',
     '# Plan\n\n## Scope\n\nKeep scope visible on demand.',
     '# Standards\n\n## Rules\n\nUnique coding rule.',
   );
@@ -486,6 +524,29 @@ test('report accepts an authored README without index markers and keeps catalog 
   for (const id of ['readme', 'test_plan', 'coding_standards', 'scenarios']) {
     assert.ok(html.includes(`<details id="${id}">`));
   }
+});
+
+test('split documents link to standalone catalog, strategy and reporting sections', () => {
+  const report = buildReport(catalog, inventory(), null, snapshot);
+  report.documents = {
+    scenarioGuide:
+      '# Catalog\n\n## Mobile selection\n\n[Metrics](docs/REPORTING.md#metric-definitions)',
+    reporting:
+      '# Reporting\n\n## Metric definitions\n\nUnique metric contract.\n\n[Catalog](../TEST_CASES.md) [Plan](../TEST_PLAN.md#scope)',
+  };
+  const html = renderReport(
+    report,
+    '# README\n\n[Cases](TEST_CASES.md) [Mobile](TEST_CASES.md#mobile-selection) [Reporting](docs/REPORTING.md)',
+    '# Plan\n\n## Scope\n\nStrategy only.',
+  );
+  assert.match(html, /href="#scenarios"[^>]*>Cases/);
+  assert.match(html, /href="#test_cases-mobile-selection"/);
+  assert.match(html, /id="test_cases-mobile-selection"/);
+  assert.match(html, /href="#reporting-metric-definitions"/);
+  assert.match(html, /id="reporting-metric-definitions"/);
+  assert.match(html, /href="#test_plan-scope"/);
+  assert.match(html, /Unique metric contract/);
+  assert.doesNotMatch(html, /strategy and catalog/);
 });
 
 test('HTML embeds both documents, escapes scenario text and excludes raw logs', () => {

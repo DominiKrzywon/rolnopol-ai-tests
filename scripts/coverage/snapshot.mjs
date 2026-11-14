@@ -20,6 +20,8 @@ export function sourceSnapshot(root) {
   files.push(
     'README.md',
     'TEST_PLAN.md',
+    'TEST_CASES.md',
+    'docs/REPORTING.md',
     'CODING_STANDARDS.md',
     'playwright.config.ts',
     'package.json',

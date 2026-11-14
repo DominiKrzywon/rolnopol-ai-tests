@@ -261,7 +261,7 @@ test('should register new user', async ({ page }) => {
 
 ## Scenario IDs and catalog maintenance
 
-[TEST_PLAN.md](TEST_PLAN.md#4-scenario-catalog-and-coverage-contract) owns the
+[TEST_CASES.md](TEST_CASES.md#catalog-contract) owns the
 manual catalog. Every scenario test declares exactly one annotation:
 
 ```ts
@@ -273,7 +273,7 @@ Each parameterized input has an explicit ID in its data. Tags describe categorie
 they do not replace IDs. Multiple projects may execute the same test definition.
 The setup project is explicitly marked as infrastructure and has no scenario ID.
 
-After changing the catalog, run `coverage:readme` and `coverage:validate`.
-Unknown IDs, duplicate definitions, missing annotations, excluded collected cases,
-and an outdated generated index fail validation. Planned rows without tests are
-valid gaps. The catalog parser requires its exact headers and markers.
+After changing the catalog, run `npm run coverage:validate`.
+Unknown IDs, duplicate definitions, missing annotations and excluded collected
+cases fail validation. Planned rows without tests are valid gaps. The catalog
+parser requires its exact headers and markers.

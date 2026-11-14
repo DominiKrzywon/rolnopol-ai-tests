@@ -24,7 +24,7 @@ Apply the [shared context](../CONTEXT.md).
    Separate a correction required for the current exercise from an intentional deferral.
 6. Present the result in the conversation. When the task includes updating the roadmap,
    edit the relevant NOTES.md item instead of creating a second backlog.
-   Keep TEST_PLAN.md focused on strategy, scope and catalog metadata.
+   Keep TEST_PLAN.md focused on strategy and scope; TEST_CASES.md owns catalog metadata.
 
 ## Assessment boundaries
 

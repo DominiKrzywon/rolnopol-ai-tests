@@ -5,6 +5,11 @@ execution details. **Implemented** means a catalog scenario has a collected test
 **Confirmed** requires passing evidence matching the current source in every
 required project. This measures scenarios, not application code coverage.
 
+The standalone HTML includes the README, test plan, coding standards, reporting
+instructions and catalog guide. Catalog links open the Scenarios table; guide
+links open the relevant section. The scenario table is rendered once from
+TEST_CASES.md, alongside collected tests and execution evidence.
+
 Use **History** to open the archived-run summary and **Latest scenario coverage**
 to return. **Run details** keeps timing and setup results; full data is in JSON.
 **Source metadata missing** means the saved run cannot confirm the current source,
@@ -43,7 +48,37 @@ comparison groups. Archives are local, Git-ignored, and have no automatic expiry
 To refresh documentation without running tests, use `npm run coverage:collect`
 then `npm run coverage:report`. Source or documentation edits can make saved
 results stale; regeneration does not turn them into new passing evidence.
-See [metric definitions](../TEST_PLAN.md#metric-definitions) for the reporting contract.
+Scenario metadata is maintained in [TEST_CASES](../TEST_CASES.md).
+
+## Metric definitions
+
+Automation coverage = included IDs with a collected test / all included IDs.
+Execution confirmation = included IDs passing in every collected project /
+all included IDs, only for matching source fingerprints and no global run errors.
+No denominator means no percentage. Missing or stale results mean no current
+confirmation, not zero failures. Setup and excluded cases are shown separately.
+
+Retries and repetitions are attempts, not new scenarios. Results retain passed,
+failed, flaky, skipped, not-run, interrupted, partial, and expected-failure states.
+A passing subset of required projects is partial. A mixture of pass and fail
+observations is shown as flaky; this describes that run, not its root cause.
+Expected failures do not confirm correct application behavior. Skips explicitly
+annotated by Playwright are separated from cases not executed after setup failure.
+
+An ID only proves a declared mapping. Review assertions before interpreting a
+passing test as evidence; known weaknesses remain visible in the Notes column.
+
+## Source and freshness
+
+The tooling in `scripts/coverage/` preserves failing exit codes and does not
+merge separate executions. Health scenarios remain in scope; setup is separate.
+
+The source fingerprint includes test and helper code, report tooling, config,
+package files, the embedded documents and the scenario catalog. A Git revision
+alone cannot identify local uncommitted edits. Application version is optional run metadata supplied with
+`COVERAGE_APP_VERSION`; it is omitted from the compact history summary.
+Freshness compares saved evidence with current source inputs. No historical trend or
+release threshold is inferred from one run.
 
 ## Application Code Coverage
 

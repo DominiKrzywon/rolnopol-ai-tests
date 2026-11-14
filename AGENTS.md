@@ -8,8 +8,8 @@ Use the [skill catalog](README.md#agent-skills) to choose a relevant procedure.
 ## Learning collaboration preferences
 
 - Keep the active learning queue, refactoring plans and progress records in
-  `NOTES.md`, outside the coverage report. `TEST_PLAN.md` owns test strategy,
-  scope decisions and the scenario catalog; do not add mentor notes there.
+  `NOTES.md`, outside the coverage report. `TEST_PLAN.md` owns test strategy and scope;
+  `TEST_CASES.md` owns the scenario catalog; do not add mentor notes there.
 
 - Preserve the agreed Marketplace purchase cleanup. Do not propose its refactor
   or fault-injection exercises in routine reviews; see the

@@ -2,8 +2,8 @@
 
 All project skills are maintained in [.agents/skills](../.agents/skills).
 The [shared context](../.agents/skills/CONTEXT.md) defines mentoring mode,
-repository sources, and verification scope. TEST_PLAN.md owns strategy, scope
-and the scenario catalog. Personal learning notes are maintained locally.
+repository sources, and verification scope. TEST_PLAN.md owns strategy and scope;
+TEST_CASES.md owns the scenario catalog. Personal learning notes are maintained locally.
 
 | Skill                                                                                         | Purpose                                                                      |
 | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |

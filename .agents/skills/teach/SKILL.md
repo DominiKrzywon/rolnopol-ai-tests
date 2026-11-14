@@ -36,7 +36,7 @@ In this repository, NOTES.md remains the sole active learning queue and progress
 record. Store learning insights there using numbered `LR-NNNN` entries and the
 learning-record format; do not create a parallel learning-records directory.
 Read its current queue and agreed decisions, not just historical entries.
-TEST_PLAN.md continues to own test strategy and scenarios, never teaching notes.
+TEST_PLAN.md owns test strategy; TEST_CASES.md owns scenarios, never teaching notes.
 MISSION.md may describe the agreed purpose, but must not duplicate the roadmap.
 
 Teach in the conversation by default. Creating this skill does not authorize

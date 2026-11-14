@@ -11,7 +11,7 @@ Select a metric for a decision: what to fix, what to repeat, or which exercise t
 ## Workflow
 
 1. Inspect `coverage-report/coverage.json`, the associated Playwright JSON,
-   reporter configuration, and dated evidence in TEST_PLAN.md when available.
+   reporter configuration, and dated evidence in reports and NOTES.md when available.
    The [README](../../../README.md#scenario-coverage-report) documents generation.
    `coverage:report` renders saved inputs without AI or application access.
    Do not assume artifacts are fresh or that CI/history is available.

@@ -24,8 +24,14 @@ export class ProfilePage extends BasePage {
   readonly editProfileInfoButton = this.page.locator('#editProfileInfoBtn');
   readonly updateUserName = this.page.getByPlaceholder('Enter display name');
   readonly saveUpdatedUserInfo = this.page.locator('#editProfileSave');
-
+  readonly updateErrorMessage = this.page
+    .locator('.notification.error.show')
+    .last();
   readonly welcomeMessage = this.page.getByTestId('nav-profile');
+  readonly updateSuccessMessage = this.page.locator(
+    '.notification.success.show .notification-message',
+  );
+
   readonly displayedName = this.page.getByTestId('displayed-name');
   readonly emailValue = this.page.getByTestId('email-value');
   readonly userId = this.page.getByTestId('user-id');

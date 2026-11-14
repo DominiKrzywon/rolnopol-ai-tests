@@ -1,4 +1,4 @@
-﻿import { request as playwrightRequest } from '@playwright/test';
+import { request as playwrightRequest } from '@playwright/test';
 import { loginAs, registerVerifiedUser } from 'src/api/auth.api';
 import { getAccountBalance } from 'src/api/financial.api';
 import {

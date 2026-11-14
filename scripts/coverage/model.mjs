@@ -356,7 +356,7 @@ export function buildReport(
     generatedAt: new Date().toISOString(),
     snapshot,
     scope:
-      'Explicit TEST_PLAN scenario catalog; not application code coverage.',
+      'Explicit TEST_CASES scenario catalog; not application code coverage.',
     freshness,
     playwrightReport: { status: playwrightReport.status },
     counts,

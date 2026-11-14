@@ -97,14 +97,15 @@ terminal from the test repository root.
 
 ## Scenario Coverage Report
 
-[Scenarios and planned gaps](TEST_PLAN.md#4-scenario-catalog-and-coverage-contract)
-are maintained only in TEST_PLAN. The report shows collected tests and execution
+[Scenarios and planned gaps](TEST_CASES.md)
+are maintained only in TEST_CASES. The report shows collected tests and execution
 evidence; collection does not establish a pass. See [reporting](docs/REPORTING.md)
 for archives, freshness, filters and the optional application-code coverage pilot.
 
 ## Documentation
 
-- [Test plan](TEST_PLAN.md): scope, scenario IDs and mobile selection.
+- [Test plan](TEST_PLAN.md): strategy, scope and completion criteria.
+- [Test cases](TEST_CASES.md): scenario IDs, planned gaps and mobile selection.
 - [Coding standards](CODING_STANDARDS.md): test structure and conventions.
 - [Decisions](DECISION_LOG.md): agreed project choices.
 - [Reporting](docs/REPORTING.md): commands, outputs and history.

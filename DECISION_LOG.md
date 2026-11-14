@@ -59,6 +59,6 @@ Agreed November 12, 2026:
   state-and-navigation check is acceptable here: aria-expanded=false verifies
   declared state, not visual collapse. Accept and describe that limit instead of
   repeatedly expanding the test. CSS checks also couple it to implementation.
-- The learner implements test changes and aligns TEST_PLAN scenario descriptions.
+- The learner implements test changes and aligns TEST_CASES scenario descriptions.
   These decisions do not mean existing code has already been simplified.
   NOTES owns the learning steps and progress.
