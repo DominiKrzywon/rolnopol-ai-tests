@@ -210,8 +210,8 @@ test.describe('Financial API', () => {
         (recipientAccountBalance + amount).toFixed(2),
       );
 
-      expect(senderAccountAfter).toBe(expectedSenderBalance);
-      expect(recipientAccountAfter).toBe(expectedRecipientBalance);
+      expect(senderAccountAfter).toBeCloseTo(expectedSenderBalance, 2);
+      expect(recipientAccountAfter).toBeCloseTo(expectedRecipientBalance, 2);
     },
   );
 

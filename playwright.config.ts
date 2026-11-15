@@ -90,6 +90,7 @@ export default defineConfig({
       testMatch: [
         '**/*.mobile.spec.ts',
         '**/auth/login.noauth.spec.ts',
+        '**/auth/contact.noauth.spec.ts',
         '**/auth/profile.isolated.spec.ts',
         '**/auth/financial.isolated.spec.ts',
         '**/auth/registration.noauth.spec.ts',
@@ -104,6 +105,7 @@ export default defineConfig({
       testMatch: [
         '**/*.mobile.spec.ts',
         '**/auth/login.noauth.spec.ts',
+        '**/auth/contact.noauth.spec.ts',
         '**/auth/profile.isolated.spec.ts',
         '**/auth/financial.isolated.spec.ts',
         '**/auth/registration.noauth.spec.ts',

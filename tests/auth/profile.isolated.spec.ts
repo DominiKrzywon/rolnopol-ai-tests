@@ -261,4 +261,74 @@ test.describe('profile isolated tests', () => {
       );
     },
   );
+
+  test(
+    'should disable Save while profile update is pending',
+    {
+      annotation: { type: 'case-id', description: 'TC-PROFILE-007' },
+      tag: ['@profile'],
+    },
+    async ({ page, freshUser, profilePage }) => {
+      const expectedSuccessMessage = 'Profile information updated';
+      const expectedSavingText = 'Saving...';
+      const updatedName = `user_${Date.now()}`;
+      const profileUrl = `${BASE_API_URL}/users/profile`;
+
+      let releaseSave!: () => void;
+
+      const saveGate = new Promise<void>((resolve) => {
+        releaseSave = resolve;
+      });
+
+      await profilePage.goto();
+
+      await page.route(profileUrl, async (route) => {
+        if (route.request().method() !== 'PUT') {
+          await route.continue();
+          return;
+        }
+
+        await saveGate;
+        await route.continue();
+      });
+
+      try {
+        await Promise.all([
+          page.waitForRequest(
+            (request) =>
+              request.url() === profileUrl && request.method() === 'PUT',
+          ),
+          profilePage.updateUserInfo(updatedName),
+        ]);
+
+        await expect(profilePage.saveUpdatedUserInfo).toBeDisabled();
+        await expect(profilePage.saveUpdatedUserInfo).toHaveText(
+          expectedSavingText,
+        );
+        await expect(profilePage.displayedName).toHaveText(
+          freshUser.displayName!,
+        );
+
+        const responsePromise = page.waitForResponse(
+          (response) =>
+            response.url() === profileUrl &&
+            response.request().method() === 'PUT',
+        );
+        releaseSave();
+
+        const updateResponse = await responsePromise;
+
+        expect(updateResponse.status()).toBe(200);
+        await expect(profilePage.updateSuccessMessage).toHaveText(
+          expectedSuccessMessage,
+        );
+
+        await page.reload();
+
+        await expect(profilePage.displayedName).toHaveText(updatedName);
+      } finally {
+        releaseSave();
+      }
+    },
+  );
 });

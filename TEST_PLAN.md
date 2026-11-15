@@ -65,6 +65,28 @@ or establish release readiness. The generated report owns current execution
 results. See [reporting](docs/REPORTING.md) for commands, metric definitions,
 freshness and archives.
 
+For a run that should appear in execution history, run these commands in order
+from the repository root:
+
+```bash
+npm run coverage:run
+npm run coverage:archive
+npm run coverage:summary
+```
+
+Run each command separately. `coverage:run` generates execution evidence even
+when tests fail and preserves the failing exit code; continue with
+`coverage:archive` to save that run, then `coverage:summary` to refresh the
+history view. Archive before starting another run, because a later run replaces
+the latest execution results. `coverage:collect` refreshes the inventory but does
+not execute tests or create archivable run evidence.
+
+If archiving reports that a completed run with provenance is required, and the
+raw Playwright results still exist, recover the report before another run with
+`npm run coverage:collect`, `npm run coverage:report`, then retry
+`npm run coverage:archive` and `npm run coverage:summary`. See
+[reporting recovery](docs/REPORTING.md#reports-and-execution-evidence).
+
 ## 6. Completion criteria
 
 - Assertions detect the intended behavior or rejection and relevant state changes.

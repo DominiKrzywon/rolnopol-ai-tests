@@ -15,13 +15,35 @@ to return. **Run details** keeps timing and setup results; full data is in JSON.
 **Source metadata missing** means the saved run cannot confirm the current source,
 even if its observed tests passed. Use `coverage:run` for new evidence.
 
-Run these commands separately, including after test failures:
+Run these commands separately, in order, from the repository root:
 
 ```bash
 npm run coverage:run
 npm run coverage:archive
 npm run coverage:summary
 ```
+
+`coverage:run` writes execution evidence and generates the latest report even
+when tests fail; its command still returns a failing exit code. After a failed
+run, start `coverage:archive` as a separate command to archive those failures,
+then run `coverage:summary` to refresh the history. Do not start another test run
+before archiving, because it replaces the latest execution results.
+
+If `coverage:archive` says that a completed run with provenance is required,
+the normalized coverage report may be missing or stale even though the raw
+Playwright results remain. Recover the latest run before starting another one:
+
+```bash
+npm run coverage:collect
+npm run coverage:report
+npm run coverage:archive
+npm run coverage:summary
+```
+
+This rebuilds the report from the current inventory and saved Playwright results;
+it does not rerun tests. Archive only when those saved results are still from the
+run you intend to keep. If the raw results have been replaced or removed, that
+run cannot be reconstructed from the summary alone.
 
 | Output                                               | Purpose                                                         |
 | ---------------------------------------------------- | --------------------------------------------------------------- |

@@ -16,6 +16,9 @@ export class ContactPage extends BasePage {
     name: 'Send Message',
   });
   readonly validationErrors = this.page.getByRole('alert');
+  readonly successMessage = this.page.locator(
+    '.notification.success.show .notification-message',
+  );
 
   async sendTheMessage(
     name: string,
