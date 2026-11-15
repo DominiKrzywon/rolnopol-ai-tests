@@ -104,3 +104,145 @@ test.describe('Alerts page', () => {
     },
   );
 });
+
+test.describe('alerts API tests', () => {
+  test(
+    'should return empty list',
+    {
+      annotation: { type: 'case-id', description: 'TC-PUBLIC-010' },
+      tag: ['@alerts'],
+    },
+    async ({ page, alertsPage }) => {
+      const alertsUrl = '/api/v1/alerts';
+      const alertForToday = ' No alerts for today.';
+      const upcomingAlerts = ' No upcoming alerts.';
+      const historyAlerts = ' No alerts in the last 7 days.';
+
+      await page.route(
+        (url) => url.pathname === alertsUrl,
+        async (route) => {
+          if (route.request().method() !== 'GET') {
+            await route.continue();
+            return;
+          }
+          await route.fulfill({
+            status: 200,
+            json: {
+              success: true,
+              data: {
+                today: { alerts: [] },
+                upcoming: { alerts: [] },
+                history: [],
+              },
+            },
+          });
+        },
+      );
+
+      await alertsPage.goto();
+
+      await expect(alertsPage.todayList).toHaveText(alertForToday);
+      await expect(alertsPage.upcomingList).toHaveText(upcomingAlerts);
+      await expect(alertsPage.historyList).toHaveText(historyAlerts);
+    },
+  );
+
+  test(
+    'should display one alert only',
+    {
+      annotation: { type: 'case-id', description: 'TC-PUBLIC-011' },
+      tag: ['@alerts'],
+    },
+    async ({ page, alertsPage }) => {
+      const alertsUrl = '/api/v1/alerts';
+      const expectedTodayAlerts = 'Example alert message';
+      const upcomingAlerts = ' No upcoming alerts.';
+      const historyAlerts = ' No alerts in the last 7 days.';
+
+      await page.route(
+        (url) => url.pathname === alertsUrl,
+        async (route) => {
+          if (route.request().method() !== 'GET') {
+            await route.continue();
+            return;
+          }
+          await route.fulfill({
+            status: 200,
+            json: {
+              success: true,
+              data: {
+                today: {
+                  alerts: [
+                    {
+                      date: '2026-11-15',
+                      severity: 'low',
+                      title: 'Controlled test alert',
+                      category: 'weather',
+                      message: expectedTodayAlerts,
+                    },
+                  ],
+                },
+                upcoming: { alerts: [] },
+                history: [],
+              },
+            },
+          });
+        },
+      );
+
+      await alertsPage.goto();
+
+      await expect(alertsPage.todayList).toContainText(expectedTodayAlerts);
+      await expect(alertsPage.upcomingList).toHaveText(upcomingAlerts);
+      await expect(alertsPage.historyList).toHaveText(historyAlerts);
+    },
+  );
+
+  test(
+    'should send query params after change region',
+    {
+      annotation: { type: 'case-id', description: 'TC-PUBLIC-012' },
+      tag: ['@alerts'],
+    },
+    async ({ page, alertsPage }) => {
+      const alertsUrl = '/api/v1/alerts';
+      const selectedRegion = 'PL-02';
+
+      await alertsPage.goto();
+      await expect(alertsPage.regionSelect).toBeEnabled();
+
+      const [regionRequest] = await Promise.all([
+        page.waitForRequest((request) => {
+          const url = new URL(request.url());
+
+          return (
+            url.pathname === alertsUrl &&
+            request.method() === 'GET' &&
+            url.searchParams.get('region') === selectedRegion
+          );
+        }),
+        alertsPage.selectRegion(selectedRegion),
+      ]);
+
+      const requestUrl = new URL(regionRequest.url());
+      expect(requestUrl.searchParams.get('region')).toEqual(selectedRegion);
+    },
+  );
+
+  test(
+    'should preserve selected region after reload',
+    {
+      annotation: { type: 'case-id', description: 'TC-PUBLIC-013' },
+      tag: ['@alerts'],
+    },
+    async ({ page, alertsPage }) => {
+      const selectedRegion = 'PL-02';
+
+      await alertsPage.goto();
+      await alertsPage.selectRegion(selectedRegion);
+      await page.reload();
+
+      await expect(alertsPage.regionSelect).toHaveValue(selectedRegion);
+    },
+  );
+});

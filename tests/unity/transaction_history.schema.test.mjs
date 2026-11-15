@@ -55,3 +55,22 @@ test('rejects a history without hasMore', () => {
 
   assert.equal(validateTransactionHistory(history), false);
 });
+
+test('rejects a transaction without referenceId', () => {
+  const history = {
+    ...validHistory,
+    transactions: [{ ...validTransaction }],
+  };
+
+  delete history.transactions[0].referenceId;
+  assert.equal(validateTransactionHistory(history), false);
+
+  const historyError = validateTransactionHistory.errors.find(
+    (error) =>
+      error.keyword === 'required' &&
+      error.instancePath === '/transactions/0' &&
+      error.params.missingProperty === 'referenceId',
+  );
+
+  assert.ok(historyError, 'Expected a missing referenceId error');
+});

@@ -159,6 +159,15 @@ retain a risk estimate, but remain outside coverage denominators.
 
 | TC-PROFILE-007 | Profile | Save remains disabled while a profile update is pending and the name persists after completion | UI | P1 | medium | included | Source reviewed 2026-11-15: fresh user, PUT held behind an explicitly released promise, disabled Save, saving feedback and original displayed name asserted. After release, real HTTP 200, success UI and updated name after reload are checked. Gate released in finally. Disabled state does not establish complete duplicate-request prevention. No new application execution. |
 
+| TC-PUBLIC-010 | Public | Alerts shows empty sections after a successful empty response | UI | P2 | low | included | Source reviewed 2026-11-15: GET interception before navigation returns empty today, upcoming and history data; asserts all three empty-state messages. Learner reports a pass; command and project scope not supplied. Mentor did not rerun application tests. |
+
+| TC-PUBLIC-011 | Public | Alerts displays a controlled alert in today's section | UI | P2 | low | included | Source reviewed 2026-11-15: controlled GET response contains one alert; asserts its message and empty upcoming/history sections. Learner reports a pass; exact command and project scope not supplied. Source annotation corrected to TC-PUBLIC-011. Does not independently assert exactly one card. |
+| TC-PUBLIC-012 | Public | Changing Alerts region requests data for the selected region | UI | P2 | low | included | Source reviewed 2026-11-15: selects PL-02 while observing GET /api/v1/alerts with pathname, method and region predicates; asserts the region query parameter. Learner reports a pass; exact command/project scope not supplied. No mentor application execution. |
+
+| TC-PUBLIC-013 | Public | Alerts preserves the selected region after reload | UI | P2 | low | included | Source reviewed 2026-11-15: selects PL-02, reloads and asserts the visible selection is preserved. Learner reports recording the case; no separate passing-run confirmation or mentor application execution. |
+
+| TC-PROFILE-008 | Profile | Profile renders a display name modified in the GET response without persisting it | UI | P2 | low | included | Source reviewed 2026-11-15: freshUser, GET-only route.fetch handler before navigation, only data.displayedName modified before fulfill. Controlled displayed name asserted; specific handler removed and original name asserted after reload. Learner reports a pass; exact command/project scope not supplied. No mentor application execution. |
+
 <!-- coverage-catalog:end -->
 
 ## Mobile selection

@@ -331,4 +331,45 @@ test.describe('profile isolated tests', () => {
       }
     },
   );
+
+  test(
+    'should render modified profile response without persisting it',
+    {
+      annotation: { type: 'case-id', description: 'TC-PROFILE-008' },
+      tag: ['@profile'],
+    },
+    async ({ page, freshUser, profilePage }) => {
+      const profileQuery = '/api/v1/users/profile';
+      const expectedDisplayName = 'Test_Change';
+      const profileHandler = async (route: Route): Promise<void> => {
+        // eslint-disable-next-line playwright/no-conditional-in-test
+        if (route.request().method() === 'GET') {
+          const response = await route.fetch();
+          const json = await response.json();
+
+          json.data.displayedName = expectedDisplayName;
+
+          await route.fulfill({
+            response,
+            json,
+          });
+        } else {
+          await route.continue();
+        }
+      };
+
+      await page.route(profileQuery, profileHandler);
+
+      await profilePage.goto();
+
+      await expect(profilePage.displayedName).toHaveText(expectedDisplayName);
+
+      await page.unroute(profileQuery, profileHandler);
+      await page.reload();
+
+      await expect(profilePage.displayedName).toHaveText(
+        freshUser.displayName!,
+      );
+    },
+  );
 });
