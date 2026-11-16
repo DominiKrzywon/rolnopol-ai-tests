@@ -74,3 +74,12 @@ test('rejects a transaction without referenceId', () => {
 
   assert.ok(historyError, 'Expected a missing referenceId error');
 });
+
+test('should accept "referenceId" as a text', () => {
+  const history = {
+    ...validHistory,
+    transactions: [{ ...validTransaction, referenceId: 'order-123' }],
+  };
+
+  assert.equal(validateTransactionHistory(history), true);
+});

@@ -1,3 +1,4 @@
+import { Route } from '@playwright/test';
 import { expect, test } from 'src/fixtures/test.fixture';
 
 test.describe('Alerts page', () => {
@@ -243,6 +244,225 @@ test.describe('alerts API tests', () => {
       await page.reload();
 
       await expect(alertsPage.regionSelect).toHaveValue(selectedRegion);
+    },
+  );
+
+  test(
+    'should show loading placeholders until alerts arrive',
+    {
+      annotation: { type: 'case-id', description: 'TC-PUBLIC-014' },
+      tag: ['@alerts'],
+    },
+    async ({ page, alertsPage }) => {
+      const alertsUrl = '/api/v1/alerts';
+      const expectedTodayAlerts = 'Example alert message';
+
+      let releaseAlerts!: () => void;
+
+      const alertsGate = new Promise<void>((resolve) => {
+        releaseAlerts = resolve;
+      });
+
+      await page.route(
+        (url) => url.pathname === alertsUrl,
+        async (route) => {
+          if (route.request().method() !== 'GET') {
+            await route.continue();
+            return;
+          }
+
+          await alertsGate;
+
+          await route.fulfill({
+            status: 200,
+            json: {
+              success: true,
+              data: {
+                today: {
+                  alerts: [
+                    {
+                      date: '2026-11-15',
+                      severity: 'low',
+                      title: 'Controlled test alert',
+                      category: 'weather',
+                      message: expectedTodayAlerts,
+                    },
+                  ],
+                },
+                upcoming: { alerts: [] },
+                history: [],
+              },
+            },
+          });
+        },
+      );
+
+      try {
+        await alertsPage.goto();
+
+        await expect(alertsPage.todayLoadingPlaceholders.first()).toBeVisible();
+
+        releaseAlerts();
+
+        await expect(alertsPage.todayList).toContainText(expectedTodayAlerts);
+        await expect(alertsPage.todayLoadingPlaceholders).toHaveCount(0);
+      } finally {
+        releaseAlerts();
+      }
+    },
+  );
+
+  test(
+    'should replace alerts after refresh while showing loading placeholders',
+    {
+      annotation: { type: 'case-id', description: 'TC-PUBLIC-015' },
+      tag: ['@alerts'],
+    },
+    async ({ page, alertsPage }) => {
+      const alertsUrl = '/api/v1/alerts';
+      const expectedAlert1 = 'Initial alert';
+      const expectedAlert2 = 'Refreshed alert';
+
+      const alertsMatcher = (url: URL): boolean => url.pathname === alertsUrl;
+
+      const initialAlertsHandler = async (route: Route): Promise<void> => {
+        // eslint-disable-next-line playwright/no-conditional-in-test
+        if (route.request().method() === 'GET') {
+          await route.fulfill({
+            status: 200,
+            json: {
+              success: true,
+              data: {
+                today: {
+                  alerts: [
+                    {
+                      date: '2026-11-15',
+                      severity: 'low',
+                      title: 'Controlled test alert',
+                      category: 'weather',
+                      message: expectedAlert1,
+                    },
+                  ],
+                },
+                upcoming: { alerts: [] },
+                history: [],
+              },
+            },
+          });
+        } else {
+          await route.continue();
+        }
+      };
+
+      await page.route(alertsMatcher, initialAlertsHandler);
+      await alertsPage.goto();
+
+      await expect(alertsPage.todayList).toContainText(expectedAlert1);
+
+      await page.unroute(alertsMatcher, initialAlertsHandler);
+
+      let releaseRefresh!: () => void;
+
+      const refreshGate = new Promise<void>((resolve) => {
+        releaseRefresh = resolve;
+      });
+
+      const refreshedAlertsHandler = async (route: Route): Promise<void> => {
+        // eslint-disable-next-line playwright/no-conditional-in-test
+        if (route.request().method() === 'GET') {
+          await refreshGate;
+
+          await route.fulfill({
+            status: 200,
+            json: {
+              success: true,
+              data: {
+                today: {
+                  alerts: [
+                    {
+                      date: '2026-11-15',
+                      severity: 'low',
+                      title: 'Controlled test alert',
+                      category: 'weather',
+                      message: expectedAlert2,
+                    },
+                  ],
+                },
+                upcoming: { alerts: [] },
+                history: [],
+              },
+            },
+          });
+        } else {
+          await route.continue();
+        }
+      };
+
+      await page.route(alertsMatcher, refreshedAlertsHandler);
+      try {
+        await alertsPage.refreshAlerts();
+
+        await expect(alertsPage.todayLoadingPlaceholders.first()).toBeVisible();
+
+        releaseRefresh();
+
+        await expect(alertsPage.todayList).toContainText(expectedAlert2);
+        await expect(alertsPage.todayList).not.toContainText(expectedAlert1);
+        await expect(alertsPage.todayLoadingPlaceholders).toHaveCount(0);
+      } finally {
+        releaseRefresh();
+      }
+    },
+  );
+
+  test(
+    'should show an error after a delayed alerts response fails',
+    {
+      annotation: { type: 'case-id', description: 'TC-PUBLIC-016' },
+      tag: ['@alerts'],
+    },
+    async ({ page, alertsPage }) => {
+      const alertsUrl = '/api/v1/alerts';
+      const expectedErrorMessage = 'Alerts temporarily unavailable';
+
+      let releaseResponse!: () => void;
+
+      const responseGate = new Promise<void>((resolve) => {
+        releaseResponse = resolve;
+      });
+
+      await page.route(
+        (url) => url.pathname === alertsUrl,
+        async (route) => {
+          if (route.request().method() !== 'GET') {
+            await route.continue();
+            return;
+          }
+          await responseGate;
+
+          await route.fulfill({
+            status: 500,
+            json: {
+              success: false,
+              error: expectedErrorMessage,
+            },
+          });
+        },
+      );
+
+      try {
+        await alertsPage.goto();
+
+        await expect(alertsPage.todayLoadingPlaceholders.first()).toBeVisible();
+
+        releaseResponse();
+
+        await expect(alertsPage.notificationMessage).toHaveText(
+          `Error: ${expectedErrorMessage}`,
+        );
+      } finally {
+        releaseResponse();
+      }
     },
   );
 });

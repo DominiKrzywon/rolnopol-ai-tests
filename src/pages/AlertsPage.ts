@@ -30,6 +30,8 @@ export class AlertsPage extends BasePage {
   readonly todayAlerts = this.todayList.locator('.alert-card');
   readonly historyAlerts = this.historyList.locator('.alert-card');
 
+  readonly todayLoadingPlaceholders = this.todayList.locator('.skeleton');
+
   async searchAlerts(query: string): Promise<void> {
     await this.searchInput.fill(query);
   }
