@@ -170,9 +170,9 @@ retain a risk estimate, but remain outside coverage denominators.
 
 | TC-PUBLIC-014 | Public | Alerts shows loading placeholders until the initial response arrives | UI | P2 | low | included | Source reviewed 2026-11-16: GET /api/v1/alerts held behind a promise before fulfill; first today placeholder visible before release, controlled alert message visible and placeholders absent after release. Gate released in finally. No mentor browser execution. |
 
-| TC-PUBLIC-015 | Public | Refresh shows loading placeholders and replaces the previous Alerts data | UI | P2 | low | included | Planned learning exercise: initially render controlled alert A, replace its named GET handler with a gated response containing B, click Refresh, verify loading, release the response, then verify B, absence of A and no loading placeholders. No implementation or passing-run evidence yet. |
+| TC-PUBLIC-015 | Public | Refresh shows loading placeholders and replaces the previous Alerts data | UI | P2 | low | included | Source inspected 2026-11-19: renders controlled alert A, replaces its named GET handler with a gated response containing B, clicks Refresh, verifies loading, then B, absence of A and no loading placeholders. Gate released in finally. Learner previously reported completion; no mentor browser execution. |
 
-| TC-PUBLIC-016 | Public | Alerts displays an error after a delayed failed initial response | UI | P2 | medium | included | Planned: hold GET /api/v1/alerts behind a promise, verify a visible loading placeholder, release a controlled HTTP 500 JSON response and verify its error notification. Release the gate in finally. Tests frontend handling of a simulated error; no passing-run evidence. |
+| TC-PUBLIC-016 | Public | Alerts displays an error after a delayed failed initial response | UI | P2 | medium | included | Source inspected 2026-11-19: holds GET /api/v1/alerts behind a promise, verifies a visible loading placeholder, releases a controlled HTTP 500 JSON response and verifies its error notification. Gate released in finally. Tests frontend handling of a simulated error; no passing-run confirmation or mentor browser execution. |
 
 <!-- coverage-catalog:end -->
 

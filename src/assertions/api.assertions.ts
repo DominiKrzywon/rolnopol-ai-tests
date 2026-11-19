@@ -1,5 +1,5 @@
-import { APIResponse, expect } from '@playwright/test';
-import { ApiEnvelope } from 'src/models/ApiResponse';
+import { type APIResponse, expect } from '@playwright/test';
+import type { ApiEnvelope } from 'src/models/ApiResponse';
 
 export async function expectApiSuccess<T = unknown>(
   response: APIResponse,

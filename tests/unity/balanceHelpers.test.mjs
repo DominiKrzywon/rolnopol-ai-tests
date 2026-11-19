@@ -20,3 +20,13 @@ test('check validation of 0 ROL', () => {
 
   assert.equal(actualBalance, 0);
 });
+
+test('check validation of number', () => {
+  const actualBalance = parseBalance('1 234,56 ROL');
+
+  assert.equal(actualBalance, 1234.56);
+});
+
+test('rejects empty balance text', () => {
+  assert.throws(() => parseBalance(''), /Invalid balance/);
+});
