@@ -1,5 +1,37 @@
 # Coding Standards
 
+## Read before planning: readable tests and proportionate coverage
+
+Read this document before planning a test, learning exercise or refactor.
+Review the relevant existing scenarios before proposing more assertions.
+
+- Prefer one main behavior per test and a scenario readable at first glance,
+  ideally within one editor view. This is a design preference, not a line limit.
+- Keep the action, scenario inputs and expected outcome visible. Extract repeated
+  response data or stable setup when it removes meaningful duplication; do not
+  compress formatting or hide a long scenario inside an assertion helper.
+- Judge assertions across the suite. Do not repeat unrelated empty-state,
+  control-visibility, success or persistence checks already owned by another
+  scenario. Retain prerequisites and checks needed to distinguish this behavior
+  from a regression. Several assertions can describe one state transition.
+- With `page.route`, separate response data from interception mechanics. Prefer
+  a small domain-specific pure data factory when multiple mocks repeat the same
+  envelope. Keep messages, statuses and timing choices explicit in each spec.
+  Return fresh nested objects; do not introduce a generic routing framework,
+  request counter or mode flags merely to shorten a test.
+- Register handlers before the triggering action, preserve URL/method matching,
+  and remove the specific handler when changing responses. Keep deliberate
+  response gates and their `finally` release visible when timing is under test.
+- In Alerts, TC-PUBLIC-010 owns empty-state messages, 011 controlled rendering,
+  014 initial loading, 015 replacement during Refresh and 016 delayed failure.
+  For 015, initial A, refreshed B and absence of A prove replacement rather than
+  appending. Loading during Refresh is distinct from initial loading; keep it
+  while the case explicitly covers that transition. Changing this scope requires
+  updating its catalog description, not silently deleting those checks.
+- Simplify one selected case first. Expand only to actual consumers of the same
+  rule; leave accepted Contact/Profile/Finance/mobile cases alone unless requested
+  or a concrete defect appears. Do not claim faster execution from fewer lines.
+
 ## API clients and explicit response assertions
 
 ### Responsibilities

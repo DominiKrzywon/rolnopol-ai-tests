@@ -19,10 +19,10 @@ export function sourceSnapshot(root) {
   ['tests', 'src', 'scripts/coverage'].forEach(visit);
   files.push(
     'README.md',
-    'TEST_PLAN.md',
-    'TEST_CASES.md',
+    'docs/TEST_PLAN.md',
+    'docs/TEST_CASES.md',
     'docs/REPORTING.md',
-    'CODING_STANDARDS.md',
+    'docs/CODING_STANDARDS.md',
     'playwright.config.ts',
     'package.json',
     'package-lock.json',

@@ -55,14 +55,14 @@ Case-level priorities, risk estimates and their definitions live in
 
 ## 5. Execution and evidence
 
-Run against the pinned localhost application described in [README](README.md).
+Run against the pinned localhost application described in [README](../README.md).
 CI is manually triggered. Choose focused runs for local changes; extend scope
 when shared fixtures, configuration or dependent behavior warrant it.
 
 Collection proves that a scenario is mapped to a test. Passing execution supports
 only the recorded scope and matching source; it does not assess assertion quality
 or establish release readiness. The generated report owns current execution
-results. See [reporting](docs/REPORTING.md) for commands, metric definitions,
+results. See [reporting](REPORTING.md) for commands, metric definitions,
 freshness and archives.
 
 For a run that should appear in execution history, run these commands in order
@@ -85,7 +85,7 @@ If archiving reports that a completed run with provenance is required, and the
 raw Playwright results still exist, recover the report before another run with
 `npm run coverage:collect`, `npm run coverage:report`, then retry
 `npm run coverage:archive` and `npm run coverage:summary`. See
-[reporting recovery](docs/REPORTING.md#reports-and-execution-evidence).
+[reporting recovery](REPORTING.md#reports-and-execution-evidence).
 
 ## 6. Completion criteria
 

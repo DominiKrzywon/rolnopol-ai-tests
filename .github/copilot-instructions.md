@@ -2,7 +2,7 @@
 
 ## Important: Follow Coding Standards
 
-**Always refer to and follow the guidelines in `CODING_STANDARDS.md`** for:
+**Always refer to and follow the guidelines in `docs/CODING_STANDARDS.md`** for:
 
 - Page Object Pattern implementation
 - Test structure (Arrange-Act-Assert pattern)

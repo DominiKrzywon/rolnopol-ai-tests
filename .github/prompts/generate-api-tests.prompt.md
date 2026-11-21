@@ -9,7 +9,7 @@ Use [playwright-test-automation](../../.agents/skills/playwright-test-automation
 for the requested API behavior. Follow the learning/implementation mode in
 [the shared context](../../.agents/skills/CONTEXT.md).
 
-Start with the existing API helpers and TEST_PLAN.md. Consult the application's
+Start with docs/CODING_STANDARDS.md, the existing API helpers and docs/TEST_PLAN.md. Consult the application's
 actual documentation when needed; do not assume a fixed schema URL or treat an
 observed response as an approved requirement. Deliver a small exercise or the
 requested implementation, with evidence appropriate to the scope.

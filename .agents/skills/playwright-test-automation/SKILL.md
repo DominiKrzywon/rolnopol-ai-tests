@@ -9,7 +9,7 @@ Apply the [shared context](../CONTEXT.md), including mentoring mode and check se
 
 ## Workflow
 
-1. Choose a concrete behavior from TEST_CASES.md and the layer that verifies it.
+1. Choose a concrete behavior from docs/TEST_CASES.md and the layer that verifies it.
    Test business rules mainly through API, visible behavior through UI,
    and reserve full E2E for a few justified journeys.
 2. Inspect the existing spec, Page Object, actions, fixture, and API helper.
@@ -33,7 +33,7 @@ Apply the [shared context](../CONTEXT.md), including mentoring mode and check se
    `*.journey.spec.ts` is a roadmap proposal until configuration collects it.
    Do not create tests that will never execute.
 9. Assign exactly one static `case-id` annotation from the
-   [scenario catalog](../../../TEST_CASES.md#catalog-contract).
+   [scenario catalog](../../../docs/TEST_CASES.md#catalog-contract).
    Keep IDs after renames; never reuse retired IDs. Parameterized data contains
    explicit IDs per collected case. Setup uses `coverage-role: setup` instead.
    New planned rows need no placeholder test.
@@ -44,7 +44,7 @@ Apply the [shared context](../CONTEXT.md), including mentoring mode and check se
 
 ## Stability
 
-- Use locators according to CODING_STANDARDS.md; do not add fixed sleeps.
+- Use locators according to docs/CODING_STANDARDS.md; do not add fixed sleeps.
 - Do not share a mutable session between parallel tests.
 - Parameterize distinct validations as separate reported cases.
 - For visual tests, choose a stable component and control data and platform.

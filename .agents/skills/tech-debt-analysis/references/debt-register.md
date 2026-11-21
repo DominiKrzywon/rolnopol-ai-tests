@@ -2,15 +2,15 @@
 
 For each significant item, record:
 
-| Field        | Content                                                  |
-| ------------ | -------------------------------------------------------- |
-| Observation  | File and line plus behavior visible in code or execution |
-| Cost         | What makes diagnosis harder or reduces test confidence   |
-| Priority     | Now, next, or intentionally deferred                     |
-| Correction   | The smallest change and its risks                        |
-| Learning     | The concept explained by the exercise                    |
-| Verification | A specific test or check and the expected evidence       |
-| Roadmap      | An existing NOTES.md learning item or proposed addition  |
+| Field        | Content                                                      |
+| ------------ | ------------------------------------------------------------ |
+| Observation  | File and line plus behavior visible in code or execution     |
+| Cost         | What makes diagnosis harder or reduces test confidence       |
+| Priority     | Now, next, or intentionally deferred                         |
+| Correction   | The smallest change and its risks                            |
+| Learning     | The concept explained by the exercise                        |
+| Verification | A specific test or check and the expected evidence           |
+| Roadmap      | An existing docs/NOTES.md learning item or proposed addition |
 
 Describe size qualitatively and explain it: a local assertion change, a fixture
 change affecting several callers, or configuration affecting multiple projects.

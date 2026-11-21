@@ -262,9 +262,9 @@ test('catalog and reporting edits invalidate source provenance', () => {
     mkdirSync(path.join(directory, 'docs'));
     for (const file of [
       'README.md',
-      'TEST_PLAN.md',
-      'TEST_CASES.md',
-      'CODING_STANDARDS.md',
+      'docs/TEST_PLAN.md',
+      'docs/TEST_CASES.md',
+      'docs/CODING_STANDARDS.md',
       'docs/REPORTING.md',
       'playwright.config.ts',
       'package.json',
@@ -273,7 +273,7 @@ test('catalog and reporting edits invalidate source provenance', () => {
     ])
       writeFileSync(path.join(directory, file), 'initial');
     const first = sourceSnapshot(directory).fingerprint;
-    writeFileSync(path.join(directory, 'TEST_CASES.md'), 'changed scope');
+    writeFileSync(path.join(directory, 'docs/TEST_CASES.md'), 'changed scope');
     const second = sourceSnapshot(directory).fingerprint;
     assert.notEqual(first, second);
     writeFileSync(path.join(directory, 'docs/REPORTING.md'), 'changed metrics');
@@ -489,7 +489,7 @@ test('Markdown renders content without accepting scripts, HTML or dangerous URLs
 
 test('collapsible Markdown preserves anchors, nesting and code fences', () => {
   const html = renderMarkdown(
-    '# Guide\n\n## Parent\n\n### Child\n\n```md\n## Not a section\n```\n\n## Next\n\n[Rules](CODING_STANDARDS.md#rules)',
+    '# Guide\n\n## Parent\n\n### Child\n\n```md\n## Not a section\n```\n\n## Next\n\n[Rules](docs/CODING_STANDARDS.md#rules)',
     'readme',
     { collapsible: true },
   );
@@ -513,7 +513,7 @@ test('report accepts an authored README without index markers and keeps catalog 
   const report = buildReport(catalog, inventory(), null, snapshot);
   const html = renderReport(
     report,
-    '# README\n\n## Quick Start\n\nRun the first healthcheck.\n\n[Scenario catalog](TEST_CASES.md)',
+    '# README\n\n## Quick Start\n\nRun the first healthcheck.\n\n[Scenario catalog](docs/TEST_CASES.md)',
     '# Plan\n\n## Scope\n\nKeep scope visible on demand.',
     '# Standards\n\n## Rules\n\nUnique coding rule.',
   );
@@ -530,13 +530,13 @@ test('split documents link to standalone catalog, strategy and reporting section
   const report = buildReport(catalog, inventory(), null, snapshot);
   report.documents = {
     scenarioGuide:
-      '# Catalog\n\n## Mobile selection\n\n[Metrics](docs/REPORTING.md#metric-definitions)',
+      '# Catalog\n\n## Mobile selection\n\n[Metrics](REPORTING.md#metric-definitions)',
     reporting:
-      '# Reporting\n\n## Metric definitions\n\nUnique metric contract.\n\n[Catalog](../TEST_CASES.md) [Plan](../TEST_PLAN.md#scope)',
+      '# Reporting\n\n## Metric definitions\n\nUnique metric contract.\n\n[Catalog](TEST_CASES.md) [Plan](TEST_PLAN.md#scope) [Setup](../README.md#quick-start)',
   };
   const html = renderReport(
     report,
-    '# README\n\n[Cases](TEST_CASES.md) [Mobile](TEST_CASES.md#mobile-selection) [Reporting](docs/REPORTING.md)',
+    '# README\n\n## Quick Start\n\n[Cases](docs/TEST_CASES.md) [Mobile](docs/TEST_CASES.md#mobile-selection) [Reporting](docs/REPORTING.md)',
     '# Plan\n\n## Scope\n\nStrategy only.',
   );
   assert.match(html, /href="#scenarios"[^>]*>Cases/);
@@ -545,6 +545,7 @@ test('split documents link to standalone catalog, strategy and reporting section
   assert.match(html, /href="#reporting-metric-definitions"/);
   assert.match(html, /id="reporting-metric-definitions"/);
   assert.match(html, /href="#test_plan-scope"/);
+  assert.match(html, /href="#readme-quick-start"/);
   assert.match(html, /Unique metric contract/);
   assert.doesNotMatch(html, /strategy and catalog/);
 });

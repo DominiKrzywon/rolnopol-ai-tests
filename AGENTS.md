@@ -7,13 +7,17 @@ Use the [skill catalog](README.md#agent-skills) to choose a relevant procedure.
 
 ## Learning collaboration preferences
 
+- Before planning tests, exercises or refactors, read
+  [coding standards](docs/CODING_STANDARDS.md). Keep the main behavior readable
+  and check existing scenario coverage before adding assertions.
+
 - Keep the active learning queue, refactoring plans and progress records in
-  `NOTES.md`, outside the coverage report. `TEST_PLAN.md` owns test strategy and scope;
-  `TEST_CASES.md` owns the scenario catalog; do not add mentor notes there.
+  `docs/NOTES.md`, outside the coverage report. `docs/TEST_PLAN.md` owns test strategy and scope;
+  `docs/TEST_CASES.md` owns the scenario catalog; do not add mentor notes there.
 
 - Preserve the agreed Marketplace purchase cleanup. Do not propose its refactor
   or fault-injection exercises in routine reviews; see the
-  [recorded decision](NOTES.md#agreed-decision-keep-marketplace-purchase-cleanup).
+  [recorded decision](docs/NOTES.md#agreed-decision-keep-marketplace-purchase-cleanup).
 
 - Do not change test, source, configuration, or other non-Markdown files unless
   the user explicitly asks for that implementation. Review, diagnosis, and

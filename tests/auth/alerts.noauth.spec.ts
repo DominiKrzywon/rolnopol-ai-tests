@@ -1,4 +1,5 @@
 import { Route } from '@playwright/test';
+import { todayAlertResponse } from 'src/factories/alerts.factory';
 import { expect, test } from 'src/fixtures/test.fixture';
 
 test.describe('Alerts page', () => {
@@ -330,24 +331,7 @@ test.describe('alerts API tests', () => {
         if (route.request().method() === 'GET') {
           await route.fulfill({
             status: 200,
-            json: {
-              success: true,
-              data: {
-                today: {
-                  alerts: [
-                    {
-                      date: '2026-11-15',
-                      severity: 'low',
-                      title: 'Controlled test alert',
-                      category: 'weather',
-                      message: expectedAlert1,
-                    },
-                  ],
-                },
-                upcoming: { alerts: [] },
-                history: [],
-              },
-            },
+            json: todayAlertResponse(expectedAlert1),
           });
         } else {
           await route.continue();
@@ -374,24 +358,7 @@ test.describe('alerts API tests', () => {
 
           await route.fulfill({
             status: 200,
-            json: {
-              success: true,
-              data: {
-                today: {
-                  alerts: [
-                    {
-                      date: '2026-11-15',
-                      severity: 'low',
-                      title: 'Controlled test alert',
-                      category: 'weather',
-                      message: expectedAlert2,
-                    },
-                  ],
-                },
-                upcoming: { alerts: [] },
-                history: [],
-              },
-            },
+            json: todayAlertResponse(expectedAlert2),
           });
         } else {
           await route.continue();

@@ -70,7 +70,7 @@ comparison groups. Archives are local, Git-ignored, and have no automatic expiry
 To refresh documentation without running tests, use `npm run coverage:collect`
 then `npm run coverage:report`. Source or documentation edits can make saved
 results stale; regeneration does not turn them into new passing evidence.
-Scenario metadata is maintained in [TEST_CASES](../TEST_CASES.md).
+Scenario metadata is maintained in [TEST_CASES](TEST_CASES.md).
 
 ## Metric definitions
 

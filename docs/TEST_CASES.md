@@ -1,7 +1,7 @@
 # Rolnopol scenario catalog
 
 [TEST_PLAN](TEST_PLAN.md) owns strategy and scope;
-[reporting](docs/REPORTING.md#metric-definitions) defines scenario metrics.
+[reporting](REPORTING.md#metric-definitions) defines scenario metrics.
 
 ## Catalog contract
 

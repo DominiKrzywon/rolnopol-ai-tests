@@ -23,7 +23,7 @@ Read existing state before proposing a lesson; create documents only as needed.
   Use [RESOURCES-FORMAT.md](RESOURCES-FORMAT.md).
 - `GLOSSARY.md`: concise definitions of terms the user has demonstrated they
   understand. Use [GLOSSARY-FORMAT.md](GLOSSARY-FORMAT.md).
-- `NOTES.md`: teaching preferences, active queue, plans, and progress.
+- `docs/NOTES.md`: teaching preferences, active queue, plans, and progress.
 - `learning-records/NNNN-slug.md`: non-obvious learning insights in a standalone
   teaching workspace. Use [LEARNING-RECORD-FORMAT.md](LEARNING-RECORD-FORMAT.md).
 - `lessons/NNNN-slug.html`: short lessons when HTML output is authorized.
@@ -32,11 +32,11 @@ Read existing state before proposing a lesson; create documents only as needed.
 
 ### Rolnopol integration
 
-In this repository, NOTES.md remains the sole active learning queue and progress
+In this repository, docs/NOTES.md remains the sole active learning queue and progress
 record. Store learning insights there using numbered `LR-NNNN` entries and the
 learning-record format; do not create a parallel learning-records directory.
 Read its current queue and agreed decisions, not just historical entries.
-TEST_PLAN.md owns test strategy; TEST_CASES.md owns scenarios, never teaching notes.
+docs/TEST_PLAN.md owns test strategy; docs/TEST_CASES.md owns scenarios, never teaching notes.
 MISSION.md may describe the agreed purpose, but must not duplicate the roadmap.
 
 Teach in the conversation by default. Creating this skill does not authorize
@@ -133,5 +133,5 @@ communities before recommending them, respect budget and community preferences,
 and never contact or join one on the user's behalf without explicit instruction.
 
 Finish each completed lesson with what the attempt demonstrated, what remains
-uncertain, and one small next practice step. Update NOTES.md accurately; do not
+uncertain, and one small next practice step. Update docs/NOTES.md accurately; do not
 claim that reading the lesson proves learning or that one success proves retention.

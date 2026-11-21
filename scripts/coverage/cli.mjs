@@ -66,7 +66,7 @@ function collect() {
   if (code !== 0 || !existsSync(inventoryFile))
     throw new Error(`Collection failed (${code})`);
   const inventory = readJson(inventoryFile);
-  validateInventory(parseCatalog(read('TEST_CASES.md')), inventory);
+  validateInventory(parseCatalog(read('docs/TEST_CASES.md')), inventory);
   process.stdout.write(
     `Collected ${inventory.tests.length} tests; ${inventory.tests.filter((test) => test.infrastructure).length} setup entries.\n`,
   );
@@ -74,11 +74,11 @@ function collect() {
 }
 
 async function generate(resultPath) {
-  const plan = read('TEST_PLAN.md');
-  const catalog = read('TEST_CASES.md');
+  const plan = read('docs/TEST_PLAN.md');
+  const catalog = read('docs/TEST_CASES.md');
   const reporting = read('docs/REPORTING.md');
   const readme = read('README.md');
-  const standards = read('CODING_STANDARDS.md');
+  const standards = read('docs/CODING_STANDARDS.md');
   const inventory = readJson(inventoryFile);
   const run = resultPath ? readJson(resultPath) : null;
   const report = buildReport(

@@ -16,29 +16,30 @@ that materially changes the scope or expected behavior.
 
 ## Sources and freshness
 
-- [TEST_PLAN.md](../../TEST_PLAN.md): test strategy, scope and exclusions.
-- [TEST_CASES.md](../../TEST_CASES.md): scenario catalog and case-level metadata.
+- [docs/TEST_PLAN.md](../../docs/TEST_PLAN.md): test strategy, scope and exclusions.
+- [docs/TEST_CASES.md](../../docs/TEST_CASES.md): scenario catalog and case-level metadata.
 - [REPORTING.md](../../docs/REPORTING.md): metric definitions and reporting contract.
-- [CODING_STANDARDS.md](../../CODING_STANDARDS.md): AAA, Page Objects, and locators.
-- [NOTES.md](../../NOTES.md): the single active learning queue, reference roadmap,
+- [docs/CODING_STANDARDS.md](../../docs/CODING_STANDARDS.md): AAA, Page Objects, and locators.
+- [docs/NOTES.md](../../docs/NOTES.md): the single active learning queue, reference roadmap,
   historical evidence, completed exercises and reporting reference; dated records
   are not current run evidence.
-- [DECISION_LOG.md](../../DECISION_LOG.md): concise agreed project choices and
+- [docs/DECISION_LOG.md](../../docs/DECISION_LOG.md): concise agreed project choices and
   scope decisions. Keep exercise sequencing and progress in NOTES.md.
-- [NOTES_CODING_DEBT.md](../../NOTES_CODING_DEBT.md): historical proposals and deferred concerns; NOTES owns the active learning queue.
+- [docs/NOTES_CODING_DEBT.md](../../docs/NOTES_CODING_DEBT.md): historical proposals and deferred concerns; NOTES owns the active learning queue.
 - [playwright.config.ts](../../playwright.config.ts): actual projects, filename
   patterns, dependencies, parallelism, and reporting.
 - [package.json](../../package.json), [tsconfig.json](../../tsconfig.json),
   [eslint.config.mjs](../../eslint.config.mjs): current commands and tooling rules.
 - [Workflow](../../.github/workflows/playwright-e2e-tests.yml): actual CI scope.
 
-Read the sources needed for the task. Compare historical results and plan checkboxes
+Read [coding standards](../../docs/CODING_STANDARDS.md) before planning any test,
+refactoring exercise or implementation. Then read the sources needed for the task. Compare historical results and plan checkboxes
 with current code; the presence of a file does not prove that its tests pass.
 Plan small tasks in the conversation. Create a separate document when it is a
 needed deliverable; do not duplicate the roadmap in mandatory `.ai-docs/` plans.
 When code and standards disagree, describe the discrepancy instead of copying an antipattern.
 
-Respect the [agreed Marketplace cleanup decision](../../NOTES.md#agreed-decision-keep-marketplace-purchase-cleanup).
+Respect the [agreed Marketplace cleanup decision](../../docs/NOTES.md#agreed-decision-keep-marketplace-purchase-cleanup).
 Do not propose its refactoring or fault-injection exercises in routine reviews.
 
 ## Implementation map
@@ -66,7 +67,7 @@ through [env.config.ts](../../src/config/env.config.ts) and
 and contains information intended for the conversation. Do not paste raw login
 responses, cookies, or traces containing credentials.
 
-Respect scope decisions in DECISION_LOG.md and environment constraints in TEST_PLAN.md. Operate on
+Respect scope decisions in docs/DECISION_LOG.md and environment constraints in TEST_PLAN.md. Operate on
 your own test users and resources; do not delete demo data or another test's data.
 Destructive administrative operations require an agreed disposable environment.
 CLI and MCP are optional exploration tools.

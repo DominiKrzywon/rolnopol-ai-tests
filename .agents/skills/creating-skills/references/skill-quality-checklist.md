@@ -30,7 +30,7 @@ Do not record an expected answer as the result of an actual test run.
    Check when the balance is read, explain the assertion's value, and propose
    a small exercise. Do not edit code for a review-only request.
 2. "Which exercise should I choose next?"
-   Compare TEST_PLAN.md with code. Do not suggest moving a file again if
+   Compare docs/TEST_PLAN.md with code. Do not suggest moving a file again if
    it already has the isolated suffix; choose an existing unfinished step.
 3. "I have 4 passed, 1 failed, and 2 skipped without retries. Are the tests stable?"
    Distinguish 4/5 executed cases from two skips. Without history,

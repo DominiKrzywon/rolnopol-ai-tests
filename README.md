@@ -97,21 +97,21 @@ terminal from the test repository root.
 
 ## Scenario Coverage Report
 
-[Scenarios and planned gaps](TEST_CASES.md)
+[Scenarios and planned gaps](docs/TEST_CASES.md)
 are maintained only in TEST_CASES. The report shows collected tests and execution
 evidence; collection does not establish a pass. See [reporting](docs/REPORTING.md)
 for archives, freshness, filters and the optional application-code coverage pilot.
 
 ## Documentation
 
-- [Test plan](TEST_PLAN.md): strategy, scope and completion criteria.
-- [Test cases](TEST_CASES.md): scenario IDs, planned gaps and mobile selection.
-- [Coding standards](CODING_STANDARDS.md): test structure and conventions.
-- [Decisions](DECISION_LOG.md): agreed project choices.
+- [Test plan](docs/TEST_PLAN.md): strategy, scope and completion criteria.
+- [Test cases](docs/TEST_CASES.md): scenario IDs, planned gaps and mobile selection.
+- [Coding standards](docs/CODING_STANDARDS.md): test structure and conventions.
+- [Decisions](docs/DECISION_LOG.md): agreed project choices.
 - [Reporting](docs/REPORTING.md): commands, outputs and history.
 
 ## Agent Skills
 
 [Skill catalog](docs/AGENT_SKILLS.md) and
 [shared context](.agents/skills/CONTEXT.md) describe the learning workflow.
-Personal notes are local and are not required to run this repository.
+Project documentation lives in `docs/`. Personal notes are local and are not required to run this repository.

@@ -21,15 +21,21 @@ function safeLink(href, document) {
   const match = /^([^#]+)(?:#([\w-]+))?$/.exec(href);
   const documents = {
     'README.md': 'readme',
-    'TEST_PLAN.md': 'test_plan',
-    'TEST_CASES.md': 'test_cases',
-    'CODING_STANDARDS.md': 'coding_standards',
+    'docs/TEST_PLAN.md': 'test_plan',
+    'docs/TEST_CASES.md': 'test_cases',
+    'docs/CODING_STANDARDS.md': 'coding_standards',
     'docs/REPORTING.md': 'reporting',
   };
-  const file = match?.[1].replace(/^\.\.?\//, '');
+  const relative = match?.[1].replace(/^\.\//, '');
+  const file =
+    document === 'readme'
+      ? relative
+      : relative?.startsWith('../')
+        ? relative.slice(3)
+        : `docs/${relative}`;
   const target = Object.hasOwn(documents, file) ? documents[file] : null;
   if (target) {
-    if (file === 'TEST_CASES.md' && !match[2]) return '#scenarios';
+    if (file === 'docs/TEST_CASES.md' && !match[2]) return '#scenarios';
     return `#${target}${match[2] ? '-' + match[2] : ''}`;
   }
   return null;

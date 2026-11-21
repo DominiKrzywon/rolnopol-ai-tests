@@ -7,7 +7,7 @@
 its depth, and why it changes future teaching.}
 ```
 
-In Rolnopol, append these entries to NOTES.md and increment the highest existing
+In Rolnopol, append these entries to docs/NOTES.md and increment the highest existing
 LR number. In a standalone teaching workspace, use `learning-records/0001-slug.md`,
 increment the highest filename number, and use a level-one title instead.
 Create that directory only when writing the first record.
