@@ -50,6 +50,17 @@ Case-level priorities, risk estimates and their definitions live in
   backend failure behavior.
 - Preserve one definition and ID when reusing a case across device projects.
 
+### Live response contracts
+
+Add a dedicated Playwright API scenario for the transaction history response.
+Create one transaction through the API, fetch a populated page, and validate
+the complete HTTP 200 JSON body with Ajv against the operation schema served
+by the same application instance. A focused Zod check can cover the required
+boolean `data.hasMore` omitted from that document. TC-FIN-004 checks pagination
+behavior, including the expected flag values for both pages.
+Report contract checks from live API runs. Offline tests cover helper behavior
+and intentional invalid inputs.
+
 [Coding standards](CODING_STANDARDS.md) own implementation conventions and
 [project decisions](DECISION_LOG.md) explain agreed constraints.
 

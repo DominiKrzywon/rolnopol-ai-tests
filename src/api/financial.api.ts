@@ -50,6 +50,16 @@ export async function getAccountResponse(
   return request.get(`${BASE_API_URL}/financial/account`);
 }
 
+export async function getTransactionsResponse(
+  request: APIRequestContext,
+  limit: number,
+  offset: number,
+): Promise<APIResponse> {
+  return request.get(
+    `${BASE_API_URL}/financial/transactions?limit=${limit}&offset=${offset}`,
+  );
+}
+
 export async function transferFunds(
   request: APIRequestContext,
   data: {

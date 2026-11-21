@@ -74,7 +74,7 @@ export default defineConfig({
     {
       name: 'api-tests',
       dependencies: ['health-check'],
-      testMatch: ['**/api/**/*.spec.ts'],
+      testMatch: ['**/api/**/*.spec.ts', '**/contract/**.*spec.ts'],
     },
 
     {

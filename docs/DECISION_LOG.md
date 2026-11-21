@@ -31,11 +31,16 @@ npm run coverage:summary
 
 ## API schemas
 
-Continue the runtime response-schema work started in `src/schemas`, alongside assertions of business behavior.
+Prioritize live Playwright API contracts. Use Ajv for the published OpenAPI
+response schema and pilot Zod on a field the consumer requires beyond that
+schema. Keep scenario-specific expectations for the resources created by the
+test. See the [test strategy](TEST_PLAN.md#live-response-contracts).
 
 ## Fast unit tests
 
-Extend the existing reporting-tool unit tests with small, fast tests of schemas and useful test helpers, without browsers or a running application.
+Keep fast offline tests for helpers and validator diagnostics. Consider Vitest
+in a separate one-file unit exercise after the first live contract pilot.
+The current unit command uses Node's built-in test runner.
 
 ## Mobile views
 

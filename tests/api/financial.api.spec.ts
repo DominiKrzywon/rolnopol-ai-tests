@@ -1,3 +1,5 @@
+import assert from 'node:assert/strict';
+
 import { topUpAmount } from 'src/actions/user.actions';
 import {
   addTransaction,
@@ -5,12 +7,14 @@ import {
   getAccountBalance,
   getAccountResponse,
   getTransactions,
+  getTransactionsResponse,
 } from 'src/api/financial.api';
 import { expectApiSuccess } from 'src/assertions/api.assertions';
 import { BASE_API_URL } from 'src/config/env.config';
 import { expect, test } from 'src/fixtures/financial.fixture';
 import {
   CreateTransactionPayload,
+  TransactionHistory,
   TransactionResponse,
 } from 'src/models/financial';
 import { validateAccountData } from 'src/schemas/financial.schema';
@@ -428,26 +432,32 @@ test.describe('Financial API', () => {
       const transaction3 = await topUpAmount(request, amount3);
 
       // Read the first page of transaction history
-      const firstPage = await request.get(
-        `${BASE_API_URL}/financial/transactions?limit=2&offset=0`,
+      const firstPage = await getTransactionsResponse(request, 2, 0);
+      const bodyFirstPage = await expectApiSuccess<TransactionHistory>(
+        firstPage,
+        200,
       );
 
-      const bodyFirstPage = await firstPage.json();
-      expect(firstPage.status()).toBe(200);
-      expect(bodyFirstPage.success).toBe(true);
+      assert.ok(
+        bodyFirstPage.data,
+        'Expected data on the first transaction history page',
+      );
       expect(bodyFirstPage.data.total).toBe(3);
       expect(bodyFirstPage.data.limit).toBe(2);
       expect(bodyFirstPage.data.offset).toBe(0);
       expect(bodyFirstPage.data.hasMore).toBe(true);
 
       // Read the remaining transaction on the second page
-      const secondPage = await request.get(
-        `${BASE_API_URL}/financial/transactions?limit=2&offset=2`,
+      const secondPage = await getTransactionsResponse(request, 2, 2);
+      const bodySecondPage = await expectApiSuccess<TransactionHistory>(
+        secondPage,
+        200,
       );
-      const bodySecondPage = await secondPage.json();
 
-      expect(bodySecondPage.success).toBe(true);
-      expect(secondPage.status()).toBe(200);
+      assert.ok(
+        bodySecondPage.data,
+        'Expected data on the second transaction history page',
+      );
       expect(bodySecondPage.data.total).toBe(3);
       expect(bodySecondPage.data.limit).toBe(2);
       expect(bodySecondPage.data.offset).toBe(2);
