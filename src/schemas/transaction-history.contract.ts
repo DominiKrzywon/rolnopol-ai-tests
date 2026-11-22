@@ -18,24 +18,10 @@ export async function loadTransactionHistoryValidator(
       ?.content?.['application/json']?.schema;
   assert.ok(schema, 'Expected the GET /financial/transactions HTTP 200 schema');
 
-  const transactionRef = '#/components/schemas/Transaction';
-  const transactions = schema.properties?.data?.properties?.transactions;
-  assert.equal(
-    transactions?.items?.$ref,
-    transactionRef,
-    'Unexpected schema reference for transaction items',
-  );
-
-  const transactionSchema = openApi.components?.schemas?.Transaction;
-  assert.ok(transactionSchema, 'Expected the Transaction schema in OpenAPI');
-
-  const responseSchema = structuredClone(schema);
-  responseSchema.properties.data.properties.transactions.items =
-    transactionSchema;
-
   const ajv = new Ajv({ allErrors: true });
   addFormats(ajv);
   ajv.addKeyword({ keyword: 'example', valid: true });
+  ajv.addKeyword({ keyword: 'components', valid: true });
 
-  return ajv.compile(responseSchema);
+  return ajv.compile({ ...schema, components: openApi.components });
 }

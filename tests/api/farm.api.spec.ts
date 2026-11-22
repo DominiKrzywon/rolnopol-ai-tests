@@ -229,6 +229,7 @@ test.describe('Farm API', () => {
       expect(response.status()).toBe(200);
 
       const body = (await response.json()) as { data: CreatedStaff[] };
+
       const isValidStaffList = validateStaffList(body.data);
       expect(
         isValidStaffList,
