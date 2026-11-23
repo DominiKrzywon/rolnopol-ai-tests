@@ -306,6 +306,9 @@ they do not replace IDs. Multiple projects may execute the same test definition.
 The setup project is explicitly marked as infrastructure and has no scenario ID.
 
 After changing the catalog, run `npm run coverage:validate`.
+In learning tasks, the agent handles the catalog row and synchronizes the
+test's case metadata. The handoff includes the case ID, test title, and spec
+filename so the learner can focus on the test logic.
 Unknown IDs, duplicate definitions, missing annotations and excluded collected
 cases fail validation. Planned rows without tests are valid gaps. The catalog
 parser requires its exact headers and markers.

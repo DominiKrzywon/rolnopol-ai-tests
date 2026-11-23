@@ -14,6 +14,10 @@ Use the [skill catalog](README.md#agent-skills) to choose a relevant procedure.
 - Keep the active learning queue, refactoring plans and progress records in
   `docs/NOTES.md`, outside the coverage report. `docs/TEST_PLAN.md` owns test strategy and scope;
   `docs/TEST_CASES.md` owns the scenario catalog; do not add mentor notes there.
+- During test exercises and reviews, the agent maintains `docs/TEST_CASES.md`,
+  chooses or preserves the case ID, and synchronizes the spec's case metadata.
+  Run `npm run coverage:validate` and give the learner the case ID, test title,
+  and spec filename. The learner owns the exercise's test logic.
 
 - Preserve the agreed Marketplace purchase cleanup. Do not propose its refactor
   or fault-injection exercises in routine reviews; see the

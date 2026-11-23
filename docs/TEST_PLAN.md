@@ -63,7 +63,8 @@ TC-FIN-016 validates the full transaction history response with Ajv against
 OpenAPI from the same instance. TC-FIN-017/018 use Zod for the required boolean
 `data.hasMore`. TC-FIN-004 checks its expected values across pages. TC-PUBLIC-017
 uses Zod for the three section arrays returned by Alerts. Contract coverage
-comes from live API runs. The synthetic schema exercises are being retired.
+comes from live API runs. Unit schema tests exercise validator behavior on
+controlled inputs, including malformed responses.
 
 [Coding standards](CODING_STANDARDS.md) own implementation conventions and
 [project decisions](DECISION_LOG.md) explain agreed constraints.

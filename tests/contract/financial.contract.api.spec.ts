@@ -11,10 +11,13 @@ test(
     tag: ['@financial', '@schema'],
   },
   async ({ apiSession: _, request }) => {
-    const amount = 100;
+    const amount1 = 100;
+    const amount2 = 200;
 
-    await topUpAmount(request, amount);
-    const response = await getTransactionsResponse(request, 1, 0);
+    await topUpAmount(request, amount1);
+    await topUpAmount(request, amount2);
+
+    const response = await getTransactionsResponse(request, 2, 0);
     expect(response.status()).toBe(200);
 
     const body = await response.json();
@@ -22,6 +25,6 @@ test(
     const matchesContract = validate(body);
 
     expect(matchesContract, JSON.stringify(validate.errors)).toBe(true);
-    expect(body.data.transactions).toHaveLength(1);
+    expect(body.data.transactions).toHaveLength(2);
   },
 );
