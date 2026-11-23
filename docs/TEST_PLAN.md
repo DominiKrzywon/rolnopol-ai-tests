@@ -52,14 +52,18 @@ Case-level priorities, risk estimates and their definitions live in
 
 ### Live response contracts
 
-Add a dedicated Playwright API scenario for the transaction history response.
-Create one transaction through the API, fetch a populated page, and validate
-the complete HTTP 200 JSON body with Ajv against the operation schema served
-by the same application instance. A focused Zod check can cover the required
-boolean `data.hasMore` omitted from that document. TC-FIN-004 checks pagination
-behavior, including the expected flag values for both pages.
-Report contract checks from live API runs. Offline tests cover helper behavior
-and intentional invalid inputs.
+Make a request to the running application, assert the expected HTTP status,
+and validate the actual response JSON. When a contract requires populated data,
+prepare it through the API or use a documented stable application fixture.
+Establish expected fields from the published specification or a confirmed
+consumer requirement. Use observed responses to check that the expectation
+and the setup exercise the intended case.
+
+TC-FIN-016 validates the full transaction history response with Ajv against
+OpenAPI from the same instance. TC-FIN-017/018 use Zod for the required boolean
+`data.hasMore`. TC-FIN-004 checks its expected values across pages. TC-PUBLIC-017
+uses Zod for the three section arrays returned by Alerts. Contract coverage
+comes from live API runs. The synthetic schema exercises are being retired.
 
 [Coding standards](CODING_STANDARDS.md) own implementation conventions and
 [project decisions](DECISION_LOG.md) explain agreed constraints.

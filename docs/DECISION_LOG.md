@@ -31,16 +31,17 @@ npm run coverage:summary
 
 ## API schemas
 
-Prioritize live Playwright API contracts. Use Ajv for the published OpenAPI
-response schema and pilot Zod on a field the consumer requires beyond that
-schema. Keep scenario-specific expectations for the resources created by the
-test. See the [test strategy](TEST_PLAN.md#live-response-contracts).
+Validate API response schemas in Playwright using real JSON from the running
+application. Use Ajv for the published OpenAPI response schema and Zod for
+focused consumer requirements. Keep scenario-specific expectations for the
+resources created by the test. The standalone schema tests with synthetic
+responses were initial learning exercises and are scheduled for removal.
+See the [test strategy](TEST_PLAN.md#live-response-contracts).
 
 ## Fast unit tests
 
-Keep fast offline tests for helpers and validator diagnostics. Consider Vitest
-in a separate one-file unit exercise after the first live contract pilot.
-The current unit command uses Node's built-in test runner.
+The current unit command uses Node's built-in test runner for helper tests
+and the standalone schema exercises pending removal.
 
 ## Mobile views
 
