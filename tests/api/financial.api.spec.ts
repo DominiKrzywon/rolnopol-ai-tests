@@ -17,8 +17,7 @@ import {
   TransactionHistory,
   TransactionResponse,
 } from 'src/models/financial';
-import { validateAccountData } from 'src/schemas/financial.schema';
-import { AccountData } from 'src/types/accountData';
+import { validateAccountResponse } from 'src/schemas/financial.schema';
 
 test.describe('Financial API', () => {
   test(
@@ -29,16 +28,16 @@ test.describe('Financial API', () => {
     },
     async ({ apiSession, request }) => {
       const response = await getAccountResponse(request);
-      const body = await expectApiSuccess<AccountData>(response, 200);
-      const isValidAccountData = validateAccountData(body.data);
+      const body = await response.json();
+      const isValidResponse = validateAccountResponse(body);
 
+      expect(response.status()).toBe(200);
       expect(
-        isValidAccountData,
-        `Account data does not match the schema: ${JSON.stringify(validateAccountData.errors)}`,
+        isValidResponse,
+        `Account data does not match the schema: ${JSON.stringify(validateAccountResponse.errors)}`,
       ).toBe(true);
 
       expect(body.data?.account).toMatchObject({
-        id: expect.any(Number),
         balance: 0,
         userId: apiSession.session.id,
         currency: 'ROL',

@@ -19,3 +19,13 @@ const staffListSchema: JSONSchemaType<CreatedStaff[]> = {
 const ajv = new Ajv({ allErrors: true });
 
 export const validateStaffList = ajv.compile(staffListSchema);
+
+export const validateStaffResponse = ajv.compile({
+  properties: {
+    success: { type: 'boolean', const: true },
+    timestamp: { type: 'string' },
+    data: staffListSchema,
+  },
+  type: 'object',
+  required: ['success', 'timestamp', 'data'],
+});

@@ -15,8 +15,8 @@ test.describe('financial history zod validation', () => {
       expect(response.status()).toBe(200);
       const body = await response.json();
 
-      transactionHistoryPaginationSchema.parse(body);
-      expect(body.data.transactions).toEqual([]);
+      const history = transactionHistoryPaginationSchema.parse(body);
+      expect(history.data.transactions).toEqual([]);
     },
   );
 
@@ -33,8 +33,8 @@ test.describe('financial history zod validation', () => {
       expect(response.status()).toBe(200);
 
       const body = await response.json();
-      transactionHistoryPaginationSchema.parse(body);
-      expect(body.data.transactions).toHaveLength(1);
+      const history = transactionHistoryPaginationSchema.parse(body);
+      expect(history.data.transactions).toHaveLength(1);
     },
   );
 });

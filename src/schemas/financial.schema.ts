@@ -23,3 +23,13 @@ const accountDataSchema: JSONSchemaType<AccountData> = {
 const ajv = new Ajv({ allErrors: true });
 
 export const validateAccountData = ajv.compile(accountDataSchema);
+
+export const validateAccountResponse = ajv.compile({
+  properties: {
+    success: { type: 'boolean', const: true },
+    timestamp: { type: 'string' },
+    data: accountDataSchema,
+  },
+  type: 'object',
+  required: ['success', 'timestamp', 'data'],
+});

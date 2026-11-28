@@ -8,6 +8,7 @@ import {
 } from 'src/api/auth.api';
 import { prepareRandomUser } from 'src/factories/user.factory';
 import { expect, test } from 'src/fixtures/auth.fixture';
+import { loginErrorSchema, loginSuccessSchema } from 'src/schemas/auth.zod';
 
 import { getDemoUserData, User } from '../../src/models/User';
 
@@ -113,25 +114,12 @@ test.describe('Authentication API', () => {
         tag: ['@api', '@auth', '@login', '@happy-path'],
       },
       async ({ request, registeredUser }) => {
-        // Act
         const response = await loginUser(request, registeredUser);
-        const body = await response.json();
-
-        // Assert
         expect(response.status(), 'Login should return 200 OK').toBe(200);
-        expect(body.success, 'Response success flag should be true').toBe(true);
-        expect(
-          body.data.token,
-          'Response should contain authentication token',
-        ).toBeDefined();
-        expect(
-          body.data.user.id,
-          'Response should contain numeric user ID',
-        ).toEqual(expect.any(Number));
-        expect(
-          body.data.user.email,
-          'Response email should match login email',
-        ).toBe(registeredUser.email);
+
+        const body = await response.json();
+        loginSuccessSchema.parse(body);
+        expect(body.data.user.email).toBe(registeredUser.email);
       },
     );
 
@@ -187,10 +175,7 @@ test.describe('Authentication API', () => {
           response.status(),
           'Wrong password should return 401 Unauthorized',
         ).toBe(401);
-        expect(
-          body.success,
-          'Response success flag should be false for wrong password',
-        ).toBe(false);
+        loginErrorSchema.parse(body);
       },
     );
   });
